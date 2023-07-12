@@ -6,7 +6,7 @@
   <div class="row">
     <div class="col-6">
       <h1 class="">Masterclasses</h1>
-      <p class="p-muted-heading">Watch all the talks brought to by the Canonical team</p>
+      <p class="p-muted-heading">Watch all the talks brought to you by the Canonical team</p>
       <p>
         <a href="https://docs.google.com/spreadsheets/d/1fFumFWIM3oHwLr9pcBlaANcadAU0bNJxbkfGKwC_1pg/edit#gid=0"
           class="p-button u-no-margin--bottom">
@@ -18,6 +18,19 @@
 </section>
 
 <section class="p-strip u-no-padding--bottom is-bordered">
+
+  <div class="row">
+    <div class="col-12">
+      <h2 class="p-heading--5">Filter for previous sessions</h2>
+
+      {% for key,value in tags.items() %}
+      <a class="p-chip" href="/#{{ key }}" id="#{{ key }}">
+        <span class="p-chip__value">{{ key }}</span>
+        <span class="p-badge" aria-label="{{ value }} videos exist">{{ value }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
   <div class="row">
     <div class="p-divider u-no-margin--bottom">
       <div class="col-3 p-divider__block">
@@ -75,7 +88,7 @@
 
 <section class="p-strip--light is-shallow is-bordered">
   <div class="row">
-    <div class="col-8">
+    <div class="col-9">
       <h3 class="p-muted-heading u-sv2">Something missing?</h3>
       <p class="p-heading--3">If you would like to see a topic covered but you don't have the knowledge, submit an idea
         to the team.</p>
@@ -93,9 +106,18 @@
   let images = document.querySelectorAll('.p-card__image');
   images.forEach(function (image) {
     image.onerror = function (e) {
-      image.src = 'https://assets.ubuntu.com/v1/36f1139e-Design-and-Web-Team-Blog.jpg';
+      image.src = 'https://assets.ubuntu.com/v1/89a57889-Masterclasses-thumbnail.png';
     }
   });
+
+  if (window.history) {
+    var myOldUrl = window.location.href;
+    window.addEventListener('hashchange', function () {
+      Array.from(document.getElementsByClassName("p-chip--positive")).forEach((el) => el.className = "p-chip");
+      document.getElementById(window.location.hash).className = "p-chip--positive";
+    });
+  }
+
 </script>
 
 
