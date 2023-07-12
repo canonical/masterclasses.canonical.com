@@ -24,11 +24,14 @@
       <h2 class="p-heading--5">Filter for previous sessions</h2>
 
       {% for key,value in tags.items() %}
-      <a class="p-chip" href="/#{{ key }}" id="#{{ key }}">
+      <button class="p-chip">
         <span class="p-chip__value">{{ key }}</span>
         <span class="p-badge" aria-label="{{ value }} videos exist">{{ value }}</span>
-      </a>
+      </button>
       {% endfor %}
+      <button class="p-chip--negative" id="reset">
+        <span class="p-chip__value">Reset</span>
+      </button>
     </div>
   </div>
   <div class="row">
@@ -117,6 +120,33 @@
       document.getElementById(window.location.hash).className = "p-chip--positive";
     });
   }
+
+  Array.from(document.getElementsByClassName("p-chip")).forEach((el) => el.addEventListener("click", function () {
+    // change class of clicked element to p-chip--positive
+    Array.from(document.getElementsByClassName("p-chip--positive")).forEach((el) => el.className = "p-chip");
+    this.className = "p-chip--positive";
+    // show sessions with this tag
+    let tag = this.getElementsByTagName("span")[0].innerHTML;
+    let cards = document.getElementsByClassName("p-card");
+    Array.from(cards).forEach((card) => {
+      if (card.dataset.tags.includes(tag)) {
+        card.style.display = "block";
+      } else {
+        card.style.display = "none";
+      }
+    });
+    // Add reset button
+    let reset = document.getElementById("reset");
+    reset.style.display = "block";
+    reset.addEventListener("click", function () {
+      // change class of clicked element to p-chip
+      Array.from(document.getElementsByClassName("p-chip--positive")).forEach((el) => el.className = "p-chip");
+      Array.from(cards).forEach((card) => {
+        card.style.display = "block";
+      });
+      reset.style.display = "none";
+    });
+  }));
 
 </script>
 
