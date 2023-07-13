@@ -64,11 +64,13 @@ def get_id(video_link):
 def index():
     previous_sessions = get_previous_sessions()
     upcoming_sessions = get_upcoming_sessions()
+    tags = get_tags()
 
     return flask.render_template(
         "masterclasses.html",
         previous_sessions=previous_sessions,
         upcoming_sessions=upcoming_sessions,
+        tags=tags,
     )
 
 
@@ -121,7 +123,7 @@ def get_previous_sessions():
         flask.abort(500, str(error))
 
     SHEET = "Completed"
-    RANGE = "A2:G1000"
+    RANGE = "A2:I1000"
     COLUMNS = [
         ("Topic", str),
         ("Owner", str),
@@ -130,6 +132,8 @@ def get_previous_sessions():
         ("Slides", str),
         ("Recording", str),
         ("Description", str),
+        ("Chat log", str),
+        ("Tags", str),
     ]
     res = sheet.get(
         spreadsheetId=SPREADSHEET_ID,
@@ -158,6 +162,43 @@ def get_previous_sessions():
     sessions.sort(key=lambda x: x["Date"]["Object"], reverse=True)
 
     return sessions
+
+def get_tags():
+    try:
+        sheet = get_sheet()
+    except MissingCredential as error:
+        flask.abort(500, str(error))
+
+    SHEET = "Completed"
+    RANGE = "I2:I1000"
+    COLUMNS = [
+        ("Tag", str),
+    ]
+    res = sheet.get(
+        spreadsheetId=SPREADSHEET_ID,
+        ranges=[f"{SHEET}!{RANGE}"],
+        includeGridData=True,
+    ).execute()
+
+    tags = {}
+    for row in res["sheets"][0]["data"][0]["rowData"]:
+        if "values" in row and row["values"][0]:
+            for column_index in range(len(COLUMNS)):
+                (column, type) = COLUMNS[column_index]
+                temp_tag = get_value_row(
+                    row["values"][column_index]
+                    if index_in_list(row["values"], column_index)
+                    else None,
+                    type,
+                )
+                for tag in temp_tag.strip().split(","):
+                    tag = tag.strip()
+                    if tag:
+                        if tag not in tags:
+                            tags[tag] = 1
+                        else:
+                            tags[tag] += 1
+    return tags
 
 
 def _has_row_value(row):

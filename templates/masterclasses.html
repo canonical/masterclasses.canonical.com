@@ -6,7 +6,7 @@
   <div class="row">
     <div class="col-6">
       <h1 class="">Masterclasses</h1>
-      <p class="p-muted-heading">Watch all the talks brought to by the Canonical team</p>
+      <p class="p-muted-heading">Watch all the talks brought to you by the Canonical team</p>
       <p>
         <a href="https://docs.google.com/spreadsheets/d/1fFumFWIM3oHwLr9pcBlaANcadAU0bNJxbkfGKwC_1pg/edit#gid=0"
           class="p-button u-no-margin--bottom">
@@ -18,6 +18,22 @@
 </section>
 
 <section class="p-strip u-no-padding--bottom is-bordered">
+
+  <div class="row">
+    <div class="col-12">
+      <h2 class="p-heading--5">Filter for previous sessions</h2>
+
+      {% for key,value in tags.items() %}
+      <button class="p-chip">
+        <span class="p-chip__value">{{ key }}</span>
+        <span class="p-badge" aria-label="{{ value }} videos exist">{{ value }}</span>
+      </button>
+      {% endfor %}
+      <button class="p-chip--negative" id="reset-btn">
+        <span class="p-chip__value">Reset</span>
+      </button>
+    </div>
+  </div>
   <div class="row">
     <div class="p-divider u-no-margin--bottom">
       <div class="col-3 p-divider__block">
@@ -54,19 +70,11 @@
       </div>
       <div class="col-9 p-divider__block">
         <h2 class="p-heading--3">Previous sessions</h2>
-        <div class="row u-equal-height">
+        <div class="u-equal-height">
           {% for session in previous_sessions %}
-          {% if loop.index % 3 == 0 %}
           {% with session=session %}
           {% include "shared/_card--masterclass.html" %}
           {% endwith %}
-        </div>
-        <div class="row u-equal-height">
-          {% else %}
-          {% with session=session %}
-          {% include "shared/_card--masterclass.html" %}
-          {% endwith %}
-          {% endif %}
           {% endfor %}
         </div>
       </div>
@@ -75,7 +83,7 @@
 
 <section class="p-strip--light is-shallow is-bordered">
   <div class="row">
-    <div class="col-8">
+    <div class="col-9">
       <h3 class="p-muted-heading u-sv2">Something missing?</h3>
       <p class="p-heading--3">If you would like to see a topic covered but you don't have the knowledge, submit an idea
         to the team.</p>
@@ -92,10 +100,38 @@
 <script>
   let images = document.querySelectorAll('.p-card__image');
   images.forEach(function (image) {
-    image.onerror = function (e) {
-      image.src = 'https://assets.ubuntu.com/v1/36f1139e-Design-and-Web-Team-Blog.jpg';
-    }
+      image.src = 'https://assets.ubuntu.com/v1/89a57889-Masterclasses-thumbnail.png';
   });
+
+
+  Array.from(document.getElementsByClassName("p-chip")).forEach((el) => el.addEventListener("click", function () {
+    // change class of clicked element to p-chip--positive
+    Array.from(document.getElementsByClassName("p-chip--positive")).forEach((el) => el.className = "p-chip");
+    this.className = "p-chip--positive";
+    // show sessions with this tag
+    let tag = this.getElementsByTagName("span")[0].innerHTML;
+    let cards = document.getElementsByClassName("p-card");
+    Array.from(cards).forEach((card) => {
+      if (card.dataset.tags.includes(tag)) {
+        card.style.display = "block";
+      } else {
+        card.style.display = "none";
+      }
+    });
+
+    // Create a reset button, when p-chip is clicked
+    let reset = document.getElementById("reset-btn");
+    reset.style.display = "block";
+    reset.addEventListener("click", function () {
+      // change class of clicked element to p-chip
+      Array.from(document.getElementsByClassName("p-chip--positive")).forEach((el) => el.className = "p-chip");
+      Array.from(cards).forEach((card) => {
+        card.style.display = "block";
+      });
+      reset.style.display = "none";
+    });
+  }));
+
 </script>
 
 
