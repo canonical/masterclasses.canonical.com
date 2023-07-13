@@ -99,8 +99,10 @@
 
 <script>
   let images = document.querySelectorAll('.p-card__image');
-  images.forEach(function (image) {
-      image.src = 'https://assets.ubuntu.com/v1/89a57889-Masterclasses-thumbnail.png';
+  images.forEach(function(image) {
+    image.onerror = function(e) {
+      image.src = 'https://assets.ubuntu.com/v1/36f1139e-Design-and-Web-Team-Blog.jpg';
+    }
   });
 
 
