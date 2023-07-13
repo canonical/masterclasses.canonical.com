@@ -29,7 +29,7 @@
         <span class="p-badge" aria-label="{{ value }} videos exist">{{ value }}</span>
       </button>
       {% endfor %}
-      <button class="p-chip--negative" id="reset">
+      <button class="p-chip--negative" id="reset-btn">
         <span class="p-chip__value">Reset</span>
       </button>
     </div>
@@ -70,19 +70,11 @@
       </div>
       <div class="col-9 p-divider__block">
         <h2 class="p-heading--3">Previous sessions</h2>
-        <div class="row u-equal-height">
+        <div class="u-equal-height">
           {% for session in previous_sessions %}
-          {% if loop.index % 3 == 0 %}
           {% with session=session %}
           {% include "shared/_card--masterclass.html" %}
           {% endwith %}
-        </div>
-        <div class="row u-equal-height">
-          {% else %}
-          {% with session=session %}
-          {% include "shared/_card--masterclass.html" %}
-          {% endwith %}
-          {% endif %}
           {% endfor %}
         </div>
       </div>
@@ -108,18 +100,9 @@
 <script>
   let images = document.querySelectorAll('.p-card__image');
   images.forEach(function (image) {
-    image.onerror = function (e) {
       image.src = 'https://assets.ubuntu.com/v1/89a57889-Masterclasses-thumbnail.png';
-    }
   });
 
-  if (window.history) {
-    var myOldUrl = window.location.href;
-    window.addEventListener('hashchange', function () {
-      Array.from(document.getElementsByClassName("p-chip--positive")).forEach((el) => el.className = "p-chip");
-      document.getElementById(window.location.hash).className = "p-chip--positive";
-    });
-  }
 
   Array.from(document.getElementsByClassName("p-chip")).forEach((el) => el.addEventListener("click", function () {
     // change class of clicked element to p-chip--positive
@@ -135,8 +118,9 @@
         card.style.display = "none";
       }
     });
-    // Add reset button
-    let reset = document.getElementById("reset");
+
+    // Create a reset button, when p-chip is clicked
+    let reset = document.getElementById("reset-btn");
     reset.style.display = "block";
     reset.addEventListener("click", function () {
       // change class of clicked element to p-chip

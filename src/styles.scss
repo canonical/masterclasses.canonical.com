@@ -1,2 +1,12 @@
 @import "vanilla-framework";
 @include vanilla;
+
+.p-card {
+  width: 16rem;
+}
+
+.u-equal-height {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
