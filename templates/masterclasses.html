@@ -21,8 +21,7 @@
 
   <div class="row">
     <div class="col-12">
-      <h2 class="p-heading--5">Filter for previous sessions</h2>
-
+      <h2 class="p-heading--5">Filter previous sessions by topic</h2>
       {% for key,value in tags.items() %}
       <button class="p-chip">
         <span class="p-chip__value">{{ key }}</span>
@@ -54,7 +53,7 @@
                     <span class="u-off-screen">Date: </span>{{ session.Date.Formatted }}
                   </li>
                   <li class="p-media-object__meta-list-item--location">
-                    <span class="u-off-screen">Location: </span><a href="{{session.Event}}">Google Meet</a>
+                    <span class="u-off-screen">Location: </span><a href="{{ session.Event }}">Google Meet</a>
                   </li>
                   {% else %}
                   <li class="p-media-object__meta-list-item--date">
@@ -99,9 +98,9 @@
 
 <script>
   let images = document.querySelectorAll('.p-card__image');
-  images.forEach(function(image) {
-    image.onerror = function(e) {
-      image.src = 'https://assets.ubuntu.com/v1/36f1139e-Design-and-Web-Team-Blog.jpg';
+  images.forEach(function (image) {
+    image.onerror = function (e) {
+      image.src = 'https://assets.ubuntu.com/v1/89a57889-Masterclasses-thumbnail.png';
     }
   });
 
