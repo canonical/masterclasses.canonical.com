@@ -17,13 +17,13 @@ def get_value_row(row, type):
     if row:
         if type == datetime:
             if "formattedValue" in row:
+                parsed_datetime = datetime.strptime(
+                    row["formattedValue"], "%d %B %Y"
+                )
                 return {
-                    "Formatted": datetime.strptime(
-                        row["formattedValue"], "%d %B %Y"
-                    ).strftime("%d %b %Y"),
-                    "Object": datetime.strptime(
-                        row["formattedValue"], "%d %B %Y"
-                    ),
+                    "Formatted": parsed_datetime.strftime("%d %b %Y"),
+                    "Object": parsed_datetime,
+                    "Calendar": parsed_datetime.strftime('%Y%m%d'),
                 }
         elif "userEnteredValue" in row:
             if "stringValue" in row["userEnteredValue"]:
@@ -81,7 +81,7 @@ def get_upcoming_sessions():
         flask.abort(500, str(error))
 
     SHEET = "Upcoming"
-    RANGE = "A2:E1000"
+    RANGE = "A2:F1000"
     COLUMNS = [
         ("Topic", str),
         ("Owner", str),

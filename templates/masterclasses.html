@@ -52,6 +52,14 @@
                   <li class="p-media-object__meta-list-item--date">
                     <span class="u-off-screen">Date: </span>{{ session.Date.Formatted }}
                   </li>
+                  <!-- Add to calendar button, URL documentation: https://github.com/InteractionDesignFoundation/add-event-to-calendar-docs/blob/main/services/google.md -->
+                  <!-- Currently, all events start at 11AM CST with duration of 45 minutes -->
+                  <li class="p-media-object__meta-list-item--date">
+                    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Masterclass:+{{ session.Topic }}&dates={{ session.Date.Calendar }}T110000/{{ session.Date.Calendar }}T114500&ctz=Europe/Paris&location={{ session.Event }}&details={{ session.Owner }}+would+like+to+talk+about+{{ session.Topic }}.%0ANotes:+{{ session.Notes }}"
+                      target="_blank" rel="noopener noreferrer">
+                      Add to Google Calendar
+                    </a>
+                  </li>
                   <li class="p-media-object__meta-list-item--location">
                     <span class="u-off-screen">Location: </span><a href="{{ session.Event }}">Google Meet</a>
                   </li>
