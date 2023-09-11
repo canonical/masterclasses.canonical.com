@@ -17,7 +17,7 @@ PRIVATE_KEY_ID=your_private_key_id
 PRIVATE_KEY=your_private_key
 ```
 
-these keys are [specs-canonical-com](https://github.com/canonical/masterclasses.canonical.com/blob/3daee9f1bc4232348acc792575c7dd9685f12481/konf/site.yaml#L12) google drive keys.
+these keys are [specs-canonical-com](https://github.com/canonical/masterclasses.canonical.com/blob/main/konf/site.yaml#L12) google drive keys.
 
 2. Install dotrun as described in https://github.com/canonical/dotrun#installation
 3. Launch it from the head of this repo by running the following command:
