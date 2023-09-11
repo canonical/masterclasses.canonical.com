@@ -10,7 +10,7 @@ Canonical is known for its brilliant people, both in terms of intelligence and v
 
 It uses [dotrun](https://github.com/canonical/dotrun) for local development, defining standard endpoints for `serve`, `build`, `test`, `watch` etc. within the package.json. This allows for a consistent development experience across all Canonical projects.
 
-1. Make a .env.local with the following contents:
+1. Create a `.env.local` file locally in the repo head directory with the following contents:
 
 ```bash
 PRIVATE_KEY_ID=your_private_key_id
