@@ -123,7 +123,7 @@ def get_previous_sessions():
         flask.abort(500, str(error))
 
     SHEET = "Completed"
-    RANGE = "A2:I1000"
+    RANGE = "A2:J1000"
     COLUMNS = [
         ("Topic", str),
         ("Owner", str),
@@ -134,6 +134,7 @@ def get_previous_sessions():
         ("Description", str),
         ("Chat log", str),
         ("Tags", str),
+        ("Thumbnails", str)
     ]
     res = sheet.get(
         spreadsheetId=SPREADSHEET_ID,

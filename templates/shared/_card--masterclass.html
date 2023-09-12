@@ -1,7 +1,11 @@
 <div class="p-card u-no-padding" data-tags="{{ session.Tags }}">
   {% if session.Link %}
   <a href="{{ session.Recording }}" aria-hidden="true" tabindex="-1">
+    {% if session.Thumbnails %}
+    <img class="p-card__image" alt="{{ session.Topic }} video" src="{{ session.Thumbnails }}">
+    {% else %}
     <img class="p-card__image" alt="{{ session.Topic }} video" src="https://lh3.google.com/u/0/d/{{ session.Link }}=k">
+    {% endif %}
   </a>
   <div class="p-card__inner">
     <h3 class="p-heading--5 u-no-margin--bottom"><a href="{{ session.Recording }}">{{ session.Topic }}</a></h3>
