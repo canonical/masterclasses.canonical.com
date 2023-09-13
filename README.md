@@ -26,4 +26,4 @@ these keys are [specs-canonical-com](https://github.com/canonical/masterclasses.
 dotrun
 ```
 
-4. Once the containers are started, you can visit <http://127.0.0.1:9000> in your browser.
+4. Once the containers are started, you can visit <http://127.0.0.1:8409> in your browser.
