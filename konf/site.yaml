@@ -9,12 +9,12 @@ env:
   - name: PRIVATE_KEY_ID
     secretKeyRef:
       key: private-key-id
-      name: specs-canonical-com
+      name: masterclasses-canonical-com
 
   - name: PRIVATE_KEY
     secretKeyRef:
       key: private-key
-      name: specs-canonical-com
+      name: masterclasses-canonical-com
 
 # Overrides for production
 production:

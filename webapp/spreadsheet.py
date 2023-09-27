@@ -51,11 +51,11 @@ def get_sheet():
 
     service_account_info = {
         "type": "service_account",
-        "project_id": "roadmap-270011",
+        "project_id": "masterclasses-canonical-com",
         "private_key_id": PRIVATE_KEY_ID,
         "private_key": PRIVATE_KEY,
-        "client_email": "specs-reader@roadmap-270011.iam.gserviceaccount.com",
-        "client_id": "112404606310881291739",
+        "client_email": "masterclasses-canonical-com-gd@masterclasses-canonical-com.iam.gserviceaccount.com",
+        "client_id": "110393379435559223460",
         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
         "token_uri": "https://oauth2.googleapis.com/token",
         "auth_provider_x509_cert_url": (
@@ -63,9 +63,10 @@ def get_sheet():
         ),
         "client_x509_cert_url": (
             "https://www.googleapis.com/robot/v1/metadata"
-            "/x509/specs-reader%40roadmap-270011.iam.gserviceaccount.com"
+            "/x509/masterclasses-canonical-com-gd%40masterclasses-canonical-com.iam.gserviceaccount.com"
         ),
-    }
+        "universe_domain": "googleapis.com"
+}
 
     creds = service_account.Credentials.from_service_account_info(
         service_account_info, scopes=SCOPES
