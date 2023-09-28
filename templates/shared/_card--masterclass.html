@@ -8,7 +8,7 @@
     {% endif %}
   </a>
   <div class="p-card__inner">
-    <h3 class="p-heading--5 u-no-margin--bottom"><a href="{{ session.Recording }}">{{ session.Topic }}</a>
+    <h3 class="p-heading--5 u-no-margin--bottom card-title"><a href="{{ session.Recording }}">{{ session.Topic }}</a>
     </h3>
     <p>{{ session.Description }}</p>
     <p class="u-text--muted u-no-margin--bottom">{{ session.Tags }}</p>
@@ -20,7 +20,7 @@
   </div>
   {% else %}
   <div class="p-card__inner">
-    <h3 class="p-heading--5 u-no-margin--bottom">{{ session.Topic }}</h3>
+    <h3 class="p-heading--5 u-no-margin--bottom card-title">{{ session.Topic }}</h3>
     <p>{{ session.Description }}</p>
     <p>Sorry we forgot to record this session.</p>
   </div>

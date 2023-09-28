@@ -16,8 +16,17 @@
   </div>
 </section>
 
-<section class="p-strip u-no-padding--bottom is-bordered">
-
+<section class="p-strip is-shallow u-no-padding--bottom is-bordered">
+  <div class="row">
+    <form class="p-search-box">
+      <label class="u-off-screen" for="search">Search</label>
+      <input type="search" id="search-input" class="p-search-box__input" name="search" placeholder="Search" required=""
+        autocomplete="on">
+      <button id="reset-search" type="reset" class="p-search-box__reset"><i class="p-icon--close">Close</i></button>
+      <button id="submit-search" type="submit" class="p-search-box__button"><i
+          class="p-icon--search">Search</i></button>
+    </form>
+  </div>
   <div class="row">
     <div class="col-12">
       <h2 class="p-heading--5">Filter previous sessions by topic</h2>
@@ -27,7 +36,7 @@
         <span class="p-badge" aria-label="{{ value }} videos exist">{{ value }}</span>
       </button>
       {% endfor %}
-      <button class="p-chip--negative" id="reset-btn">
+      <button class="p-chip--negative" id="reset-tags">
         <span class="p-chip__value">Reset</span>
       </button>
     </div>
@@ -80,6 +89,7 @@
         </div>
       </div>
     </div>
+  </div>
 </section>
 
 <section class="p-strip--light is-shallow is-bordered">
@@ -98,7 +108,7 @@
   </div>
 </section>
 
-<script>
+<script defer>
   let images = document.querySelectorAll('.p-card__image');
   images.forEach(function (image) {
     image.onerror = function (e) {
@@ -106,16 +116,47 @@
     }
   });
 
-  let reset = document.getElementById("reset-btn");
-  reset.style.display = "none";
+  let resetTags = document.getElementById("reset-tags");
+  resetTags.style.display = "none";
 
-  Array.from(document.getElementsByClassName("p-chip")).forEach((el) => el.addEventListener("click", function () {
-    // change class of clicked element to p-chip--positive
+  const resetTagFilters = () => {
     Array.from(document.getElementsByClassName("p-chip--positive")).forEach((el) => el.className = "p-chip");
+    resetTags.style.display = "none";
+  }
+
+  const resetSearch = document.getElementById('reset-search');
+  const searchInput = document.getElementById('search-input');
+  const cards = document.querySelectorAll('.p-card');
+  const submitButton = document.getElementById('submit-search');
+
+  searchInput.addEventListener('input', () => {
+    const searchText = searchInput.value.toLowerCase();
+    resetTagFilters();
+    cards.forEach((card) => {
+      const title = card.querySelector('.card-title')?.textContent.toLowerCase();
+      if (title?.includes(searchText)) {
+        card.style.display = 'block';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  });
+  resetSearch.addEventListener('click', () => {
+    cards.forEach((card) => {
+      card.style.display = 'block';
+    });
+  });
+  // Prevent form submission
+  submitButton.addEventListener('click', (e) => {
+    e.preventDefault();
+  })
+  Array.from(document.getElementsByClassName("p-chip")).forEach((el) => el.addEventListener("click", function () {
+    searchInput.value = "";
+    // change class of clicked element to p-chip--positive
+    resetTagFilters();
     this.className = "p-chip--positive";
     // show sessions with this tag
-    let tag = this.getElementsByTagName("span")[0].innerHTML;
-    let cards = document.getElementsByClassName("p-card");
+    const tag = this.getElementsByTagName("span")[0].innerHTML;
     Array.from(cards).forEach((card) => {
       if (card.dataset.tags.includes(tag)) {
         card.style.display = "block";
@@ -125,14 +166,14 @@
     });
 
     // Create a reset button, when p-chip is clicked
-    reset.style.display = "block";
-    reset.addEventListener("click", function () {
+    resetTags.style.display = "block";
+    resetTags.addEventListener("click", function () {
       // change class of clicked element to p-chip
-      Array.from(document.getElementsByClassName("p-chip--positive")).forEach((el) => el.className = "p-chip");
+      resetTagFilters();
       Array.from(cards).forEach((card) => {
         card.style.display = "block";
       });
-      reset.style.display = "none";
+      resetTags.style.display = "none";
     });
   }));
 
