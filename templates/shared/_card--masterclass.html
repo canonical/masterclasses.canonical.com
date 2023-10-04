@@ -8,9 +8,11 @@
     {% endif %}
   </a>
   <div class="p-card__inner">
-    <h3 class="p-heading--5 u-no-margin--bottom"><a href="{{ session.Recording }}">{{ session.Topic }}</a></h3>
-    <p class="u-text--muted u-no-margin--bottom">Duration: {{ session.Duration }}</p>
+    <h3 class="p-heading--5 u-no-margin--bottom"><a href="{{ session.Recording }}">{{ session.Topic }}</a>
+    </h3>
     <p>{{ session.Description }}</p>
+    <p class="u-text--muted u-no-margin--bottom">{{ session.Tags }}</p>
+    <p class="u-text--muted u-no-margin--bottom">Duration: {{ session.Duration }}</p>
   </div>
   <hr class="u-no-margin--bottom">
   <div class="p-card__inner">
