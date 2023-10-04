@@ -21,6 +21,8 @@ PRIVATE_KEY=your_private_key
 
 these keys are [mastermasterclasses-canonical-com](https://github.com/canonical/masterclasses.canonical.com/blob/main/konf/site.yaml#L12) google drive keys.
 
+Contact @aaryan-porwal on mattermost to get the keys.
+
 2. Install dotrun as described in https://github.com/canonical/dotrun#installation
 3. Launch it from the head of this repo by running the following command:
 
