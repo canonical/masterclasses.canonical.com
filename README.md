@@ -1,5 +1,5 @@
 
-<img width="836" alt="Masterclasses" src="https://github.com/canonical/masterclasses.canonical.com/assets/54525904/852d5f09-1508-4069-a2e5-2338ac863fac">
+<img width="836" height="280" alt="Masterclasses" src="https://github.com/canonical/masterclasses.canonical.com/assets/54525904/852d5f09-1508-4069-a2e5-2338ac863fac">
 
 
 Masterclasses are a series of talks and workshops on varied topics presented by the amazing people at Canonical.
