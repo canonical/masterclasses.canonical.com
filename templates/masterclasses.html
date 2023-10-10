@@ -106,6 +106,8 @@
     }
   });
 
+  let reset = document.getElementById("reset-btn");
+  reset.style.display = "none";
 
   Array.from(document.getElementsByClassName("p-chip")).forEach((el) => el.addEventListener("click", function () {
     // change class of clicked element to p-chip--positive
@@ -123,7 +125,6 @@
     });
 
     // Create a reset button, when p-chip is clicked
-    let reset = document.getElementById("reset-btn");
     reset.style.display = "block";
     reset.addEventListener("click", function () {
       // change class of clicked element to p-chip
