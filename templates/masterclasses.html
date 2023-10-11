@@ -19,7 +19,7 @@
 <section class="p-strip is-shallow u-no-padding--bottom is-bordered">
   <div class="row">
     <form class="p-search-box">
-      <label class="u-off-screen" for="search">Search</label>
+      <label class="u-off-screen" for="search-input">Search</label>
       <input type="search" id="search-input" class="p-search-box__input" name="search" placeholder="Search" required=""
         autocomplete="on">
       <button id="reset-search" type="reset" class="p-search-box__reset"><i class="p-icon--close">Close</i></button>
@@ -36,9 +36,6 @@
         <span class="p-badge" aria-label="{{ value }} videos exist">{{ value }}</span>
       </button>
       {% endfor %}
-      <button class="p-chip--negative" id="reset-tags">
-        <span class="p-chip__value">Reset</span>
-      </button>
     </div>
   </div>
   <div class="row">
@@ -111,17 +108,25 @@
 <script defer>
   let images = document.querySelectorAll('.p-card__image');
   images.forEach(function (image) {
-    image.onerror = function (e) {
+    image.onerror = function () {
       image.src = 'https://assets.ubuntu.com/v1/89a57889-Masterclasses-thumbnail.png';
     }
   });
 
-  let resetTags = document.getElementById("reset-tags");
-  resetTags.style.display = "none";
+  const resetChips = () => {
+    Array.from(document.getElementsByClassName("p-chip--positive")).forEach((chip) => {
+      const neutralChip = changeTag(chip, "button");
+      const dismissBtn = neutralChip.lastChild;
+      neutralChip.removeChild(dismissBtn);
+      neutralChip.className = "p-chip";
+      neutralChip.addEventListener("click", () => handleChipClick(neutralChip));
+    });
+  }
 
-  const resetTagFilters = () => {
-    Array.from(document.getElementsByClassName("p-chip--positive")).forEach((el) => el.className = "p-chip");
-    resetTags.style.display = "none";
+  const resetCards = () => {
+    Array.from(cards).forEach((card) => {
+      card.style.display = "block";
+    });
   }
 
   const resetSearch = document.getElementById('reset-search');
@@ -131,7 +136,7 @@
 
   searchInput.addEventListener('input', () => {
     const searchText = searchInput.value.toLowerCase();
-    resetTagFilters();
+    resetChips();
     cards.forEach((card) => {
       const title = card.querySelector('.card-title')?.textContent.toLowerCase();
       if (title?.includes(searchText)) {
@@ -141,22 +146,42 @@
       }
     });
   });
-  resetSearch.addEventListener('click', () => {
-    cards.forEach((card) => {
-      card.style.display = 'block';
-    });
-  });
+  resetSearch.addEventListener('click', resetCards);
   // Prevent form submission
   submitButton.addEventListener('click', (e) => {
     e.preventDefault();
   })
-  Array.from(document.getElementsByClassName("p-chip")).forEach((el) => el.addEventListener("click", function () {
+
+  const changeTag = (node, tag) => {
+    const clone = document.createElement(tag)
+    for (const { name, value } of node.attributes) {
+      clone.setAttribute(name, value);
+    }
+    while (node.firstChild) {
+      clone.appendChild(node.firstChild)
+    }
+    node.replaceWith(clone)
+    return clone
+  };
+
+  const handleChipClick = (chip) => {
     searchInput.value = "";
-    // change class of clicked element to p-chip--positive
-    resetTagFilters();
-    this.className = "p-chip--positive";
+    resetChips();
+
+    const dismissBtn = document.createElement("button");
+    dismissBtn.className = "p-chip__dismiss";
+    dismissBtn.innerHTML = "Dismiss";
+    dismissBtn.addEventListener("click", function () {
+      resetChips();
+      resetCards();
+    });
+
+    const positiveChip = changeTag(chip, "span");
+    positiveChip.className = "p-chip--positive";
+    positiveChip.appendChild(dismissBtn)
+
     // show sessions with this tag
-    const tag = this.getElementsByTagName("span")[0].innerHTML;
+    const tag = positiveChip.getElementsByTagName("span")[0].innerHTML;
     Array.from(cards).forEach((card) => {
       if (card.dataset.tags.includes(tag)) {
         card.style.display = "block";
@@ -164,18 +189,9 @@
         card.style.display = "none";
       }
     });
+  }
 
-    // Create a reset button, when p-chip is clicked
-    resetTags.style.display = "block";
-    resetTags.addEventListener("click", function () {
-      // change class of clicked element to p-chip
-      resetTagFilters();
-      Array.from(cards).forEach((card) => {
-        card.style.display = "block";
-      });
-      resetTags.style.display = "none";
-    });
-  }));
+  Array.from(document.getElementsByClassName("p-chip")).forEach((el) => el.addEventListener("click", () => handleChipClick(el)));
 
 </script>
 
