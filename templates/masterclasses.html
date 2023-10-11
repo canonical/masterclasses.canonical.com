@@ -18,27 +18,6 @@
 
 <section class="p-strip is-shallow u-no-padding--bottom is-bordered">
   <div class="row">
-    <form class="p-search-box">
-      <label class="u-off-screen" for="search-input">Search</label>
-      <input type="search" id="search-input" class="p-search-box__input" name="search" placeholder="Search" required=""
-        autocomplete="on">
-      <button id="reset-search" type="reset" class="p-search-box__reset"><i class="p-icon--close">Close</i></button>
-      <button id="submit-search" type="submit" class="p-search-box__button"><i
-          class="p-icon--search">Search</i></button>
-    </form>
-  </div>
-  <div class="row">
-    <div class="col-12">
-      <h2 class="p-heading--5">Filter previous sessions by topic</h2>
-      {% for key,value in tags.items() %}
-      <button class="p-chip">
-        <span class="p-chip__value">{{ key }}</span>
-        <span class="p-badge" aria-label="{{ value }} videos exist">{{ value }}</span>
-      </button>
-      {% endfor %}
-    </div>
-  </div>
-  <div class="row">
     <div class="p-divider u-no-margin--bottom">
       <div class="col-3 p-divider__block">
         <h2 class="p-heading--3">Upcoming sessions</h2>
@@ -76,13 +55,35 @@
         </ul>
       </div>
       <div class="col-9 p-divider__block">
-        <h2 class="p-heading--3">Previous sessions</h2>
-        <div class="u-equal-height">
-          {% for session in previous_sessions %}
-          {% with session=session %}
-          {% include "shared/_card--masterclass.html" %}
-          {% endwith %}
-          {% endfor %}
+        <div class="row">
+          <form class="p-search-box">
+            <label class="u-off-screen" for="search-input">Search</label>
+            <input type="search" id="search-input" class="p-search-box__input" name="search" placeholder="Search"
+              required="" autocomplete="on">
+            <button id="reset-search" type="reset" class="p-search-box__reset"><i class="p-icon--close">Close</i></button>
+            <button id="submit-search" type="submit" class="p-search-box__button"><i
+                class="p-icon--search">Search</i></button>
+          </form>
+        </div>
+        <h2 class="p-heading--5">Filter previous sessions by topic</h2>
+        {% for key,value in tags.items() %}
+        <button class="p-chip">
+          <span class="p-chip__value">{{ key }}</span>
+          <span class="p-badge" aria-label="{{ value }} videos exist">{{ value }}</span>
+        </button>
+        {% endfor %}
+        <button class="p-chip--negative" id="reset-btn">
+          <span class="p-chip__value">Reset</span>
+        </button>
+        <div class="row">
+          <h2 class="p-heading--3">Previous sessions</h2>
+          <div class="u-equal-height">
+            {% for session in previous_sessions %}
+            {% with session=session %}
+            {% include "shared/_card--masterclass.html" %}
+            {% endwith %}
+            {% endfor %}
+          </div>
         </div>
       </div>
     </div>
