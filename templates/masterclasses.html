@@ -154,8 +154,8 @@
 
   const changeTag = (node, tag) => {
     const clone = document.createElement(tag)
-    for (const attr of node.attributes) {
-      clone.setAttributeNS(null, attr.name, attr.value)
+    for (const { name, value } of node.attributes) {
+      clone.setAttribute(name, value);
     }
     while (node.firstChild) {
       clone.appendChild(node.firstChild)
