@@ -13,7 +13,7 @@ app = FlaskBase(
     template_500="500.html",
 )
 
-init_sso(app)
+# init_sso(app)
 
 app.register_blueprint(masterclasses, url_prefix="/")
 
