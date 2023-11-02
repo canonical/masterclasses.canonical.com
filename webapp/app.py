@@ -2,7 +2,7 @@ import flask
 from canonicalwebteam.flask_base.app import FlaskBase
 
 from webapp.masterclasses import masterclasses
-from webapp.sso import init_sso
+# from webapp.sso import init_sso
 
 app = FlaskBase(
     __name__,
@@ -13,7 +13,7 @@ app = FlaskBase(
     template_500="500.html",
 )
 
-init_sso(app)
+# init_sso(app)
 
 app.register_blueprint(masterclasses, url_prefix="/")
 
