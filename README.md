@@ -19,6 +19,8 @@ PRIVATE_KEY_ID=your_private_key_id
 PRIVATE_KEY=your_private_key
 ```
 
+Ask a member of the team for the values of these keys.
+
 these keys are [mastermasterclasses-canonical-com](https://github.com/canonical/masterclasses.canonical.com/blob/main/konf/site.yaml#L12) google drive keys.
 
 2. Install dotrun as described in https://github.com/canonical/dotrun#installation
