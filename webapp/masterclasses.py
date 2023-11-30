@@ -23,7 +23,7 @@ def get_value_row(row, type):
                 return {
                     "Formatted": parsed_datetime.strftime("%d %b %Y"),
                     "Object": parsed_datetime,
-                    "Calendar": parsed_datetime.strftime('%Y%m%d'),
+                    "Calendar": parsed_datetime.strftime("%Y%m%d"),
                 }
         elif "userEnteredValue" in row:
             if "stringValue" in row["userEnteredValue"]:
@@ -64,12 +64,14 @@ def get_id(video_link):
 def index():
     previous_sessions = get_previous_sessions()
     upcoming_sessions = get_upcoming_sessions()
+    sprint_sessions = get_sprint_sessions()
     tags = get_tags()
 
     return flask.render_template(
         "masterclasses.html",
         previous_sessions=previous_sessions,
         upcoming_sessions=upcoming_sessions,
+        sprint_sessions=sprint_sessions,
         tags=tags,
     )
 
@@ -134,7 +136,7 @@ def get_previous_sessions():
         ("Description", str),
         ("Chat log", str),
         ("Tags", str),
-        ("Thumbnails", str)
+        ("Thumbnails", str),
     ]
     res = sheet.get(
         spreadsheetId=SPREADSHEET_ID,
@@ -163,6 +165,56 @@ def get_previous_sessions():
     sessions.sort(key=lambda x: x["Date"]["Object"], reverse=True)
 
     return sessions
+
+
+def get_sprint_sessions():
+    try:
+        sheet = get_sheet()
+    except MissingCredential as error:
+        flask.abort(500, str(error))
+
+    SHEET = "Sprint presentations"
+    RANGE = "A2:J1000"
+    COLUMNS = [
+        ("Topic", str),
+        ("Owner", str),
+        ("Duration", str),
+        ("Date", datetime),
+        ("Slides", str),
+        ("Recording", str),
+        ("Description", str),
+        ("Chat log", str),
+        ("Tags", str),
+        ("Thumbnails", str),
+    ]
+    res = sheet.get(
+        spreadsheetId=SPREADSHEET_ID,
+        ranges=[f"{SHEET}!{RANGE}"],
+        includeGridData=True,
+    ).execute()
+
+    sessions = []
+    for row in res["sheets"][0]["data"][0]["rowData"]:
+        if "values" in row and row["values"][0]:
+            session = {}
+            for column_index in range(len(COLUMNS)):
+                (column, type) = COLUMNS[column_index]
+                session[column] = get_value_row(
+                    row["values"][column_index]
+                    if index_in_list(row["values"], column_index)
+                    else None,
+                    type,
+                )
+                if COLUMNS[column_index][0] == "Recording":
+                    session["Link"] = get_id(session[column])
+
+            sessions.append(session)
+
+    # Sort sessions by date
+    sessions.sort(key=lambda x: x["Date"]["Object"], reverse=True)
+
+    return sessions
+
 
 def get_tags():
     try:
