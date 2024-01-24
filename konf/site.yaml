@@ -16,6 +16,11 @@ env:
       key: private-key
       name: masterclasses-canonical-com
 
+  - name: DATABASE_URL
+    secretKeyRef:
+      key: masterclasses-database-url
+      name: masterclasses-canonical-com
+
 # Overrides for production
 production:
   replicas: 2
