@@ -1,32 +1,37 @@
-<div class="p-card u-no-padding" data-tags="{{ session.Tags }}">
-  {% if session.Link %}
-  <a href="{{ session.Recording }}" aria-hidden="true" tabindex="-1">
-    {% if session.Thumbnails %}
-    <img class="p-card__image" alt="{{ session.Topic }} video" src="{{ session.Thumbnails }}">
+<div class="p-card u-no-padding" data-tags="{{ session.tags }}">
+  {% if session.recording %}
+  <a href="{{ session.recording }}" aria-hidden="true" tabindex="-1">
+    {% if session.thumbnails %}
+    <img class="p-card__image" alt="{{ session.topic }} video" src="{{ session.thumbnails }}">
     {% else %}
-    <img class="p-card__image" alt="{{ session.Topic }} video" src="https://lh3.google.com/u/0/d/{{ session.Link }}=k">
+    <!-- FIXME: session.Link (id of the video) needs to be added into session object -->
+    <img class="p-card__image" alt="{{ session.topic }} video" src="https://lh3.google.com/u/0/d/{{ session.Link }}=k">
     {% endif %}
   </a>
   <div class="p-card__inner">
-    <h3 class="p-heading--5 u-no-margin--bottom card-title"><a href="{{ session.Recording }}">{{ session.Topic }}</a>
+    <h3 class="p-heading--5 u-no-margin--bottom card-title"><a href="{{ session.recording }}">{{ session.topic }}</a>
     </h3>
-    <p>{{ session.Description }}</p>
-    <p class="u-text--muted u-no-margin--bottom">{{ session.Tags }}</p>
-    <p class="u-text--muted u-no-margin--bottom">{{ session.Duration }}</p>
+    {% if session.description %}
+    <p>{{ session.description }}</p>
+    {% endif %}
+    {% if session.tags %}
+    <p class="u-text--muted u-no-margin--bottom">{{ session.tags }}</p>
+    {% endif %}
+    <p class="u-text--muted u-no-margin--bottom">{{ session.duration }}</p>
   </div>
   <hr class="u-no-margin--bottom">
   <div class="p-card__inner">
-    by {{ session.Owner }} on {{ session.Date.Formatted }}
+    by {{ session.owner }} on {{ session.date }}
   </div>
   {% else %}
   <div class="p-card__inner">
-    <h3 class="p-heading--5 u-no-margin--bottom card-title">{{ session.Topic }}</h3>
-    <p>{{ session.Description }}</p>
+    <h3 class="p-heading--5 u-no-margin--bottom card-title">{{ session.topic }}</h3>
+    <p>{{ session.description }}</p>
     <p>Sorry we forgot to record this session.</p>
   </div>
   <hr class="u-no-margin--bottom">
   <div class="p-card__inner">
-    by {{ session.Owner }} on {{ session.Date.Formatted }}
+    by {{ session.owner }} on {{ session.date }}
   </div>
   {% endif %}
 </div>
