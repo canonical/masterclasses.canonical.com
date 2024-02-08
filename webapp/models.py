@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Date, Integer, String, DateTime
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.sql import func
 
@@ -13,7 +13,7 @@ class PreviousSession(Base):
   topic = Column(String, nullable=False)
   owner = Column(String, nullable=False)
   duration = Column(String, nullable=False)
-  date = Column(DateTime, nullable=False, default=func.now())
+  date = Column(Date, nullable=False, default=func.now())
   slides = Column(String, nullable=True)
   recording = Column(String, nullable=False)
   description = Column(String, nullable=True)
@@ -32,7 +32,7 @@ class UpcomingSession(Base):
   topic = Column(String, nullable=False)
   owner = Column(String, nullable=False)
   duration = Column(String, nullable=False)
-  date = Column(DateTime, nullable=True, default=func.now())
+  date = Column(Date, nullable=True, default=func.now())
   notes = Column(String, nullable=True)
   event = Column(String, nullable=True)
 
