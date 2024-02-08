@@ -85,14 +85,22 @@ def index():
         tags=tags,
     )
 
+def format_date(date):
+    # change the date format, like 23 May 2024
+    return date.strftime("%d %b %Y")
 
 def get_upcoming_sessions():
     session = db_session.query(UpcomingSession).all()
+    for i in range(len(session)):
+        if session[i].date:
+            session[i].date = format_date(session[i].date)
     return session
 
 
 def get_previous_sessions():
-    session = db_session.query(PreviousSession).all()
+    session = db_session.query(PreviousSession).order_by(PreviousSession.date.desc()).all()
+    for i in range(len(session)):
+        session[i].date = format_date(session[i].date)
     return session
 
 
