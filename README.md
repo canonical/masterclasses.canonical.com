@@ -8,7 +8,7 @@ Canonical is known for its brilliant people, both in terms of intelligence and v
 
 # Local Development
 
-[masterclassses.canonical.com](masterclasses.canonical.com) is a [Flask v1](https://flask.palletsprojects.com/_/downloads/en/1.1.x/pdf/) app and uses [Flask-base](https://github.com/canonical/canonicalwebteam.flask-base): This is Canonical's core Flask app that sets default functionality (e.g. redirects.yaml, templates/404.html, robots.txt, favicon, caching headers, security headers).
+[masterclassses.canonical.com](https://masterclasses.canonical.com) is a [Flask v1](https://flask.palletsprojects.com/_/downloads/en/1.1.x/pdf/) app and uses [Flask-base](https://github.com/canonical/canonicalwebteam.flask-base): This is Canonical's core Flask app that sets default functionality (e.g. redirects.yaml, templates/404.html, robots.txt, favicon, caching headers, security headers).
 
 It uses [dotrun](https://github.com/canonical/dotrun) for local development, defining standard endpoints for `serve`, `build`, `test`, `watch` etc. within the package.json. This allows for a consistent development experience across all Canonical projects.
 
