@@ -35,6 +35,7 @@
 <section class="p-strip is-shallow u-no-padding--bottom is-bordered" id="masterclasses">
   <div class="row">
     <div class="p-divider u-no-margin--bottom">
+      {% if upcoming_sessions %}
       <div class="col-3 p-divider__block">
         <h2 class="p-heading--3">Upcoming sessions</h2>
         <ul class="p-list--divided">
@@ -71,6 +72,9 @@
         </ul>
       </div>
       <div class="col-9 p-divider__block">
+      {% else %}
+      <div class="col-12 p-divider__block">
+      {% endif %}
         <div class="row">
           <form class="p-search-box">
             <label class="u-off-screen" for="search-input">Search</label>
