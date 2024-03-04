@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 from webapp.spreadsheet import get_sheet, MissingCredential
-from webapp.models import PreviousSession, UpcomingSession
+from webapp.models import PreviousSession, UpcomingSession, SprintSession
 
 db_engine = create_engine(os.getenv("DATABASE_URL"))
 db_session = scoped_session(
@@ -106,52 +106,56 @@ def get_previous_sessions():
 
 
 def get_sprint_sessions():
-    try:
-        sheet = get_sheet()
-    except MissingCredential as error:
-        flask.abort(500, str(error))
+    # try:
+    #     sheet = get_sheet()
+    # except MissingCredential as error:
+    #     flask.abort(500, str(error))
 
-    SHEET = "Sprint presentations"
-    RANGE = "A2:J1000"
-    COLUMNS = [
-        ("Topic", str),
-        ("Owner", str),
-        ("Duration", str),
-        ("Date", datetime),
-        ("Slides", str),
-        ("Recording", str),
-        ("Description", str),
-        ("Chat log", str),
-        ("Tags", str),
-        ("Thumbnails", str),
-    ]
-    res = sheet.get(
-        spreadsheetId=SPREADSHEET_ID,
-        ranges=[f"{SHEET}!{RANGE}"],
-        includeGridData=True,
-    ).execute()
+    # SHEET = "Sprint presentations"
+    # RANGE = "A2:J1000"
+    # COLUMNS = [
+    #     ("Topic", str),
+    #     ("Owner", str),
+    #     ("Duration", str),
+    #     ("Date", datetime),
+    #     ("Slides", str),
+    #     ("Recording", str),
+    #     ("Description", str),
+    #     ("Chat log", str),
+    #     ("Tags", str),
+    #     ("Thumbnails", str),
+    # ]
+    # res = sheet.get(
+    #     spreadsheetId=SPREADSHEET_ID,
+    #     ranges=[f"{SHEET}!{RANGE}"],
+    #     includeGridData=True,
+    # ).execute()
 
-    sessions = []
-    for row in res["sheets"][0]["data"][0]["rowData"]:
-        if "values" in row and row["values"][0]:
-            session = {}
-            for column_index in range(len(COLUMNS)):
-                (column, type) = COLUMNS[column_index]
-                session[column] = get_value_row(
-                    row["values"][column_index]
-                    if index_in_list(row["values"], column_index)
-                    else None,
-                    type,
-                )
-                if COLUMNS[column_index][0] == "Recording":
-                    session["Link"] = get_id(session[column])
+    # sessions = []
+    # for row in res["sheets"][0]["data"][0]["rowData"]:
+    #     if "values" in row and row["values"][0]:
+    #         session = {}
+    #         for column_index in range(len(COLUMNS)):
+    #             (column, type) = COLUMNS[column_index]
+    #             session[column] = get_value_row(
+    #                 row["values"][column_index]
+    #                 if index_in_list(row["values"], column_index)
+    #                 else None,
+    #                 type,
+    #             )
+    #             if COLUMNS[column_index][0] == "Recording":
+    #                 session["Link"] = get_id(session[column])
 
-            sessions.append(session)
+    #         sessions.append(session)
 
-    # Sort sessions by date
-    sessions.sort(key=lambda x: x["Date"]["Object"], reverse=True)
+    # # Sort sessions by date
+    # sessions.sort(key=lambda x: x["Date"]["Object"], reverse=True)
 
-    return sessions
+    # return sessions
+    session = db_session.query(SprintSession).order_by(SprintSession.date.desc()).all()
+    # for i in range(len(session)):
+    #     session[i].date = format_date(session[i].date)
+    return session
 
 
 def get_tags():
