@@ -1,10 +1,6 @@
-from sqlalchemy import Column, Date, Integer, String, DateTime
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy import Column, Date, Integer, String
 from sqlalchemy.sql import func
-
-class Base(DeclarativeBase):
-  pass
-
+from models.base import Base
 
 class PreviousSession(Base):
   __tablename__ = "previous_sessions"
@@ -15,7 +11,7 @@ class PreviousSession(Base):
   duration = Column(String, nullable=False)
   date = Column(Date, nullable=False, default=func.now())
   slides = Column(String, nullable=True)
-  recording = Column(String, nullable=False)
+  recording = Column(String, nullable=True)
   description = Column(String, nullable=True)
   chat_log = Column(String, nullable=True)
   tags = Column(String, nullable=True)
