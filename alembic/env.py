@@ -5,9 +5,11 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
-from models.PreviousSession import Base as PreviousSessionBase
-from models.UpcomingSession import Base as UpcomingSessionBase
-from models.SprintSession import Base as SprintSessionBase
+from models.base import Base
+# https://stackoverflow.com/a/62925227
+from models.PreviousSession import PreviousSession
+from models.UpcomingSession import UpcomingSession
+from models.SprintSession import SprintSession
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -23,7 +25,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodelx``
 # target_metadata = mymodel.Base.metadata
-target_metadata = [PreviousSessionBase.metadata, UpcomingSessionBase.metadata, SprintSessionBase.metadata]
+target_metadata = [Base.metadata]
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
