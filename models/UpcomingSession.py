@@ -1,10 +1,6 @@
-from sqlalchemy import Column, Date, Integer, String, DateTime
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy import Column, Date, Integer, String
 from sqlalchemy.sql import func
-
-class Base(DeclarativeBase):
-  pass
-
+from models.base import Base
 
 class UpcomingSession(Base):
   __tablename__ = "upcoming_sessions"
@@ -19,3 +15,4 @@ class UpcomingSession(Base):
 
   def __repr__(self):
     return f"<UpcomingSession(topic={self.topic}, owner={self.owner}, duration={self.duration}, date={self.date}, notes={self.notes}, event={self.event})>"
+

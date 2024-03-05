@@ -1,10 +1,11 @@
 import os
-from datetime import datetime
 import flask
-from sqlalchemy import create_engine, func
+from sqlalchemy import create_engine, func, nullslast
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-from models import PreviousSession, UpcomingSession, SprintSession
+from models.PreviousSession import PreviousSession
+from models.UpcomingSession import UpcomingSession
+from models.SprintSession import SprintSession
 
 db_engine = create_engine(os.getenv("DATABASE_URL"))
 db_session = scoped_session(
@@ -54,7 +55,7 @@ def format_date(date):
     return date.strftime("%d %b %Y")
 
 def get_upcoming_sessions():
-    session = db_session.query(UpcomingSession).all()
+    session = db_session.query(UpcomingSession).order_by(nullslast(UpcomingSession.date.desc())).all()
     for i in range(len(session)):
         if session[i].date:
             session[i].date = format_date(session[i].date)
@@ -66,7 +67,6 @@ def get_previous_sessions():
     for i in range(len(session)):
         session[i].date = format_date(session[i].date)
     return session
-
 
 
 def get_sprint_sessions():
@@ -85,5 +85,4 @@ def get_tags():
                     tags[t] = count
                 else:
                     tags[t] += count
-
     return tags
