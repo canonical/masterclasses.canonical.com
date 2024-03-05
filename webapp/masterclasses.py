@@ -4,7 +4,7 @@ import flask
 from sqlalchemy import create_engine, func
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-from webapp.models import PreviousSession, UpcomingSession, SprintSession
+from models import PreviousSession, UpcomingSession, SprintSession
 
 db_engine = create_engine(os.getenv("DATABASE_URL"))
 db_session = scoped_session(
