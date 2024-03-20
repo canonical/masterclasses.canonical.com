@@ -8,4 +8,5 @@ if [ "${FLASK_DEBUG}" = true ] || [ "${FLASK_DEBUG}" = 1 ]; then
     RUN_COMMAND="${RUN_COMMAND} --reload --log-level debug --timeout 9999"
 fi
 
+alembic upgrade head
 ${RUN_COMMAND}

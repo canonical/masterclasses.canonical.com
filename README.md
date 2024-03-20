@@ -17,6 +17,7 @@ It uses [dotrun](https://github.com/canonical/dotrun) for local development, def
 ```bash
 PRIVATE_KEY_ID=your_private_key_id
 PRIVATE_KEY=your_private_key
+DATABASE_URL=production_database_url
 ```
 
 Ask a member of the team for the values of these keys.

@@ -1,9 +1,18 @@
-from datetime import datetime
+import os
 import flask
-from webapp.spreadsheet import get_sheet, MissingCredential
+from sqlalchemy import create_engine, func, nullslast
+from sqlalchemy.orm import scoped_session, sessionmaker
 
+from models.PreviousSession import PreviousSession
+from models.UpcomingSession import UpcomingSession
+from models.SprintSession import SprintSession
 
-SPREADSHEET_ID = "1fFumFWIM3oHwLr9pcBlaANcadAU0bNJxbkfGKwC_1pg"
+print(f"dbURL123: {os.getenv('DATABASE_URL')}")
+db_engine = create_engine(os.getenv("DATABASE_URL"))
+db_session = scoped_session(
+    sessionmaker(autocommit=False, autoflush=False, bind=db_engine)
+)
+
 
 masterclasses = flask.Blueprint(
     "masterclasses",
@@ -11,39 +20,6 @@ masterclasses = flask.Blueprint(
     template_folder="/templates",
     static_folder="/static",
 )
-
-
-def get_value_row(row, type):
-    if row:
-        if type == datetime:
-            if "formattedValue" in row:
-                parsed_datetime = datetime.strptime(
-                    row["formattedValue"], "%d %B %Y"
-                )
-                return {
-                    "Formatted": parsed_datetime.strftime("%d %b %Y"),
-                    "Object": parsed_datetime,
-                    "Calendar": parsed_datetime.strftime("%Y%m%d"),
-                }
-        elif "userEnteredValue" in row:
-            if "stringValue" in row["userEnteredValue"]:
-                if (
-                    "userEnteredFormat" in row
-                    and "textFormat" in row["userEnteredFormat"]
-                    and "link" in row["userEnteredFormat"]["textFormat"]
-                ):
-                    return row["userEnteredFormat"]["textFormat"]["link"][
-                        "uri"
-                    ]
-                return type(row["userEnteredValue"]["stringValue"])
-            if "numberValue" in row["userEnteredValue"]:
-                return type(row["userEnteredValue"]["numberValue"])
-
-    return ""
-
-
-def index_in_list(a_list, index):
-    return index < len(a_list)
 
 
 # Parse the id from a google url
@@ -75,190 +51,40 @@ def index():
         tags=tags,
     )
 
+def format_date(date):
+    # change the date format, like 23 May 2024
+    return date.strftime("%d %b %Y")
 
 def get_upcoming_sessions():
-    try:
-        sheet = get_sheet()
-    except MissingCredential as error:
-        flask.abort(500, str(error))
-
-    SHEET = "Upcoming"
-    RANGE = "A2:F1000"
-    COLUMNS = [
-        ("Topic", str),
-        ("Owner", str),
-        ("Duration", str),
-        ("Date", datetime),
-        ("Notes", str),
-        ("Event", str),
-    ]
-    res = sheet.get(
-        spreadsheetId=SPREADSHEET_ID,
-        ranges=[f"{SHEET}!{RANGE}"],
-        includeGridData=True,
-    ).execute()
-
-    sessions = []
-    for row in res["sheets"][0]["data"][0]["rowData"]:
-        if _has_row_value(row):
-            session = {}
-            for column_index in range(len(COLUMNS)):
-                (column, type) = COLUMNS[column_index]
-                session[column] = get_value_row(
-                    row["values"][column_index]
-                    if index_in_list(row["values"], column_index)
-                    else None,
-                    type,
-                )
-                if COLUMNS[column_index][0] == "Recording":
-                    session["Link"] = get_id(session[column])
-
-            sessions.append(session)
-
-    return sessions
+    session = db_session.query(UpcomingSession).order_by(nullslast(UpcomingSession.date.desc())).all()
+    for i in range(len(session)):
+        if session[i].date:
+            session[i].date = format_date(session[i].date)
+    return session
 
 
 def get_previous_sessions():
-    try:
-        sheet = get_sheet()
-    except MissingCredential as error:
-        flask.abort(500, str(error))
+    session = db_session.query(PreviousSession).order_by(PreviousSession.date.desc()).all()
+    for i in range(len(session)):
+        session[i].date = format_date(session[i].date)
+    return session
 
-    SHEET = "Completed"
-    RANGE = "A2:J1000"
-    COLUMNS = [
-        ("Topic", str),
-        ("Owner", str),
-        ("Duration", str),
-        ("Date", datetime),
-        ("Slides", str),
-        ("Recording", str),
-        ("Description", str),
-        ("Chat log", str),
-        ("Tags", str),
-        ("Thumbnails", str),
-    ]
-    res = sheet.get(
-        spreadsheetId=SPREADSHEET_ID,
-        ranges=[f"{SHEET}!{RANGE}"],
-        includeGridData=True,
-    ).execute()
-
-    sessions = []
-    for row in res["sheets"][0]["data"][0]["rowData"]:
-        if "values" in row and row["values"][0]:
-            session = {}
-            for column_index in range(len(COLUMNS)):
-                (column, type) = COLUMNS[column_index]
-                session[column] = get_value_row(
-                    row["values"][column_index]
-                    if index_in_list(row["values"], column_index)
-                    else None,
-                    type,
-                )
-                if COLUMNS[column_index][0] == "Recording":
-                    session["Link"] = get_id(session[column])
-
-            sessions.append(session)
-
-    # Sort sessions by date
-    sessions.sort(key=lambda x: x["Date"]["Object"], reverse=True)
-
-    return sessions
 
 
 def get_sprint_sessions():
-    try:
-        sheet = get_sheet()
-    except MissingCredential as error:
-        flask.abort(500, str(error))
-
-    SHEET = "Sprint presentations"
-    RANGE = "A2:J1000"
-    COLUMNS = [
-        ("Topic", str),
-        ("Owner", str),
-        ("Duration", str),
-        ("Date", datetime),
-        ("Slides", str),
-        ("Recording", str),
-        ("Description", str),
-        ("Chat log", str),
-        ("Tags", str),
-        ("Thumbnails", str),
-    ]
-    res = sheet.get(
-        spreadsheetId=SPREADSHEET_ID,
-        ranges=[f"{SHEET}!{RANGE}"],
-        includeGridData=True,
-    ).execute()
-
-    sessions = []
-    for row in res["sheets"][0]["data"][0]["rowData"]:
-        if "values" in row and row["values"][0]:
-            session = {}
-            for column_index in range(len(COLUMNS)):
-                (column, type) = COLUMNS[column_index]
-                session[column] = get_value_row(
-                    row["values"][column_index]
-                    if index_in_list(row["values"], column_index)
-                    else None,
-                    type,
-                )
-                if COLUMNS[column_index][0] == "Recording":
-                    session["Link"] = get_id(session[column])
-
-            sessions.append(session)
-
-    # Sort sessions by date
-    sessions.sort(key=lambda x: x["Date"]["Object"], reverse=True)
-
-    return sessions
+    session = db_session.query(SprintSession).order_by(SprintSession.date.desc()).all()
+    return session
 
 
 def get_tags():
-    try:
-        sheet = get_sheet()
-    except MissingCredential as error:
-        flask.abort(500, str(error))
-
-    SHEET = "Completed"
-    RANGE = "I2:I1000"
-    COLUMNS = [
-        ("Tag", str),
-    ]
-    res = sheet.get(
-        spreadsheetId=SPREADSHEET_ID,
-        ranges=[f"{SHEET}!{RANGE}"],
-        includeGridData=True,
-    ).execute()
-
+    tag_counts = db_session.query(PreviousSession.tags, func.count(PreviousSession.tags)).filter(PreviousSession.tags.isnot(None)).group_by(PreviousSession.tags).all()
     tags = {}
-    for row in res["sheets"][0]["data"][0]["rowData"]:
-        if "values" in row and row["values"][0]:
-            for column_index in range(len(COLUMNS)):
-                (column, type) = COLUMNS[column_index]
-                temp_tag = get_value_row(
-                    row["values"][column_index]
-                    if index_in_list(row["values"], column_index)
-                    else None,
-                    type,
-                )
-                for tag in temp_tag.strip().split(","):
-                    tag = tag.strip()
-                    if tag:
-                        if tag not in tags:
-                            tags[tag] = 1
-                        else:
-                            tags[tag] += 1
+    for tag, count in tag_counts:
+        for t in tag.split(","):
+            t = t.strip()
+            if t:
+                if t not in tags:
+                    tags[t] = count
+                else:
+                    tags[t] += count
     return tags
-
-
-def _has_row_value(row):
-    if (
-        "values" in row
-        and row["values"][0]
-        and "userEnteredValue" in row["values"][0]
-    ):
-        return True
-    return False

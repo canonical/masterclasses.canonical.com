@@ -44,18 +44,18 @@
             <div class="p-media-object--small">
               <div class="p-media-object__details">
                 <h3 class="p-media-object__title">
-                  {{ session.Topic }}
+                  {{ session.topic }}
                 </h3>
-                <p class="p-media-object__content">Hosted by {{ session.Owner }}</p>
-                <p class="p-media-object__content">{{ session.Notes }}</p>
+                <p class="p-media-object__content">Hosted by {{ session.owner }}</p>
+                <p class="p-media-object__content">{{ session.notes }}</p>
                 <ul class="p-media-object__meta-list">
-                  {% if session.Date %}
+                  {% if session.date %}
                   <li class="p-media-object__meta-list-item--date">
-                    <span class="u-off-screen">Date: </span>{{ session.Date.Formatted }}
+                    <span class="u-off-screen">Date: </span>{{ session.date }}
                   </li>
                   <!-- Add to calendar btn uses a gcal published event https://support.google.com/calendar/answer/41207 -->
                   <li class="p-media-object__meta-list-item--date">
-                    <a href="{{ session.Event }}" target="_blank" rel="noopener noreferrer">
+                    <a href="{{ session.event }}" target="_blank" rel="noopener noreferrer">
                       Add to Google Calendar
                     </a>
                   </li>
