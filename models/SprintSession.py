@@ -3,7 +3,7 @@ from sqlalchemy.sql import func
 from models.base import Base
 
 class SprintSession(Base):
-  __tablename__ = "sprint_session"
+  __tablename__ = "sprint_sessions"
 
   id = Column(Integer, primary_key=True)
   topic = Column(String, nullable=False)
