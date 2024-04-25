@@ -1,4 +1,4 @@
-# python script to import csv data into our production database
+# import csv data into our production database
 import csv
 import os
 from sqlalchemy import create_engine
