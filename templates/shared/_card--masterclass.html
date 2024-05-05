@@ -1,12 +1,7 @@
 <div class="p-card u-no-padding" data-tags="{{ session.tags }}">
   {% if session.recording %}
   <a href="{{ session.recording }}" aria-hidden="true" tabindex="-1">
-    {% if session.thumbnails %}
-    <img class="p-card__image" alt="{{ session.topic }} video" src="{{ session.thumbnails }}">
-    {% else %}
-    <!-- FIXME: session.Link (id of the video) needs to be added into session object -->
-    <img class="p-card__image" alt="{{ session.topic }} video" src="https://lh3.google.com/u/0/d/{{ session.Link }}=k">
-    {% endif %}
+    <img loading="lazy" class="p-card__image" alt="{{ session.topic }} video" src="{{ session.thumbnails }}">
   </a>
   <div class="p-card__inner">
     <h3 class="p-heading--5 u-no-margin--bottom card-title"><a href="{{ session.recording }}">{{ session.topic }}</a>
