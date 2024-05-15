@@ -9,6 +9,11 @@
     {% if session.description %}
     <p>{{ session.description }}</p>
     {% endif %}
+    {% if session.slides %}
+    <a href="{{ session.slides }}" target="_blank">Slides
+    <i class="p-icon--external-link"></i>
+    </a>
+    {% endif %}
     {% if session.tags %}
     <p class="u-text--muted u-no-margin--bottom">{{ session.tags }}</p>
     {% endif %}
