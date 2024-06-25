@@ -22,7 +22,7 @@ def init_sso(app):
         if "openid" in flask.session:
             return flask.redirect(open_id.get_next_url())
 
-        teams_request = TeamsRequest(query_membership=[SSO_TEAM])
+        teams_request = TeamsRequest(query_membership=[SSO_TEAM, "canonical-content-people"])
         return open_id.try_login(
             SSO_LOGIN_URL,
             ask_for=["email", "fullname"],
@@ -38,6 +38,7 @@ def init_sso(app):
             "identity_url": resp.identity_url,
             "email": resp.email,
             "fullname": resp.fullname,
+            "is_admin": "canonical-content-people" in resp.extensions["lp"].is_member
         }
 
         return flask.redirect(open_id.get_next_url())

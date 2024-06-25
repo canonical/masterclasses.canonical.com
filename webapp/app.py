@@ -37,7 +37,7 @@ app.register_blueprint(masterclasses, url_prefix="/")
 class RestrictedModelView(ModelView):
     # Admin view is accesible to Web&Design team
     def is_accessible(self):
-        return os.getenv("OPENID_LAUNCHPAD_TEAM") == "canonical-content-people"
+        return flask.session["openid"]["is_admin"] is True
 
 
 admin = Admin(app)
