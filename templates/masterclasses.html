@@ -105,7 +105,6 @@
       </div>
     </div>
   </div>
-</section>
 </div>
 
 
@@ -113,14 +112,13 @@
 <section class="p-strip is-shallow u-no-padding--bottom is-bordered">
   <div class="row">
     <div class="p-divider u-no-margin--bottom">
-        <div class="row">
-          <div class="u-equal-height">
-            {% for session in sprint_sessions %}
-            {% with session=session %}
-            {% include "shared/_card--masterclass.html" %}
-            {% endwith %}
-            {% endfor %}
-          </div>
+      <div class="row">
+        <div class="u-equal-height">
+          {% for session in sprint_sessions %}
+          {% with session=session %}
+          {% include "shared/_card--masterclass.html" %}
+          {% endwith %}
+          {% endfor %}
         </div>
       </div>
     </div>
@@ -247,93 +245,109 @@
 </script>
 
 <script defer>
-  let images = document.querySelectorAll('.p-card__image');
-  images.forEach(function (image) {
-    image.onerror = function () {
-      image.src = 'https://assets.ubuntu.com/v1/a647fb72-Copy%20of%20Canonical%20Slides%20Template.jpg';
-    }
-  });
+  document.addEventListener("DOMContentLoaded", () => {
+    const images = document.querySelectorAll('.p-card__image');
+    const resetSearch = document.getElementById('reset-search');
+    const searchInput = document.getElementById('search-input');
+    const submitButton = document.getElementById('submit-search');
+    const cards = document.querySelectorAll('.p-card');
+    const chips = document.querySelectorAll(".p-chip");
 
-  const resetChips = () => {
-    Array.from(document.getElementsByClassName("p-chip--positive")).forEach((chip) => {
-      const neutralChip = changeTag(chip, "button");
-      const dismissBtn = neutralChip.lastChild;
-      neutralChip.removeChild(dismissBtn);
-      neutralChip.className = "p-chip";
-      neutralChip.addEventListener("click", () => handleChipClick(neutralChip));
-    });
-  }
+    const setImageFallback = (image) => {
+      image.onerror = () => {
+        image.src = 'https://assets.ubuntu.com/v1/a647fb72-Copy%20of%20Canonical%20Slides%20Template.jpg';
+      };
+    };
 
-  const resetCards = () => {
-    Array.from(cards).forEach((card) => {
-      card.style.display = "block";
-    });
-  }
+    const changeTag = (node, tag) => {
+      const clone = document.createElement(tag);
+      Array.from(node.attributes).forEach(({ name, value }) => clone.setAttribute(name, value));
+      while (node.firstChild) clone.appendChild(node.firstChild);
+      node.replaceWith(clone);
+      return clone;
+    };
 
-  const resetSearch = document.getElementById('reset-search');
-  const searchInput = document.getElementById('search-input');
-  const cards = document.querySelectorAll('.p-card');
-  const submitButton = document.getElementById('submit-search');
-
-  searchInput.addEventListener('input', () => {
-    const searchText = searchInput.value.toLowerCase();
-    resetChips();
-    cards.forEach((card) => {
-      const title = card.querySelector('.card-title')?.textContent.toLowerCase();
-      if (title?.includes(searchText)) {
-        card.style.display = 'block';
-      } else {
-        card.style.display = 'none';
+    const resetChips = () => {
+      const positiveChip = document.querySelector(".p-chip--positive");
+      if (positiveChip) {
+        const neutralChip = changeTag(positiveChip, "button");
+        neutralChip.className = "p-chip";
+        neutralChip.removeChild(neutralChip.lastChild);
+        neutralChip.addEventListener("click", () => handleChipClick(neutralChip));
+        const url = new URL(window.location.href);
+        url.searchParams.delete("tag");
+        window.history.pushState({}, "", url);
       }
-    });
-  });
-  resetSearch.addEventListener('click', resetCards);
-  // Prevent form submission
-  submitButton.addEventListener('click', (e) => {
-    e.preventDefault();
-  })
+    };
 
-  const changeTag = (node, tag) => {
-    const clone = document.createElement(tag)
-    for (const { name, value } of node.attributes) {
-      clone.setAttribute(name, value);
-    }
-    while (node.firstChild) {
-      clone.appendChild(node.firstChild)
-    }
-    node.replaceWith(clone)
-    return clone
-  };
+    const resetCards = () => {
+      cards.forEach(card => card.style.display = 'block');
+    };
 
-  const handleChipClick = (chip) => {
-    searchInput.value = "";
-    resetChips();
+    const handleChipClick = (chip) => {
+      if (searchInput.value !== "") {
+        searchInput.value = "";
+      }
 
-    const dismissBtn = document.createElement("button");
-    dismissBtn.className = "p-chip__dismiss";
-    dismissBtn.innerHTML = "Dismiss";
-    dismissBtn.addEventListener("click", function () {
+      const url = new URL(window.location.href);
       resetChips();
       resetCards();
-    });
 
-    const positiveChip = changeTag(chip, "span");
-    positiveChip.className = "p-chip--positive";
-    positiveChip.appendChild(dismissBtn)
+      const tag = chip.querySelector("span").textContent;
+      const positiveChip = changeTag(chip, "span");
+      positiveChip.className = "p-chip--positive";
 
-    // show sessions with this tag
-    const tag = positiveChip.getElementsByTagName("span")[0].innerHTML;
-    Array.from(cards).forEach((card) => {
-      if (card.dataset.tags.includes(tag)) {
-        card.style.display = "block";
-      } else {
-        card.style.display = "none";
+      const dismissBtn = document.createElement("button");
+      dismissBtn.className = "p-chip__dismiss";
+      dismissBtn.textContent = "Dismiss";
+      dismissBtn.addEventListener("click", () => {
+        resetChips();
+        resetCards();
+      });
+
+      positiveChip.appendChild(dismissBtn);
+
+      url.searchParams.set("tag", tag);
+      window.history.pushState({}, "", url);
+
+      cards.forEach(card => {
+        card.style.display = card.dataset.tags.includes(tag) ? 'block' : 'none';
+      });
+    };
+
+    const filterCardsBySearch = () => {
+      const searchText = searchInput.value.toLowerCase();
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("tag")) {
+        resetChips();
+        resetCards();
       }
-    });
-  }
+      cards.forEach(card => {
+        const title = card.querySelector('.card-title')?.textContent.toLowerCase();
+        card.style.display = title && title.includes(searchText) ? 'block' : 'none';
+      });
+    };
 
-  Array.from(document.getElementsByClassName("p-chip")).forEach((el) => el.addEventListener("click", () => handleChipClick(el)));
+    const applyUrlTagFilter = () => { 
+      const url = new URL(window.location.href);
+      const tag = url.searchParams.get("tag");
+      if (tag) {
+        chips.forEach(chip => {
+          if (chip.querySelector("span").textContent === tag) {
+            handleChipClick(chip);
+          }
+        });
+      }
+    };
 
+    images.forEach(setImageFallback);
+    searchInput.addEventListener('input', filterCardsBySearch);
+    resetSearch.addEventListener('click', resetCards);
+    submitButton.addEventListener('click', (e) => e.preventDefault());
+    chips.forEach(chip => chip.addEventListener("click", () => handleChipClick(chip)));
+
+    applyUrlTagFilter();
+  });
 </script>
 
 
