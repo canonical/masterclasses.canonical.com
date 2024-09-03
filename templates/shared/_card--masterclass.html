@@ -1,17 +1,22 @@
 <div class="p-card u-no-padding" data-tags="{{ session.tags }}">
   {% if session.recording %}
-  <a href="{{ session.recording }}" aria-hidden="true" tabindex="-1">
+  {% block card_link %}
+  <a href="/{{ session.topic | slugify }}-class-{{ session.id }}" aria-hidden="true" tabindex="-1">
+    {% endblock %}
     <img loading="lazy" class="p-card__image" alt="{{ session.topic }} video" src="{{ session.thumbnails }}">
   </a>
   <div class="p-card__inner">
-    <h3 class="p-heading--5 u-no-margin--bottom card-title"><a href="{{ session.recording }}">{{ session.topic }}</a>
+    <h3 class="p-heading--5 u-no-margin--bottom card-title">
+      {% block card_title %}
+      <a href="/{{ session.topic | slugify }}-class-{{ session.id }}">{{ session.topic }}</a>
+      {% endblock %}
     </h3>
     {% if session.description %}
     <p>{{ session.description }}</p>
     {% endif %}
     {% if session.slides %}
     <a href="{{ session.slides }}" target="_blank">Slides
-    <i class="p-icon--external-link"></i>
+      <i class="p-icon--external-link"></i>
     </a>
     {% endif %}
     {% if session.tags %}

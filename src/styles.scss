@@ -10,3 +10,15 @@
   flex-wrap: wrap;
   gap: 1rem;
 }
+
+@media screen and (max-width: 768px) {
+  .iframe-video {
+    height: 225px;
+  }
+}
+
+.iframe-video {
+  border: 0px solid #000000;
+  background: #000000bf;
+  box-shadow: 0 0.25vmax 1vmax #000000bf;
+}

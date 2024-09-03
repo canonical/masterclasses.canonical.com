@@ -1,0 +1,8 @@
+{% extends "shared/_card--masterclass.html" %}
+
+{% block card_link %}
+<a href="/{{ session.topic | slugify }}-sprint-{{ session.id }}" aria-hidden="true" tabindex="-1">
+  {% endblock %}
+  {% block card_title %}
+  <a href="/{{ session.topic | slugify }}-sprint-{{ session.id }}">{{ session.topic }}</a>
+  {% endblock %}

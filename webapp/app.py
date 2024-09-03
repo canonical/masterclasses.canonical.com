@@ -29,6 +29,11 @@ app = FlaskBase(
     template_500="500.html",
 )
 
+def slugify(text):
+    return text.lower().replace(" ", "-")
+
+app.add_template_filter(slugify)
+
 init_sso(app)
 
 app.register_blueprint(masterclasses, url_prefix="/")
