@@ -2,6 +2,7 @@ import os
 import flask
 from sqlalchemy import create_engine, func, nullslast
 from sqlalchemy.orm import scoped_session, sessionmaker
+from datetime import datetime
 
 from models.PreviousSession import PreviousSession
 from models.UpcomingSession import UpcomingSession
@@ -36,36 +37,77 @@ def index():
         tags=tags,
     )
 
+@masterclasses.route("/<title>-class-<id>")
+def previous_video(id,title):
+    session = get_session_by_id(id, "previous")
+    return flask.render_template("video.html", session=session)
+
+@masterclasses.route("/<title>-sprint-<id>")
+def sprint_video(id,title):
+    session = get_session_by_id(id, "sprint")
+    return flask.render_template("video.html", session=session)
+
+
+def get_video_id(url):
+    if "drive.google.com/file/d/" in url:
+        return url.split("/")[-2]
+    elif "drive.google.com/open?id=" in url:
+        return url.split("=")[-1]
+    else:
+        return url
 
 def format_date(date):
     # change the date format, like 23 May 2024
+    if isinstance(date, str):
+        # If date is already a string, try to parse it
+        try:
+            date = datetime.strptime(date, "%Y-%m-%d")
+        except ValueError:
+            # If parsing fails, return the original string
+            return date
     return date.strftime("%d %b %Y")
+
+def enrich_session(session):
+    session.date = format_date(session.date)
+    session.video_id = get_video_id(session.recording)
+    return session
 
 
 def get_upcoming_sessions():
-    session = (
+    upcoming_sessions = (
         db_session.query(UpcomingSession)
         .order_by(nullslast(UpcomingSession.date.desc()))
         .all()
     )
-    for i in range(len(session)):
-        if session[i].date:
-            session[i].date = format_date(session[i].date)
-    return session
-
+    for s in upcoming_sessions:
+        s.date = format_date(s.date)
+    return upcoming_sessions
 
 def get_previous_sessions():
-    session = (
+    previous_sessions = (
         db_session.query(PreviousSession).order_by(PreviousSession.date.desc()).all()
     )
-    for i in range(len(session)):
-        session[i].date = format_date(session[i].date)
-    return session
-
+    return [enrich_session(s) for s in previous_sessions]
 
 def get_sprint_sessions():
-    session = db_session.query(SprintSession).order_by(SprintSession.date.desc()).all()
-    return session
+    sprint_sessions = db_session.query(SprintSession).order_by(SprintSession.date.desc()).all()
+    return [enrich_session(s) for s in sprint_sessions]
+
+
+def get_session_by_id(id, session_type):
+    if session_type == "previous":
+        session = (
+            db_session.query(PreviousSession)
+            .filter(PreviousSession.id == id)
+            .first()
+        )
+    elif session_type == "sprint":
+        session = (
+            db_session.query(SprintSession)
+            .filter(SprintSession.id == id)
+            .first()
+        )
+    return enrich_session(session)
 
 
 def get_tags():
