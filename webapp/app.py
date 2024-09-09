@@ -3,6 +3,7 @@ import flask
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from canonicalwebteam.flask_base.app import FlaskBase
+from slugify import slugify as py_slugify
 
 from flask_admin import Admin
 from flask_admin import AdminIndexView
@@ -30,7 +31,7 @@ app = FlaskBase(
 )
 
 def slugify(text):
-    return text.lower().replace(" ", "-")
+    return py_slugify(text)
 
 app.add_template_filter(slugify)
 
