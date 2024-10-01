@@ -12,7 +12,7 @@
       {% endblock %}
     </h3>
     {% if session.description %}
-    <p>{{ session.description }}</p>
+    <p>{{ session.description | truncate(100) }}</p>
     {% endif %}
     {% if session.slides %}
     <a href="{{ session.slides }}" target="_blank">Slides
