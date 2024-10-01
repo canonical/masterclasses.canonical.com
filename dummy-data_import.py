@@ -25,15 +25,15 @@ def main():
         [
             {
                 "id": 1,
-                "topic": "Python",
-                "owner": "John Doe",
+                "topic": "Open source and its social impact (Why do we do, what we do?)",
+                "owner": "Ant/Robin",
                 "duration": "1 hour",
                 "date": "2024-03-06",
                 "slides": "https://slides.com",
-                "recording": "https://recording.com",
-                "description": "Python session",
+                "recording": "https://drive.google.com/file/d/19h7daA-TDB_s5jjQkOka9Hv2Ei7ivOhJ/view?usp=sharing",
+                "description": "This is a a very long description. Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui dolor minima officia voluptates ipsa dignissimos ex ab in commodi accusantium dicta facere alias aliquid, corporis, perferendis sit possimus necessitatibus excepturi?",
                 "chat_log": "https://chat.com",
-                "tags": "python",
+                "tags": "Open Source",
                 "thumbnails": "https://http.cat/200",
             },
             {
