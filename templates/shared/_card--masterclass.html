@@ -1,42 +1,48 @@
 <div class="p-card u-no-padding" data-tags="{{ session.tags }}">
-  {% if session.recording %}
-  {% block card_link %}
-  <a href="/{{ session.topic | slugify }}-class-{{ session.id }}" aria-hidden="true" tabindex="-1">
-    {% endblock %}
-    <img loading="lazy" class="p-card__image" alt="{{ session.topic }} video" src="{{ session.thumbnails }}">
-  </a>
-  <div class="p-card__inner">
-    <h3 class="p-heading--5 u-no-margin--bottom card-title">
-      {% block card_title %}
-      <a href="/{{ session.topic | slugify }}-class-{{ session.id }}">{{ session.topic }}</a>
-      {% endblock %}
-    </h3>
-    {% if session.description %}
-    <p>{{ session.description | truncate(100) }}</p>
+    {% if session.recording %}
+        {% block card_link %}
+            <a href="/{{ session.topic | slugify }}-class-{{ session.id }}"
+               aria-hidden="true"
+               tabindex="-1">
+            {% endblock %}
+            <img loading="lazy"
+                 width="253"
+                 height="143"
+                 class="p-card__image"
+                 alt="{{ session.topic }} video"
+                 src="{{ session.thumbnails }}">
+        </a>
+        <div class="p-card__inner">
+            <h3 class="p-heading--5 u-no-margin--bottom card-title">
+                {% block card_title %}
+                    <a href="/{{ session.topic | slugify }}-class-{{ session.id }}">{{ session.topic }}</a>
+                {% endblock %}
+            </h3>
+            {% if session.description %}
+                {% set truncated_text = session.description|truncate(100) %}
+                {% if truncated_text != session.description %}
+                    {{ truncated_text }} <a href="/{{ session.topic | slugify }}-class-{{ session.id }}">see more</a>
+                {% else %}
+                    {{ session.description }}
+                {% endif %}
+            {% endif %}
+            {% if session.slides %}
+                <a href="{{ session.slides }}" target="_blank">Slides
+                    <i class="p-icon--external-link"></i>
+                </a>
+            {% endif %}
+            {% if session.tags %}<p class="u-text--muted u-no-margin--bottom">{{ session.tags }}</p>{% endif %}
+            <p class="u-text--muted u-no-margin--bottom">{{ session.duration }}</p>
+        </div>
+        <hr class="u-no-margin--bottom">
+        <div class="p-card__inner">by {{ session.owner }} on {{ session.date }}</div>
+    {% else %}
+        <div class="p-card__inner">
+            <h3 class="p-heading--5 u-no-margin--bottom card-title">{{ session.topic }}</h3>
+            <p>{{ session.description }}</p>
+            <p>Sorry we forgot to record this session.</p>
+        </div>
+        <hr class="u-no-margin--bottom">
+        <div class="p-card__inner">by {{ session.owner }} on {{ session.date }}</div>
     {% endif %}
-    {% if session.slides %}
-    <a href="{{ session.slides }}" target="_blank">Slides
-      <i class="p-icon--external-link"></i>
-    </a>
-    {% endif %}
-    {% if session.tags %}
-    <p class="u-text--muted u-no-margin--bottom">{{ session.tags }}</p>
-    {% endif %}
-    <p class="u-text--muted u-no-margin--bottom">{{ session.duration }}</p>
-  </div>
-  <hr class="u-no-margin--bottom">
-  <div class="p-card__inner">
-    by {{ session.owner }} on {{ session.date }}
-  </div>
-  {% else %}
-  <div class="p-card__inner">
-    <h3 class="p-heading--5 u-no-margin--bottom card-title">{{ session.topic }}</h3>
-    <p>{{ session.description }}</p>
-    <p>Sorry we forgot to record this session.</p>
-  </div>
-  <hr class="u-no-margin--bottom">
-  <div class="p-card__inner">
-    by {{ session.owner }} on {{ session.date }}
-  </div>
-  {% endif %}
 </div>
