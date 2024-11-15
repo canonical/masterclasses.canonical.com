@@ -1,12 +1,14 @@
 {% extends "base.html" %}
+{% from "shared/_filter_section.html" import filter_section %}
+{% from "shared/_upcoming_session.html" import upcoming_session %}
 
 {% block content %}
 <section class="p-strip--image is-bordered"
   style="background-image: url('https://assets.ubuntu.com/v1/293d19c5-rockybgfooter.jpg');">
   <div class="row">
     <div class="col-6">
-      <h1 class="">Masterclasses</h1>
-      <p class="p-muted-heading">Watch all the talks brought to you by the Canonical team</p>
+      <h1 style="font-weight: 100" class="">Masterclasses</h1>
+      <h4 style="font-weight: 400" class="p-muted-heading">Watch all the talks brought to you by the Canonical team</h4>
       <p>
         <a href="https://forms.gle/gRGH1xPZmUwq9mcX9" class="p-button--positive u-no-margin--bottom">
           Register your session
@@ -16,341 +18,139 @@
   </div>
 </section>
 
-<section class="p-strip u-no-padding--bottom u-no-padding--top">
-  <div class="row">
-    <div class="p-tabs">
-      <div class="p-tabs__list" role="tablist">
-        <div class="p-tabs__item">
-          <button class="p-tabs__link" role="tab" aria-selected="true" aria-controls="masterclasses-tab" id="masterclasses">Masterclasses</button>
-        </div>
-        <div class="p-tabs__item">
-          <button class="p-tabs__link" role="tab" aria-selected="false" aria-controls="sprint-tab" id="sprint" tabindex="-1">Sprint presentations</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
 <div tabindex="0" role="tabpanel" id="masterclasses-tab" aria-labelledby="masterclasses">
-<section class="p-strip is-shallow u-no-padding--bottom is-bordered" id="masterclasses">
-  <div class="row">
-    <div class="p-divider u-no-margin--bottom">
-      {% if upcoming_sessions %}
-      <div class="col-3 p-divider__block">
-        <h2 class="p-heading--3">Upcoming sessions</h2>
-        <ul class="p-list--divided">
-          {% for session in upcoming_sessions %}
-          <li class="p-list__item">
-            <div class="p-media-object--small">
-              <div class="p-media-object__details">
-                <h3 class="p-media-object__title">
-                  {{ session.topic }}
-                </h3>
-                <p class="p-media-object__content">Hosted by {{ session.owner }}</p>
-                <p class="p-media-object__content">{{ session.notes }}</p>
-                <ul class="p-media-object__meta-list">
-                  {% if session.date %}
-                  <li class="p-media-object__meta-list-item--date">
-                    <span class="u-off-screen">Date: </span>{{ session.date }}
-                  </li>
-                  <!-- Add to calendar btn uses a gcal published event https://support.google.com/calendar/answer/41207 -->
-                  <li class="p-media-object__meta-list-item--date">
-                    <a href="{{ session.event }}" target="_blank" rel="noopener noreferrer">
-                      Add to Google Calendar
-                    </a>
-                  </li>
-                  {% else %}
-                  <li class="p-media-object__meta-list-item--date">
-                    <span class="u-off-screen">Date: </span>To be scheduled
-                  </li>
-                  {% endif %}
-                </ul>
-              </div>
-            </div>
-          </li>
-          {% endfor %}
-        </ul>
-      </div>
-      <div class="col-9 p-divider__block">
-      {% else %}
-      <div class="col-12 p-divider__block">
-      {% endif %}
-        <div class="row">
-          <form class="p-search-box">
-            <label class="u-off-screen" for="search-input">Search</label>
-            <input type="search" id="search-input" class="p-search-box__input" name="search" placeholder="Search"
-              required="" autocomplete="on">
-            <button id="reset-search" type="reset" class="p-search-box__reset"><i class="p-icon--close">Close</i></button>
-            <button id="submit-search" type="submit" class="p-search-box__button"><i
-                class="p-icon--search">Search</i></button>
-          </form>
+  <section class="p-strip is-shallow u-no-padding--bottom is-bordered" id="masterclasses">
+    <div class="row">
+      <div class="p-divider u-no-margin--bottom">
+        <div class="col-3">
+          {# {% if live_videos or upcoming_videos_24h or upcoming_videos_future % } #}
+          {% if False %}
+          <div class="upcoming-sessions">
+            <ul class="p-list u-no-margin--bottom">
+              {% set shown = [] %}
+
+              {# Show live videos first, up to 2 total #}
+              {% for video in live_videos %}
+              {% if shown|length < 2 %} {{ upcoming_session(video, 'live' , now) }} {% set _=shown.append(1) %} {% endif
+                %} {% endfor %} {# If we haven't shown 2 yet, try to show a 'soon' session #} {% if upcoming_videos_24h
+                and shown|length < 2 %} {{ upcoming_session(upcoming_videos_24h[0], 'soon' , now) }} {% set
+                _=shown.append(1) %} {% endif %} {# If we still haven't shown 2, show a future session #} {% if
+                upcoming_videos_future and shown|length < 2 %} {{ upcoming_session(upcoming_videos_future[0], 'future' ,
+                now) }} {% set _=shown.append(1) %} {% endif %} </ul>
+          </div>
+          {% endif %}
+          <div class="filters">
+            <aside class="p-accordion">
+              <ul class="p-accordion__list">
+                {{ filter_section('Topic', topic_tags, 'topic') }}
+                {{ filter_section('Event', event_tags, 'event') }}
+                {{ filter_section('Date', date_tags, 'date') }}
+                {{ filter_section('Presenter', presenters, 'presenter') }}
+              </ul>
+            </aside>
+          </div>
         </div>
-        <h2 class="p-heading--5">Filter previous sessions by topic</h2>
-        {% for key,value in tags.items() %}
-        <button class="p-chip">
-          <span class="p-chip__value">{{ key }}</span>
-          <span class="p-badge" aria-label="{{ value }} videos exist">{{ value }}</span>
-        </button>
-        {% endfor %}
-        <div class="row">
-          <h2 class="p-heading--3">Previous sessions</h2>
-          <div class="u-equal-height">
-            {% for session in previous_sessions %}
-            {% with session=session %}
-            {% include "shared/_card--masterclass.html" %}
-            {% endwith %}
-            {% endfor %}
+
+        <div class="col-9 p-divider__block">
+
+          <div class="row">
+            <form class="p-search-box">
+              <label class="u-off-screen" for="search-input">Search</label>
+              <input type="search" id="search-input" class="p-search-box__input" name="search" placeholder="Search"
+                required="" autocomplete="on">
+              <button id="reset-search" type="reset" class="p-search-box__reset"><i
+                  class="p-icon--close">Close</i></button>
+              <button id="submit-search" type="submit" class="p-search-box__button"><i
+                  class="p-icon--search">Search</i></button>
+            </form>
+          </div>
+
+          <div class="row">
+
+            <div class="u-equal-height">
+              <div>test</div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+</div>
 </div>
 
-
-<div tabindex="0" role="tabpanel" id="sprint-tab" aria-labelledby="sprints" hidden="true">
-<section class="p-strip is-shallow u-no-padding--bottom is-bordered">
-  <div class="row">
-    <div class="p-divider u-no-margin--bottom">
-      <div class="row">
-        <div class="u-equal-height">
-          {% for session in sprint_sessions %}
-          {% with session=session %}
-          {% include "shared/_card--masterclass-sprint.html" %}
-          {% endwith %}
-          {% endfor %}
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-</div>
-
-<section class="p-strip--light is-shallow is-bordered">
-  <div class="row">
-    <div class="col-9">
-      <h3 class="p-muted-heading u-sv2">Something missing?</h3>
-      <p class="p-heading--3">If you would like to see a topic covered but you don't have the knowledge, submit an idea
-        to the team.</p>
-      <p>
-        <a href="https://discourse.canonical.com/c/masterclasses/suggested-ideas/79"
-          class="p-button u-no-margin--bottom">
-          Register an idea
-        </a>
-      </p>
-    </div>
-  </div>
-</section>
+{% include "shared/_pagination.html" %}
 
 <script defer>
-(function () {
-  var keys = {
-    left: 'ArrowLeft',
-    right: 'ArrowRight',
-  };
+  document.addEventListener("DOMContentLoaded", () => {
 
-  var direction = {
-    ArrowLeft: -1,
-    ArrowRight: 1,
-  };
+    // Setup "See less / See All" buttons if there are more than 3 filters.
+    const toggleButtons = document.querySelectorAll('.toggle-filters');
 
-  /**
-    Attaches a number of events that each trigger
-    the reveal of the chosen tab content
-    @param {Array} tabs an array of tabs within a container
-  */
-  function attachEvents(tabs) {
-    tabs.forEach(function (tab, index) {
-      tab.addEventListener('keyup', function (e) {
-        if (e.code === keys.left || e.code === keys.right) {
-          switchTabOnArrowPress(e, tabs);
+    toggleButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const hiddenFilters = button.previousElementSibling;
+        const isShowing = button.getAttribute('data-showing') === 'more';
+
+        if (isShowing) {
+          hiddenFilters.style.display = 'none';
+          button.textContent = 'See all';
+          button.setAttribute('data-showing', 'less');
+        } else {
+          hiddenFilters.style.display = 'block';
+          button.textContent = 'See less';
+          button.setAttribute('data-showing', 'more');
         }
       });
-
-      tab.addEventListener('click', function (e) {
-        e.preventDefault();
-        setActiveTab(tab, tabs);
-      });
-
-      tab.addEventListener('focus', function () {
-        setActiveTab(tab, tabs);
-      });
-
-      tab.index = index;
     });
-  }
+  });
 
-  /**
-    Determine which tab to show when an arrow key is pressed
-    @param {KeyboardEvent} event
-    @param {Array} tabs an array of tabs within a container
-  */
-  function switchTabOnArrowPress(event, tabs) {
-    var pressed = event.code;
+  function toggleExpanded(element, show) {
+    var target = document.getElementById(element.getAttribute('aria-controls'));
 
-    if (direction[pressed]) {
-      var target = event.target;
-      if (target.index !== undefined) {
-        if (tabs[target.index + direction[pressed]]) {
-          tabs[target.index + direction[pressed]].focus();
-        } else if (pressed === keys.left) {
-          tabs[tabs.length - 1].focus();
-        } else if (pressed === keys.right) {
-          tabs[0].focus();
-        }
-      }
+    if (target) {
+      element.setAttribute('aria-expanded', show);
+      target.setAttribute('aria-hidden', !show);
     }
   }
 
   /**
-    Cycles through an array of tab elements and ensures
-    only the target tab and its content are selected
-    @param {HTMLElement} tab the tab whose content will be shown
-    @param {Array} tabs an array of tabs within a container
+    Attaches event listeners for the accordion open and close click events.
+    @param {HTMLElement} accordionContainer The accordion container element.
   */
-  function setActiveTab(tab, tabs) {
-    tabs.forEach(function (tabElement) {
-      var tabContent = document.getElementById(tabElement.getAttribute('aria-controls'));
+  function setupAccordion(accordionContainer) {
+    // Finds any open panels within the container and closes them.
+    function closeAllPanels() {
+      var openPanels = accordionContainer.querySelectorAll('[aria-expanded=true]');
 
-      if (tabElement === tab) {
-        tabElement.setAttribute('aria-selected', true);
-        tabContent.removeAttribute('hidden');
-      } else {
-        tabElement.setAttribute('aria-selected', false);
-        tabContent.setAttribute('hidden', true);
+      for (var i = 0, l = openPanels.length; i < l; i++) {
+        toggleExpanded(openPanels[i], false);
+      }
+    }
+
+    // Set up an event listener on the container so that panels can be added
+    // and removed and events do not need to be managed separately.
+    accordionContainer.addEventListener('click', function (event) {
+      var target = event.target;
+
+      if (target.closest) {
+        target = target.closest('[class*="p-accordion__tab"]');
+      }
+
+      if (target) {
+        var isTargetOpen = target.getAttribute('aria-expanded') === 'true';
+        // closeAllPanels();
+
+        // Toggle visibility of the target panel.
+        toggleExpanded(target, !isTargetOpen);
       }
     });
   }
 
-  /**
-    Attaches events to tab links within a given parent element,
-    and sets the active tab if the current hash matches the id
-    of an element controlled by a tab link
-    @param {String} selector class name of the element
-    containing the tabs we want to attach events to
-  */
-  function initTabs(selector) {
-    var tabContainers = [].slice.call(document.querySelectorAll(selector));
+  // Setup all accordions on the page.
+  var accordions = document.querySelectorAll('.p-accordion');
 
-    tabContainers.forEach(function (tabContainer) {
-      var tabs = [].slice.call(tabContainer.querySelectorAll('[aria-controls]'));
-      attachEvents(tabs);
-    });
+  for (var i = 0, l = accordions.length; i < l; i++) {
+    setupAccordion(accordions[i]);
   }
-
-  document.addEventListener('DOMContentLoaded', function () {
-    initTabs('[role="tablist"]');
-  });
-})();
 </script>
-
-<script defer>
-  document.addEventListener("DOMContentLoaded", () => {
-    const images = document.querySelectorAll('.p-card__image');
-    const resetSearch = document.getElementById('reset-search');
-    const searchInput = document.getElementById('search-input');
-    const submitButton = document.getElementById('submit-search');
-    const cards = document.querySelectorAll('.p-card');
-    const chips = document.querySelectorAll(".p-chip");
-
-    const setImageFallback = (image) => {
-      image.onerror = () => {
-        image.src = 'https://assets.ubuntu.com/v1/a647fb72-Copy%20of%20Canonical%20Slides%20Template.jpg';
-      };
-    };
-
-    const changeTag = (node, tag) => {
-      const clone = document.createElement(tag);
-      Array.from(node.attributes).forEach(({ name, value }) => clone.setAttribute(name, value));
-      while (node.firstChild) clone.appendChild(node.firstChild);
-      node.replaceWith(clone);
-      return clone;
-    };
-
-    const resetChips = () => {
-      const positiveChip = document.querySelector(".p-chip--positive");
-      if (positiveChip) {
-        const neutralChip = changeTag(positiveChip, "button");
-        neutralChip.className = "p-chip";
-        neutralChip.removeChild(neutralChip.lastChild);
-        neutralChip.addEventListener("click", () => handleChipClick(neutralChip));
-        const url = new URL(window.location.href);
-        url.searchParams.delete("tag");
-        window.history.pushState({}, "", url);
-      }
-    };
-
-    const resetCards = () => {
-      cards.forEach(card => card.style.display = 'block');
-    };
-
-    const handleChipClick = (chip) => {
-      if (searchInput.value !== "") {
-        searchInput.value = "";
-      }
-
-      const url = new URL(window.location.href);
-      resetChips();
-      resetCards();
-
-      const tag = chip.querySelector("span").textContent;
-      const positiveChip = changeTag(chip, "span");
-      positiveChip.className = "p-chip--positive";
-
-      const dismissBtn = document.createElement("button");
-      dismissBtn.className = "p-chip__dismiss";
-      dismissBtn.textContent = "Dismiss";
-      dismissBtn.addEventListener("click", () => {
-        resetChips();
-        resetCards();
-      });
-
-      positiveChip.appendChild(dismissBtn);
-
-      url.searchParams.set("tag", tag);
-      window.history.pushState({}, "", url);
-
-      cards.forEach(card => {
-        card.style.display = card.dataset.tags.includes(tag) ? 'block' : 'none';
-      });
-    };
-
-    const filterCardsBySearch = () => {
-      const searchText = searchInput.value.toLowerCase();
-      const url = new URL(window.location.href);
-      if (url.searchParams.has("tag")) {
-        resetChips();
-        resetCards();
-      }
-      cards.forEach(card => {
-        const title = card.querySelector('.card-title')?.textContent.toLowerCase();
-        card.style.display = title && title.includes(searchText) ? 'block' : 'none';
-      });
-    };
-
-    const applyUrlTagFilter = () => { 
-      const url = new URL(window.location.href);
-      const tag = url.searchParams.get("tag");
-      if (tag) {
-        chips.forEach(chip => {
-          if (chip.querySelector("span").textContent === tag) {
-            handleChipClick(chip);
-          }
-        });
-      }
-    };
-
-    images.forEach(setImageFallback);
-    searchInput.addEventListener('input', filterCardsBySearch);
-    resetSearch.addEventListener('click', resetCards);
-    submitButton.addEventListener('click', (e) => e.preventDefault());
-    chips.forEach(chip => chip.addEventListener("click", () => handleChipClick(chip)));
-
-    applyUrlTagFilter();
-  });
-</script>
-
-
-{% include "shared/_pagination.html" %}
 
 {% endblock %}

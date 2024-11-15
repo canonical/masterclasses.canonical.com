@@ -8,9 +8,15 @@ from alembic import context
 from models.base import Base
 
 # https://stackoverflow.com/a/62925227
-from models.PreviousSession import PreviousSession
-from models.UpcomingSession import UpcomingSession
-from models.SprintSession import SprintSession
+# from models.PreviousSession import PreviousSession
+# from models.UpcomingSession import UpcomingSession
+# from models.SprintSession import SprintSession
+
+# Add new imports
+from models.video import Video
+from models.presenter import Presenter
+from models.tag import Tag, TagCategory
+from models.associations import VideoPresenter, VideoTag
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

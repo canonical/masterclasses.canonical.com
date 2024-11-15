@@ -13,8 +13,8 @@
   },
   "dependencies": {
     "autoprefixer": "10.4.13",
-    "sass": "1.57.1",
-    "vanilla-framework": "3.14.0",
+    "sass": "^1.69.0",
+    "vanilla-framework": "4.18.2",
     "postcss": "8.4.31",
     "postcss-cli": "10.1.0"
   }

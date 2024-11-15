@@ -1,6 +1,11 @@
 @import "vanilla-framework";
 @include vanilla;
 
+// Import icons from vanilla-framework
+@import 'vanilla-framework/scss/patterns_icons';
+@include vf-p-icons-common;
+@include vf-p-icon-notifications;
+
 .p-card {
   width: 16rem;
 }
