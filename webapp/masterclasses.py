@@ -81,3 +81,70 @@ def video(id, title):
         )
     
     return flask.render_template("video.html", video=video)
+
+@masterclasses.route("/videos")
+def videos():
+    now = datetime.now(timezone.utc)
+    now_unix = int(now.timestamp())
+    
+    # First get videos with recordings
+    videos = db_session.query(Video).filter(Video.recording.isnot(None)).all()
+    
+    # Get tags and presenters only for videos that have recordings
+    video_ids = [v.id for v in videos]
+    
+    # Query tags only for videos with recordings
+    topic_tags = (db_session.query(Tag)
+                 .join(TagCategory)
+                 .join(Tag.videos)
+                 .filter(TagCategory.name == "Topic")
+                 .filter(Video.id.in_(video_ids))
+                 .filter(Video.recording.isnot(None))
+                 .distinct()
+                 .all())
+    
+    event_tags = (db_session.query(Tag)
+                 .join(TagCategory)
+                 .join(Tag.videos)
+                 .filter(TagCategory.name == "Event")
+                 .filter(Video.id.in_(video_ids))
+                 .filter(Video.recording.isnot(None))
+                 .distinct()
+                 .all())
+    
+    date_tags = (db_session.query(Tag)
+                .join(TagCategory)
+                .join(Tag.videos)
+                .filter(TagCategory.name == "Date")
+                .filter(Video.id.in_(video_ids))
+                .filter(Video.recording.isnot(None))
+                .distinct()
+                .all())
+    
+    # Get presenters only for videos with recordings
+    presenters = (db_session.query(Presenter)
+                 .join(Presenter.videos)
+                 .filter(Video.id.in_(video_ids))
+                 .filter(Video.recording.isnot(None))
+                 .distinct()
+                 .all())
+
+    return flask.render_template(
+        "videos.html",
+        videos=videos,
+        topic_tags=topic_tags,
+        event_tags=event_tags,
+        date_tags=date_tags,
+        presenters=presenters,
+        now=now_unix
+    )
+
+@masterclasses.app_template_filter()
+def timestamp_to_date(value, format='%d %b %Y'):
+    """Convert unix timestamp to formatted date string."""
+    if not value:
+        return ''
+    try:
+        return datetime.fromtimestamp(int(value)).strftime(format)
+    except (ValueError, TypeError):
+        return ''

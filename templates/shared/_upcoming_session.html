@@ -1,18 +1,18 @@
 {% macro upcoming_session(video, session_type='future', now=none) %}
 <li class="p-list__item">
-  {# I tried this but I couldn't align it <span class="p-chip--negative">LIVE</span> #}
   {% if session_type == 'live' %}
     <div class="u-no-margin--bottom">
-      <a href="{{ video.stream }}" class="p-heading--4">🔴 {{ video.title }}</a>
+      <a href="{{ video.stream }}" class="">
+        <span style="color: #c7162b; font-weight: 400;">● LIVE</span> {{ video.title }}
+      </a>
     </div>
-
   {% else %}
     <div class="u-no-margin--bottom">
-      <a href="{{ video.calendar_event }}" class="p-heading--4">{{ video.title }}</a>
+      <a href="{{ video.calendar_event }}" class="">{{ video.title }}</a>
     </div>
   {% endif %}
 
-  <p class="p-text u-text-muted">{{ video.description }}</p>
+  <p class="p-text u-text-muted description-truncate">{{ video.description }}</p>
 
   <p class="p-text--small u-text-muted">
     <i class="p-icon--user"></i>

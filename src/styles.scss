@@ -7,13 +7,17 @@
 @include vf-p-icon-notifications;
 
 .p-card {
-  width: 16rem;
+  flex: 1 0 16rem;
+  max-width: calc(25% - 0.75rem);
+  margin-bottom: 1rem;
 }
 
 .u-equal-height {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
+  padding: 1rem 0;
+  width: 100%;
 }
 
 @media screen and (max-width: 768px) {
@@ -26,4 +30,15 @@
   border: 0px solid #000000;
   background: #000000bf;
   box-shadow: 0 0.25vmax 1vmax #000000bf;
+}
+
+.description-truncate {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+  max-height: 6em; /* fallback for non-webkit browsers: 1.5 line-height * 4 lines */
 }

@@ -1,156 +1,77 @@
 {% extends "base.html" %}
-{% from "shared/_filter_section.html" import filter_section %}
 {% from "shared/_upcoming_session.html" import upcoming_session %}
 
 {% block content %}
-<section class="p-strip--image is-bordered"
-  style="background-image: url('https://assets.ubuntu.com/v1/293d19c5-rockybgfooter.jpg');">
+<section class="p-section--hero u-no-padding--bottom">
+  <div class="row--50-50-on-large">
+    <div class="col">
+      <div class="p-section--shallow u-no-margin--bottom">
+        <h1>Masterclass</h1>
+        <p class="p-heading--2 ">
+          Your one-stop video library for Canonical talks.
+        </p>
+      </div>
+      <div class="p-section--shallow">
+        <p>All our internal talks are recorded and made available here for you to watch at your leisure. From product deep dives to technical talks, we've got you covered. Curated by the events team, this is your one-stop shop for all the latest talks from the Canonical team.</p>
+      </div>
+      
+      <a href="/videos" class="p-button--positive">Watch now</a>
+      <a class="p-button">Another function</a>
+
+    </div>
+    <div class="col u-align--center u-hide--medium u-hide--small u-vertically-center">
+      <img src="https://res.cloudinary.com/canonical/image/fetch/f_auto,q_auto,fl_sanitize,h_366/https://assets.ubuntu.com/v1/3a4d4155-Training.svg" srcset="https://res.cloudinary.com/canonical/image/fetch/f_auto,q_auto,fl_sanitize,w_900,h_732/https://assets.ubuntu.com/v1/3a4d4155-Training.svg 2x" alt="" width="450" height="366" loading="auto">
+    </div>
+  </div>
+  <div class="u-fixed-width">
+    <hr>
+  </div>
+</section>
+
+
+{% if live_videos or upcoming_videos_24h or upcoming_videos_future %}
+<section class="">
   <div class="row">
-    <div class="col-6">
-      <h1 style="font-weight: 100" class="">Masterclasses</h1>
-      <h4 style="font-weight: 400" class="p-muted-heading">Watch all the talks brought to you by the Canonical team</h4>
+    <div class="col-8">
+      <h4>Upcoming sessions</h4>
+      <ul class="p-list">
+        {% set shown = [] %}
+        {% for video in live_videos %}
+          {% if shown|length < 2 %}
+            {{ upcoming_session(video, 'live', now) }}
+            {% set _=shown.append(1) %}
+          {% endif %}
+        {% endfor %}
+        
+        {% if upcoming_videos_24h and shown|length < 2 %}
+          {{ upcoming_session(upcoming_videos_24h[0], 'soon', now) }}
+          {% set _=shown.append(1) %}
+        {% endif %}
+        
+        {% if upcoming_videos_future and shown|length < 2 %}
+          {{ upcoming_session(upcoming_videos_future[0], 'future', now) }}
+          {% set _=shown.append(1) %}
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+
+<section class="p-strip--light is-shallow is-bordered">
+  <div class="row">
+    <div class="col-9">
+      <h3 class="p-muted-heading u-sv2">Something missing?</h3>
+      <p class="p-heading--3">If you would like to see a topic covered but you don't have the knowledge, submit an idea
+        to the team.</p>
       <p>
-        <a href="https://forms.gle/gRGH1xPZmUwq9mcX9" class="p-button--positive u-no-margin--bottom">
-          Register your session
+        <a href="https://discourse.canonical.com/c/masterclasses/suggested-ideas/79" class="p-button u-no-margin--bottom">
+          Register an idea
         </a>
       </p>
     </div>
   </div>
 </section>
-
-<div tabindex="0" role="tabpanel" id="masterclasses-tab" aria-labelledby="masterclasses">
-  <section class="p-strip is-shallow u-no-padding--bottom is-bordered" id="masterclasses">
-    <div class="row">
-      <div class="p-divider u-no-margin--bottom">
-        <div class="col-3">
-          {# {% if live_videos or upcoming_videos_24h or upcoming_videos_future % } #}
-          {% if False %}
-          <div class="upcoming-sessions">
-            <ul class="p-list u-no-margin--bottom">
-              {% set shown = [] %}
-
-              {# Show live videos first, up to 2 total #}
-              {% for video in live_videos %}
-              {% if shown|length < 2 %} {{ upcoming_session(video, 'live' , now) }} {% set _=shown.append(1) %} {% endif
-                %} {% endfor %} {# If we haven't shown 2 yet, try to show a 'soon' session #} {% if upcoming_videos_24h
-                and shown|length < 2 %} {{ upcoming_session(upcoming_videos_24h[0], 'soon' , now) }} {% set
-                _=shown.append(1) %} {% endif %} {# If we still haven't shown 2, show a future session #} {% if
-                upcoming_videos_future and shown|length < 2 %} {{ upcoming_session(upcoming_videos_future[0], 'future' ,
-                now) }} {% set _=shown.append(1) %} {% endif %} </ul>
-          </div>
-          {% endif %}
-          <div class="filters">
-            <aside class="p-accordion">
-              <ul class="p-accordion__list">
-                {{ filter_section('Topic', topic_tags, 'topic') }}
-                {{ filter_section('Event', event_tags, 'event') }}
-                {{ filter_section('Date', date_tags, 'date') }}
-                {{ filter_section('Presenter', presenters, 'presenter') }}
-              </ul>
-            </aside>
-          </div>
-        </div>
-
-        <div class="col-9 p-divider__block">
-
-          <div class="row">
-            <form class="p-search-box">
-              <label class="u-off-screen" for="search-input">Search</label>
-              <input type="search" id="search-input" class="p-search-box__input" name="search" placeholder="Search"
-                required="" autocomplete="on">
-              <button id="reset-search" type="reset" class="p-search-box__reset"><i
-                  class="p-icon--close">Close</i></button>
-              <button id="submit-search" type="submit" class="p-search-box__button"><i
-                  class="p-icon--search">Search</i></button>
-            </form>
-          </div>
-
-          <div class="row">
-
-            <div class="u-equal-height">
-              <div>test</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-</div>
-</div>
-
-{% include "shared/_pagination.html" %}
-
-<script defer>
-  document.addEventListener("DOMContentLoaded", () => {
-
-    // Setup "See less / See All" buttons if there are more than 3 filters.
-    const toggleButtons = document.querySelectorAll('.toggle-filters');
-
-    toggleButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        const hiddenFilters = button.previousElementSibling;
-        const isShowing = button.getAttribute('data-showing') === 'more';
-
-        if (isShowing) {
-          hiddenFilters.style.display = 'none';
-          button.textContent = 'See all';
-          button.setAttribute('data-showing', 'less');
-        } else {
-          hiddenFilters.style.display = 'block';
-          button.textContent = 'See less';
-          button.setAttribute('data-showing', 'more');
-        }
-      });
-    });
-  });
-
-  function toggleExpanded(element, show) {
-    var target = document.getElementById(element.getAttribute('aria-controls'));
-
-    if (target) {
-      element.setAttribute('aria-expanded', show);
-      target.setAttribute('aria-hidden', !show);
-    }
-  }
-
-  /**
-    Attaches event listeners for the accordion open and close click events.
-    @param {HTMLElement} accordionContainer The accordion container element.
-  */
-  function setupAccordion(accordionContainer) {
-    // Finds any open panels within the container and closes them.
-    function closeAllPanels() {
-      var openPanels = accordionContainer.querySelectorAll('[aria-expanded=true]');
-
-      for (var i = 0, l = openPanels.length; i < l; i++) {
-        toggleExpanded(openPanels[i], false);
-      }
-    }
-
-    // Set up an event listener on the container so that panels can be added
-    // and removed and events do not need to be managed separately.
-    accordionContainer.addEventListener('click', function (event) {
-      var target = event.target;
-
-      if (target.closest) {
-        target = target.closest('[class*="p-accordion__tab"]');
-      }
-
-      if (target) {
-        var isTargetOpen = target.getAttribute('aria-expanded') === 'true';
-        // closeAllPanels();
-
-        // Toggle visibility of the target panel.
-        toggleExpanded(target, !isTargetOpen);
-      }
-    });
-  }
-
-  // Setup all accordions on the page.
-  var accordions = document.querySelectorAll('.p-accordion');
-
-  for (var i = 0, l = accordions.length; i < l; i++) {
-    setupAccordion(accordions[i]);
-  }
-</script>
 
 {% endblock %}
