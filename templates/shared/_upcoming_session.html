@@ -2,8 +2,12 @@
 <li class="p-list__item">
   {% if session_type == 'live' %}
     <div class="u-no-margin--bottom">
-      <a href="{{ video.stream }}" class="">
-        <span style="color: #c7162b; font-weight: 400;">● LIVE</span> {{ video.title }}
+      <a href="{{ video.stream }}" class="" style="display: flex; align-items: center;">
+        <div style="display: flex; align-items: center;" class="live-dot-container">    
+          <span style="margin-right: 0.3rem;" class="live-dot"></span>
+          <span style="color: #c7162b;"></span>
+          <span>{{ video.title }}</span>
+        </div>
       </a>
     </div>
   {% else %}

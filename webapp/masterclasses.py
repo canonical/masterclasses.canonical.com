@@ -86,12 +86,20 @@ def video(id, title):
 def videos():
     now = datetime.now(timezone.utc)
     now_unix = int(now.timestamp())
+
+    # Get live videos for navigation (unfiltered)
+    live_videos = db_session.query(Video).filter(
+        and_(
+            Video.unixstart <= now_unix,
+            Video.unixend >= now_unix
+        )
+    ).all()
     
     # First get videos with recordings
-    videos = db_session.query(Video).filter(Video.recording.isnot(None)).all()
+    recorded_videos = db_session.query(Video).filter(Video.recording.isnot(None)).all()
     
     # Get tags and presenters only for videos that have recordings
-    video_ids = [v.id for v in videos]
+    video_ids = [v.id for v in recorded_videos]
     
     # Query tags only for videos with recordings
     topic_tags = (db_session.query(Tag)
@@ -131,7 +139,8 @@ def videos():
 
     return flask.render_template(
         "videos.html",
-        videos=videos,
+        recorded_videos=recorded_videos,
+        live_videos=live_videos,
         topic_tags=topic_tags,
         event_tags=event_tags,
         date_tags=date_tags,

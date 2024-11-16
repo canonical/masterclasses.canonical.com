@@ -5,7 +5,10 @@
 @import 'vanilla-framework/scss/patterns_icons';
 @include vf-p-icons-common;
 @include vf-p-icon-notifications;
-
+@include vf-p-icon-video-play;
+@include vf-p-icon-user;
+@include vf-p-icon-tag;
+@include vf-p-icon-revisions;
 .p-card {
   flex: 1 0 16rem;
   max-width: calc(25% - 0.75rem);
@@ -41,4 +44,41 @@
   margin-bottom: 1rem;
   line-height: 1.5;
   max-height: 6em; /* fallback for non-webkit browsers: 1.5 line-height * 4 lines */
+}
+
+.p-navigation__item--live {
+  margin-left: auto !important;
+}
+
+.p-navigation__item--live .p-navigation__link {
+  display: flex;
+  align-items: center;
+}
+
+.live-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-color: #c7162b;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+  animation: pulse 2s infinite;
+  flex-shrink: 0;
+}
+
+.p-navigation__item--live .p-navigation__link {
+  display: flex;
+  align-items: center;
+  color: #fff;
+}
+
+.p-navigation__item--live .p-navigation__link:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
 }
