@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% from "shared/_video_card.html" import video_card %}
+
+{% block content %}
+<div class="p-strip is-shallow u-no-padding--bottom is-bordered">
+  <div class="row">
+    <div class="col-7">
+      <iframe 
+        src="https://drive.google.com/file/d/{{ video.recording|google_drive_id }}/preview" 
+        allow="autoplay" 
+        allowfullscreen 
+        class="iframe-video"
+      ></iframe>
+
+      <h1 class="p-heading--2">{{ video.title }}</h1>
+      
+      <ul class="p-inline-list u-no-margin--bottom">
+        {% if video.presenters %}
+        <li class="p-inline-list__item">
+          <span style="white-space: nowrap">
+            <i class="p-icon--user"></i>
+            {% if video.presenters|length <= 2 %}
+              {% for presenter in video.presenters %}
+                {{ presenter.name }}{% if not loop.last %} and {% endif %}
+              {% endfor %}
+            {% else %}
+              {{ video.presenters[0].name }}, {{ video.presenters[1].name }}, et al.
+            {% endif %}
+          </span>
+        </li>
+        {% endif %}
+        
+        {% if video.unixstart %}
+        <li class="p-inline-list__item">
+          <span style="white-space: nowrap">
+            <i class="p-icon--revisions"></i>
+            {{ video.unixstart|format_date }}
+          </span>
+        </li>
+        {% endif %}
+
+        {% if video.slides %}
+        <li class="p-inline-list__item">
+          <a href="{{ video.slides }}" class="p-button--neutral u-no-margin--bottom">
+            <span style="white-space: nowrap">
+              <i class="p-icon--file"></i>
+              View slides
+            </span>
+          </a>
+        </li>
+        {% endif %}
+
+        {% if video.recording %}
+        <li class="p-inline-list__item">
+          <a href="{{ video.recording }}" class="p-button--neutral u-no-margin--bottom">
+            <span style="white-space: nowrap">
+              <i class="p-icon--video-play"></i>
+              Download video
+            </span>
+          </a>
+        </li>
+        {% endif %}
+      </ul>
+
+      {% if video.tags %}
+      <div class="u-sv1">
+        <p class="u-no-margin--bottom">
+          <span style="white-space: nowrap">
+            <i class="p-icon--tag"></i>
+            {{ video.tags|map(attribute='name')|join(' • ') }}
+          </span>
+        </p>
+      </div>
+      {% endif %}
+
+      {% if video.description %}
+      <div class="p-strip is-shallow u-no-padding--top">
+        <p>{{ video.description }}</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="col-3">
+      {% if suggested_videos %}
+      <div class="suggested-videos">
+        {% for suggested_video in suggested_videos %}
+          <div class="col-4 u-sv1">
+            {{ video_card(suggested_video) }}
+          </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

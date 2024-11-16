@@ -29,11 +29,14 @@
             </form>
           </div>
 
-          <div class="u-equal-height">
+          <div class="u-equal-height" style="padding-bottom: 1rem;">              
             {% for video in recorded_videos %}
+            <div class="col-4">
               {{ video_card(video) }}
+            </div>
             {% endfor %}
           </div>
+
         </div>
       </div>
     </div>
@@ -99,6 +102,9 @@
     }
 
     function updateVisibility() {
+      const container = document.querySelector('.u-equal-height');
+      let visibleCount = 0;
+      
       videoCards.forEach(card => {
         const cardTopics = card.dataset.topics.split(' ').filter(Boolean);
         const cardEvents = card.dataset.events.split(' ').filter(Boolean);
@@ -106,16 +112,17 @@
         const cardPresenters = card.dataset.presenters.split(' ').filter(Boolean);
         
         // Get searchable content from the card
-        const title = card.querySelector('.card-title').textContent.toLowerCase();
+        const title = card.querySelector('.video-title').textContent.toLowerCase();
         const tags = [...cardTopics, ...cardEvents, ...cardDates].join(' ').toLowerCase();
         const presenters = cardPresenters.join(' ').toLowerCase();
         const searchContent = `${title} ${tags} ${presenters}`;
 
-        // Check if card matches search term
+        // Split search terms and check if all terms are included
+        const searchTerms = filters.search.toLowerCase().split(' ').filter(Boolean);
         const searchMatch = !filters.search || 
-          searchContent.includes(filters.search.toLowerCase());
+          searchTerms.every(term => searchContent.includes(term));
 
-        // Check filters using OR logic for all categories
+        // Check filters using OR logic within categories
         const topicsMatch = filters.topic.size === 0 || 
           [...filters.topic].some(topic => cardTopics.includes(topic));
         const eventsMatch = filters.event.size === 0 || 
@@ -125,11 +132,25 @@
         const presentersMatch = filters.presenter.size === 0 || 
           [...filters.presenter].some(presenter => cardPresenters.includes(presenter));
 
-        // Show card only if it matches all active filters AND search term
-        card.style.display = 
-          searchMatch && topicsMatch && eventsMatch && datesMatch && presentersMatch 
-          ? '' : 'none';
+        // Show/hide card based on filters
+        const isVisible = searchMatch && topicsMatch && eventsMatch && datesMatch && presentersMatch;
+        const cardWrapper = card.closest('.col-4');
+        
+        if (isVisible) {
+          cardWrapper.style.display = '';
+          visibleCount++;
+        } else {
+          cardWrapper.style.display = 'none';
+        }
       });
+
+      // Update grid layout based on visible items
+      if (visibleCount === 0) {
+        // No results found - could add a "no results" message here
+        container.style.display = 'block';
+      } else {
+        container.style.display = 'flex';
+      }
     }
 
     // Modify existing checkbox handler

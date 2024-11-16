@@ -9,18 +9,31 @@
 @include vf-p-icon-user;
 @include vf-p-icon-tag;
 @include vf-p-icon-revisions;
-.p-card {
-  flex: 1 0 16rem;
-  max-width: calc(25% - 0.75rem);
-  margin-bottom: 1rem;
-}
+@include vf-p-icon-file;
 
 .u-equal-height {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
-  padding: 1rem 0;
-  width: 100%;
+  
+  > .col-4 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  @media (min-width: $breakpoint-small) {
+    > .col-4 {
+      flex: 0 0 calc(50% - 0.5rem);
+      max-width: calc(50% - 0.5rem);
+    }
+  }
+
+  @media (min-width: $breakpoint-large) {
+    > .col-4 {
+      flex: 0 0 calc(33.333% - 0.667rem);
+      max-width: calc(33.333% - 0.667rem);
+    }
+  }
 }
 
 @media screen and (max-width: 768px) {
@@ -30,11 +43,12 @@
 }
 
 .iframe-video {
-  border: 0px solid #000000;
-  background: #000000bf;
-  box-shadow: 0 0.25vmax 1vmax #000000bf;
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  border: 0;
 }
 
+// Long description truncate
 .description-truncate {
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -46,6 +60,7 @@
   max-height: 6em; /* fallback for non-webkit browsers: 1.5 line-height * 4 lines */
 }
 
+// Live video indicator
 .p-navigation__item--live {
   margin-left: auto !important;
 }
@@ -81,4 +96,71 @@
   0% { opacity: 1; }
   50% { opacity: 0.5; }
   100% { opacity: 1; }
+}
+
+.video-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .p-card__image {
+    position: relative;
+    width: 100%;
+  }
+
+  .thumbnail-wrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%; // 16:9 aspect ratio
+    overflow: hidden;
+  }
+
+  .p-card__inner {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  .video-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.5;
+    max-height: 3em; /* fallback for non-webkit browsers: 1.5 line-height * 2 lines */
+  }
+
+  .video-presenters {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.5;
+    max-height: 1.5em; /* fallback for non-webkit browsers: 1.5 line-height * 1 lines */
+  }
+
+  img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .duration-badge {
+    position: absolute;
+    padding: 0.25rem;
+    background: rgba(17, 17, 17, 0.80);
+    color: #fff;
+    border-radius: 2px;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    margin: 0.5rem;
+    z-index: 1;
+    border-radius: 5px;
+  }
 }

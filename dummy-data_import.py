@@ -123,7 +123,7 @@ def main():
             description=generate_random_description(),
             unixstart=int(start_time.timestamp()),
             unixend=int(end_time.timestamp()),
-            recording=f"https://example.com/recording_{len(videos)}" if has_recording else None,
+            recording=f"https://drive.google.com/file/d/1IgzCDxDOJp3rQBNuSxNddkhwz88i3yoU/view?usp=drive_link" if has_recording else None,
             stream=f"https://example.com/stream_{len(videos)}",
             calendar_event=f"https://calendar.google.com/calendar/u/0/event?eid=MmtiNmVjanA0NzJwYThzY2VnczgyazlzbjcgY183MTgyOTllYjQzZTg4YTg4YmFhMWY3ZDJjNjA5ZTcwMDQ2NzA4OGE4MzRkZWE4ZjJlYTQyZjA1Mjc1NDhiMzgwQGc",
             slides=f"https://example.com/slides_{len(videos)}",

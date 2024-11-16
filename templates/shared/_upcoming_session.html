@@ -42,6 +42,11 @@
         {{ minutes }}m
       {% endif %}
     </p>
+  {% elif session_type == 'future' %}
+    <p class="p-text--small u-text-muted">
+      <i class="p-icon--revisions"></i>
+      {{ video.unixstart|format_date }}
+    </p>
   {% endif %}
 </li>
 {% endmacro %} 

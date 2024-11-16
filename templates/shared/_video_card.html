@@ -1,52 +1,47 @@
 {% macro video_card(video) %}
-<div class="p-card u-no-padding" 
-     data-topics="{{ video.tags|selectattr('category.name', 'equalto', 'Topic')|map(attribute='name')|map('lower')|map('replace', ' ', '-')|join(' ') }}"
-     data-events="{{ video.tags|selectattr('category.name', 'equalto', 'Event')|map(attribute='name')|map('lower')|map('replace', ' ', '-')|join(' ') }}"
-     data-dates="{{ video.tags|selectattr('category.name', 'equalto', 'Date')|map(attribute='name')|map('lower')|map('replace', ' ', '-')|join(' ') }}"
-     data-presenters="{{ video.presenters|map(attribute='name')|map('lower')|map('replace', ' ', '-')|join(' ') }}">
-  <a href="/videos/{{ video.title|slugify }}-class-{{ video.id }}" aria-hidden="true" tabindex="-1">
-    <img loading="lazy" class="p-card__image" alt="{{ video.title }} video" src="{{ video.thumbnails or 'https://assets.ubuntu.com/v1/8e1d3bf5-juju-hero-juju.is.svg' }}">
-  </a>
-  <div class="p-card__inner u-no-padding--top">
-    <h3 class="p-heading--5 u-no-margin--bottom card-title">
-      <a href="/videos/{{ video.title|slugify }}-class-{{ video.id }}">{{ video.title }}</a>
-    </h3>
+<div class="p-card video-card u-no-padding u-no-margin--bottom"
+    data-topics="{{ video.tags|selectattr('category.name', 'equalto', 'Topic')|map(attribute='name')|map('lower')|map('replace', ' ', '-')|join(' ') }}"
+    data-events="{{ video.tags|selectattr('category.name', 'equalto', 'Event')|map(attribute='name')|map('lower')|map('replace', ' ', '-')|join(' ') }}"
+    data-dates="{{ video.tags|selectattr('category.name', 'equalto', 'Date')|map(attribute='name')|map('lower')|map('replace', ' ', '-')|join(' ') }}"
+    data-presenters="{{ video.presenters|map(attribute='name')|map('lower')|map('replace', ' ', '-')|join(' ') }}">
     
-    <div class="p-text--small u-text--muted u-no-margin--bottom">
-      {% if video.presenters %}
-      <p class="u-no-margin--bottom">
-        <i class="p-icon--user"></i>
-        {% if video.presenters|length <= 2 %}
-          {% for presenter in video.presenters %}
-            {{ presenter.name }}{% if not loop.last %} and {% endif %}
-          {% endfor %}
-        {% else %}
-          {{ video.presenters[0].name }}, {{ video.presenters[1].name }}, et al.
-        {% endif %}
-      </p>
-      {% endif %}
-
-      {% set duration = (video.unixend - video.unixstart) // 60 if video.unixend and video.unixstart else 0 %}
-      <p class="u-no-margin--bottom">
-        <i class="p-icon--video-play"></i>
-        {{ duration }} mins
-      </p>
-
-      {% if video.tags %}
-      <p class="u-no-margin--bottom">
-        <i class="p-icon--tag"></i>
-        {{ video.tags|map(attribute='name')|join(' • ') }}
-      </p>
-      {% endif %}
-
-      {% if video.unixstart %}
-      <p class="u-no-margin--bottom ">
-        <i class="p-icon--revisions"></i>
-        {{ video.unixstart|timestamp_to_date }}
-      </p>
-      {% endif %}
+    <div class="p-card__image u-image-position">
+        <a href="/videos/{{ video.title|slugify }}-class-{{ video.id }}">
+            <div class="thumbnail-wrapper">
+                <img loading="lazy" alt="{{ video.title }} video"
+                    src="{{ video.thumbnails or 'https://assets.ubuntu.com/v1/8e1d3bf5-juju-hero-juju.is.svg' }}"
+                    class="u-image-position--bottom">
+                {% set duration = (video.unixend - video.unixstart) // 60 if video.unixend and video.unixstart else 0 %}
+                <div class="duration-badge u-image-position--bottom u-image-position--right">{{ duration }} mins</div>
+            </div>
+        </a>
     </div>
 
-  </div>
+    <div class="p-card__inner u-no-padding--top">
+        <h2 class="u-no-margin--bottom p-text--small">
+            <a class="video-title p-link--soft" href="/videos/{{ video.title|slugify }}-class-{{ video.id }}">{{ video.title }}</a>
+        </h2>
+
+        {% if video.unixstart %}
+        <p class="u-text--muted video-tags u-no-margin--bottom u-no-padding--top" style="font-size: 0.7rem;">
+            {{ video.unixstart|format_date }}
+        </p>
+        {% endif %}
+
+        {% if video.presenters %}
+        <p class="u-no-padding--top video-presenters u-text--muted u-no-padding--top" style="font-size: 0.7rem;">
+            {% if video.presenters|length <= 2 %}
+                {% for presenter in video.presenters %}
+                    {{ presenter.name }}{% if not loop.last %} and {% endif %}
+                {% endfor %}
+            {% else %}
+                {{ video.presenters[0].name }}, {{ video.presenters[1].name }}, et al.
+            {% endif %}
+        </p>
+        {% endif %}
+
+
+
+    </div>
 </div>
 {% endmacro %}

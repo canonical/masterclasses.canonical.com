@@ -143,3 +143,7 @@ def time_until_filter(timestamp):
 @app.template_filter('format_date')
 def format_date_filter(timestamp):
     return datetime.fromtimestamp(timestamp, timezone.utc).strftime('%B %d, %Y')
+
+@app.route("/videos/<video_id>")
+def video_player(video_id):
+    return flask.render_template("video_player.html", video_id=video_id)

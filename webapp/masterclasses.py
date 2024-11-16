@@ -148,6 +148,64 @@ def videos():
         now=now_unix
     )
 
+@masterclasses.route("/videos/<title>-class-<id>")
+def video_player(title, id):
+    video = db_session.query(Video)\
+        .filter(Video.id == id)\
+        .first()
+    
+    if not video:
+        flask.abort(404)
+        
+    # Verify the title slug matches
+    if flask.current_app.jinja_env.filters['slugify'](video.title) != title:
+        return flask.redirect(
+            flask.url_for(
+                'masterclasses.video_player',
+                title=flask.current_app.jinja_env.filters['slugify'](video.title),
+                id=id
+            )
+        )
+    
+    # Get topic tags for the current video
+    topic_tags = [tag.id for tag in video.tags if tag.category.name == "Topic"]
+    
+    # Base query for suggested videos
+    suggested_query = db_session.query(Video)\
+        .filter(Video.id != video.id)\
+        .filter(Video.recording.isnot(None))
+
+    if topic_tags:
+        # If we have topic tags, try to find videos with matching tags
+        suggested_videos = suggested_query\
+            .join(Tag, Video.tags)\
+            .join(TagCategory)\
+            .filter(TagCategory.name == "Topic")\
+            .filter(Tag.id.in_(topic_tags))\
+            .group_by(Video.id)\
+            .order_by(func.count(Tag.id).desc())\
+            .limit(3)\
+            .all()
+    else:
+        # If no topic tags, just get recent videos
+        suggested_videos = suggested_query\
+            .order_by(Video.unixstart.desc())\
+            .limit(3)\
+            .all()
+
+    # If still no suggestions, get random videos
+    if not suggested_videos:
+        suggested_videos = suggested_query\
+            .order_by(func.random())\
+            .limit(3)\
+            .all()
+    
+    return flask.render_template(
+        "video_player.html",
+        video=video,
+        suggested_videos=suggested_videos
+    )
+
 @masterclasses.app_template_filter()
 def timestamp_to_date(value, format='%d %b %Y'):
     """Convert unix timestamp to formatted date string."""
@@ -157,3 +215,32 @@ def timestamp_to_date(value, format='%d %b %Y'):
         return datetime.fromtimestamp(int(value)).strftime(format)
     except (ValueError, TypeError):
         return ''
+
+@masterclasses.app_template_filter('google_drive_id')
+def google_drive_id(url):
+    """Extract Google Drive ID from URL."""
+    if not url:
+        return ''
+    try:
+        # Handle URLs in format: https://drive.google.com/file/d/FILEID/view?usp=sharing
+        return url.split('/d/')[1].split('/')[0]
+    except (IndexError, AttributeError):
+        return url
+
+@masterclasses.route("/random")
+def random_video():
+    video = db_session.query(Video)\
+        .filter(Video.recording.isnot(None))\
+        .order_by(func.random())\
+        .first()
+    
+    if not video:
+        return flask.redirect(flask.url_for('masterclasses.videos'))
+        
+    return flask.redirect(
+        flask.url_for(
+            'masterclasses.video_player',
+            title=flask.current_app.jinja_env.filters['slugify'](video.title),
+            id=video.id
+        )
+    )
