@@ -29,7 +29,7 @@
         {% endif %}
 
         {% if video.presenters %}
-        <p class="u-no-padding--top video-presenters u-text--muted u-no-padding--top" style="font-size: 0.7rem;">
+        <p class="video-presenters u-text--muted" style="font-size: 0.7rem;">
             {% if video.presenters|length <= 2 %}
                 {% for presenter in video.presenters %}
                     {{ presenter.name }}{% if not loop.last %} and {% endif %}

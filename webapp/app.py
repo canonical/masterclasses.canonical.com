@@ -6,24 +6,16 @@ from canonicalwebteam.flask_base.app import FlaskBase
 from slugify import slugify as py_slugify
 from datetime import datetime, timezone
 
-from flask_admin import Admin, AdminIndexView, expose
-from flask_admin.contrib.sqla import ModelView
+from webapp.masterclasses import masterclasses
+from webapp.sso import init_sso
+from webapp.database import db_session
+from webapp.admin import (
+    Admin, DashboardView, VideoModelView, 
+    RestrictedModelView, TagModelView, TagCategoryModelView
+)
 from models.video import Video
 from models.presenter import Presenter
 from models.tag import Tag, TagCategory
-from models.associations import VideoPresenter, VideoTag
-from flask_admin.form import Select2Widget
-from flask_admin.form import Select2Field
-from wtforms import SelectField
-from flask_admin.model.form import converts
-
-db_engine = create_engine(os.getenv("DATABASE_URL"))
-db_session = scoped_session(
-    sessionmaker(autocommit=False, autoflush=False, bind=db_engine)
-)
-
-from webapp.masterclasses import masterclasses
-from webapp.sso import init_sso
 
 app = FlaskBase(
     __name__,
@@ -43,79 +35,11 @@ init_sso(app)
 
 app.register_blueprint(masterclasses, url_prefix="/")
 
-class RestrictedModelView(ModelView):
-    # Admin view is accessible to Web&Design team
-    def is_accessible(self):
-        return flask.session["openid"]["is_admin"] is True
-
-class TagModelView(RestrictedModelView):
-    column_list = ['name', 'category']
-    
-    # Format the category display in list view
-    column_formatters = {
-        'category': lambda v, c, m, p: m.category.name if m.category else ''
-    }
-    
-    # Explicitly define form fields
-    form_columns = ('name', 'tag_type_id')
-    
-    # Configure how fields are displayed/edited
-    form_args = {
-        'tag_type_id': {
-            'label': 'Category',
-            'query_factory': lambda: db_session.query(TagCategory).all(),
-            'get_label': 'name'
-        }
-    }
-    
-    # Override the form creation to use the foreign key field
-    def scaffold_form(self):
-        form_class = super(TagModelView, self).scaffold_form()
-        form_class.tag_type_id = SelectField(
-            'Category',
-            coerce=int,
-            choices=[(c.id, c.name) for c in db_session.query(TagCategory).all()]
-        )
-        return form_class
-
-    def on_model_change(self, form, model, is_created):
-        # Ensure the category relationship is properly set
-        if form.tag_type_id.data:
-            category = db_session.query(TagCategory).get(form.tag_type_id.data)
-            model.category = category
-
-class TagCategoryModelView(RestrictedModelView):
-    column_list = ['name', 'tags']
-    form_columns = ['name']
-    
-    # Format the tags display in list view
-    column_formatters = {
-        'tags': lambda v, c, m, p: ', '.join([tag.name for tag in m.tags]) if m.tags else ''
-    }
-
-    def __init__(self, model, session, **kwargs):
-        super(TagCategoryModelView, self).__init__(model, session, **kwargs)
-
-class DashboardView(AdminIndexView):
-    def is_visible(self):
-        return False
-
-    @expose('/')
-    def index(self):
-        return flask.redirect('/admin/video') 
-
 # Initialize Flask-Admin
 admin = Admin(app, name='Masterclasses Admin', template_mode='bootstrap3', index_view=DashboardView())
 
-@expose('/admin/video/delete/')
-def delete_video():
-    video_id = flask.request.form.get('id')
-    print(f"Deleting video with ID: {video_id}")
-    return flask.redirect(flask.url_for('admin.index'))
-
-
 # Register models with admin interface
-admin.add_view(RestrictedModelView(Video, db_session))
+admin.add_view(VideoModelView(Video, db_session))
 admin.add_view(RestrictedModelView(Presenter, db_session))
 admin.add_view(TagModelView(Tag, db_session))
 admin.add_view(TagCategoryModelView(TagCategory, db_session))

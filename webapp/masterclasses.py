@@ -7,11 +7,7 @@ from datetime import datetime, timezone
 from models.video import Video
 from models.presenter import Presenter
 from models.tag import Tag, TagCategory
-
-db_engine = create_engine(os.getenv("DATABASE_URL"))
-db_session = scoped_session(
-    sessionmaker(autocommit=False, autoflush=False, bind=db_engine)
-)
+from webapp.database import db_session
 
 masterclasses = flask.Blueprint(
     "masterclasses",
