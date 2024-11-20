@@ -170,8 +170,8 @@ Link to docs: [Ubuntu Documentation](https://ubuntu.com/docs)
 Important note: **Please read carefully**
 Product name: *Ubuntu Pro*
         """.strip(),
-        unixstart=int(datetime.now(timezone.utc).timestamp()),
-        unixend=int(datetime.now(timezone.utc).timestamp() + 30 * 60),
+        unixstart=int(datetime.now(timezone.utc).timestamp() - (10000 * 30 * 60)),
+        unixend=int(datetime.now(timezone.utc).timestamp() - (10000 * 30 * 60) + (100 * 30 * 60)),
         recording=f"https://drive.google.com/file/d/1IgzCDxDOJp3rQBNuSxNddkhwz88i3yoU/view?usp=drive_link",
         stream=f"https://example.com/stream_{len(videos)}",
         calendar_event=f"https://calendar.google.com/calendar/u/0/event?eid=MmtiNmVjanA0NzJwYThzY2VnczgyazlzbjcgY183MTgyOTllYjQzZTg4YTg4YmFhMWY3ZDJjNjA5ZTcwMDQ2NzA4OGE4MzRkZWE4ZjJlYTQyZjA1Mjc1NDhiMzgwQGc",

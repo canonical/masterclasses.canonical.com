@@ -16,7 +16,7 @@
     </div>
   {% endif %}
 
-  <p class="p-text u-text-muted description-truncate">{{ video.description }}</p>
+  <p class="p-text u-text-muted description-truncate">{{ video.description|markdown|safe }}</p>
 
   <p class="p-text--small u-text-muted">
     <i class="p-icon--user"></i>

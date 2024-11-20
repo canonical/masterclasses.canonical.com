@@ -2,6 +2,20 @@
 {% from "shared/_video_card.html" import video_card %}
 
 {% block content %}
+<script>
+// Define the function globally
+function togglePresenters(event) {
+    event.preventDefault();
+    const morePresenters = document.getElementById('more-presenters');
+    const showMoreLink = document.getElementById('show-more-presenters');
+    
+    if (morePresenters.style.display === 'none') {
+        morePresenters.style.display = 'inline';
+        showMoreLink.style.display = 'none';  // Hide the "..." when expanded
+    }
+}
+</script>
+
 <div class="p-strip is-shallow u-no-padding--bottom is-bordered">
   <div class="row">
     <div class="col-9">
@@ -21,10 +35,12 @@
             <i class="p-icon--user"></i>
             {% if video.presenters|length <= 2 %}
               {% for presenter in video.presenters %}
-                {{ presenter.name }}{% if not loop.last %} and {% endif %}
+                <a href="{{ url_for('masterclasses.videos', presenter=presenter.name|lower|replace(' ', '-')) }}">{{ presenter.name }}</a>{% if not loop.last %} and {% endif %}
               {% endfor %}
             {% else %}
-              {{ video.presenters[0].name }}, {{ video.presenters[1].name }}, et al.
+              <span id="presenter-list">
+                <a href="{{ url_for('masterclasses.videos', presenter=video.presenters[0].name|lower|replace(' ', '-')) }}">{{ video.presenters[0].name }}</a>, <a href="{{ url_for('masterclasses.videos', presenter=video.presenters[1].name|lower|replace(' ', '-')) }}">{{ video.presenters[1].name }}</a><span id="more-presenters" style="display: none;">{% for presenter in video.presenters[2:] %}, <a href="{{ url_for('masterclasses.videos', presenter=presenter.name|lower|replace(' ', '-')) }}">{{ presenter.name }}</a>{% endfor %}</span><a href="#" id="show-more-presenters" onclick="togglePresenters(event)">...</a>
+              </span>
             {% endif %}
           </span>
         </li>
