@@ -75,7 +75,7 @@
 
       {% if video.description %}
       <div class="p-strip is-shallow u-no-padding--top">
-        <p>{{ video.description }}</p>
+        <p>{{ video.description|markdown|safe }}</p>
       </div>
       {% endif %}
     </div>

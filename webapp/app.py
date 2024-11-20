@@ -5,6 +5,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from canonicalwebteam.flask_base.app import FlaskBase
 from slugify import slugify as py_slugify
 from datetime import datetime, timezone
+from markdown import markdown
 
 from webapp.masterclasses import masterclasses
 from webapp.sso import init_sso
@@ -74,3 +75,9 @@ def format_date_filter(timestamp):
 @app.route("/videos/<video_id>")
 def video_player(video_id):
     return flask.render_template("video_player.html", video_id=video_id)
+
+@app.template_filter('markdown')
+def markdown_filter(text):
+    if not text:
+        return ''
+    return markdown(text, extensions=['extra'])

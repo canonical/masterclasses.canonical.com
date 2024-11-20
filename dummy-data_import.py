@@ -37,6 +37,7 @@ def generate_random_description(max_words=100):
              'aliquip', 'ex', 'ea', 'commodo', 'consequat']
     
     num_words = random.randint(0, max_words)
+
     return ' '.join(random.choices(words, k=num_words)) if num_words > 0 else None
 
 def generate_random_duration():
@@ -151,6 +152,35 @@ def main():
     duration = timedelta(minutes=generate_random_duration())
     videos.append(create_video(future_start, future_start + duration, has_recording=False))
 
+    # Create a submission that has every markdown formatting option
+    markdown_submission = Video(
+        title="Markdown Formatting Test",
+        description="""
+This is a test submission showing all markdown options:
+
+**Bold text** for emphasis
+*Italic text* for subtle emphasis
+
+[Link to Ubuntu](https://ubuntu.com)
+
+Mixed formatting: **Bold and [linked](https://canonical.com) text**
+
+Common use cases:
+Link to docs: [Ubuntu Documentation](https://ubuntu.com/docs)
+Important note: **Please read carefully**
+Product name: *Ubuntu Pro*
+        """.strip(),
+        unixstart=int(datetime.now(timezone.utc).timestamp()),
+        unixend=int(datetime.now(timezone.utc).timestamp() + 30 * 60),
+        recording=f"https://drive.google.com/file/d/1IgzCDxDOJp3rQBNuSxNddkhwz88i3yoU/view?usp=drive_link",
+        stream=f"https://example.com/stream_{len(videos)}",
+        calendar_event=f"https://calendar.google.com/calendar/u/0/event?eid=MmtiNmVjanA0NzJwYThzY2VnczgyazlzbjcgY183MTgyOTllYjQzZTg4YTg4YmFhMWY3ZDJjNjA5ZTcwMDQ2NzA4OGE4MzRkZWE4ZjJlYTQyZjA1Mjc1NDhiMzgwQGc",
+        slides=f"https://example.com/slides_{len(videos)}",
+        thumbnails=generate_random_thumbnail()
+    )
+    db_session.add(markdown_submission)
+    db_session.commit()
+
     db_session.add_all(videos)
     db_session.flush()
 
@@ -181,6 +211,10 @@ def main():
         VideoPresenter(video_id=videos[7].id, presenter_id=presenters["Emma"].id),
         VideoPresenter(video_id=videos[8].id, presenter_id=presenters["Sarah"].id),
         VideoPresenter(video_id=videos[9].id, presenter_id=presenters["Melissa"].id),
+
+        # Presenters for the markdown formatting test video
+        VideoPresenter(video_id=markdown_submission.id, presenter_id=presenters["Finn"].id),
+        VideoPresenter(video_id=markdown_submission.id, presenter_id=presenters["Melissa"].id),
     ]
 
     # Create random video-presenter associations for the rest of the videos

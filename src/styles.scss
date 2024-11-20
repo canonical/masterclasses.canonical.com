@@ -163,3 +163,25 @@
     border-radius: 5px;
   }
 }
+
+// Markdown styles for descriptions.
+.p-strip p a {
+  color: #06c;
+  text-decoration: none;
+}
+
+.p-strip p a:hover {
+  text-decoration: underline;
+}
+
+.p-strip p strong {
+  font-weight: 600;
+}
+
+.p-strip p em {
+  font-style: italic;
+}
+
+.p-strip p del {
+  text-decoration: line-through;
+}

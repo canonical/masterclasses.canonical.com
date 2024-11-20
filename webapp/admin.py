@@ -1,10 +1,10 @@
 from flask_admin import Admin, AdminIndexView, expose
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.form import Select2TagsField
-from wtforms import SelectField, SelectMultipleField
+from wtforms import SelectField, SelectMultipleField, TextAreaField
 from flask_admin.model.form import converts
 from flask_admin.form.widgets import Select2Widget
-from wtforms.widgets import Select as SelectWidget
+from wtforms.widgets import Select as SelectWidget, TextArea
 from flask import jsonify, redirect, url_for, session, abort
 from wtforms.fields import DateTimeField
 from datetime import datetime
@@ -14,6 +14,7 @@ from models.tag import Tag, TagCategory
 from models.associations import VideoPresenter, VideoTag
 from webapp.database import db_session
 from models.submission import VideoSubmission
+import flask
 
 class RestrictedModelView(ModelView):
     # Admin view is accessible to Web&Design team
@@ -100,6 +101,13 @@ class SubmissionModelView(RestrictedModelView):
     
     def scaffold_form(self):
         form_class = super(SubmissionModelView, self).scaffold_form()
+        
+        # Replace description field with custom markdown textarea
+        form_class.description = TextAreaField(
+            'Description',
+            widget=MarkdownTextArea(),
+        )
+        
         form_class.status.choices = [
             ('pending', 'Pending'),
             ('approved', 'Approved'),
@@ -114,6 +122,9 @@ class VideoModelView(RestrictedModelView):
     
     # Format the relationships display in list view
     column_formatters = {
+        'title': lambda v, c, m, p: flask.Markup(
+            f'<a href="{flask.url_for("masterclasses.video_player", title=flask.current_app.jinja_env.filters["slugify"](m.title), id=m.id)}">{m.title}</a>'
+        ) if m.recording else m.title,
         'presenters': lambda view, context, model, name: 
             ', '.join([presenter.name for presenter in model.presenters]) if model.presenters else '',
         'topic_tags': lambda view, context, model, name:
@@ -228,6 +239,13 @@ class VideoModelView(RestrictedModelView):
             widget=Select2Widget()
         )
         
+        # Replace description field with custom markdown textarea
+        form_class.description = TextAreaField(
+            'Description',
+            widget=MarkdownTextArea(),
+            description='Use markdown for formatting: **bold**, *italic*, [link text](url)'
+        )
+        
         return form_class
 
     def on_model_change(self, form, model, is_created):
@@ -307,3 +325,23 @@ class VideoModelView(RestrictedModelView):
         self.extra_css = [
             'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css'
         ]
+
+    # Allow HTML in the title column
+    column_formatters_args = {
+        'title': dict(safe_attrs=['href']),
+    }
+
+class MarkdownTextArea(TextArea):
+    def __call__(self, field, **kwargs):
+        # Add a help text below the textarea
+        kwargs.setdefault('style', 'height: 300px; font-family: monospace;')
+        html = super(MarkdownTextArea, self).__call__(field, **kwargs)
+        help_text = """
+        <small class="form-text text-muted">
+            Markdown formatting supported:<br>
+            <code>**bold**</code> for <strong>bold</strong><br>
+            <code>*italic*</code> for <em>italic</em><br>
+            <code>[link text](url)</code> for <a href="#">link text</a>
+        </small>
+        """
+        return f"{html}{help_text}"
