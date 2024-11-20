@@ -21,6 +21,13 @@ class RestrictedModelView(ModelView):
     def is_accessible(self):
         return session["openid"]["is_admin"] is True
 
+    def get_url(self, endpoint, **kwargs):
+        # Override delete URL to remove trailing slash
+        if endpoint == '.delete_view':
+            url = super(RestrictedModelView, self).get_url(endpoint, **kwargs)
+            return url.rstrip('/')  # Remove trailing slash
+        return super(RestrictedModelView, self).get_url(endpoint, **kwargs)
+
 class TagModelView(RestrictedModelView):
     column_list = ['name', 'category']
     
