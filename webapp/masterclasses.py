@@ -26,6 +26,18 @@ masterclasses = flask.Blueprint(
 
 logger = logging.getLogger(__name__)
 
+def get_live_videos():
+    """Helper function to get currently live videos."""
+    now = datetime.now(timezone.utc)
+    now_unix = int(now.timestamp())
+    
+    return db_session.query(Video).filter(
+        and_(
+            Video.unixstart <= now_unix,
+            Video.unixend >= now_unix
+        )
+    ).all()
+
 @masterclasses.route("/")
 def index():
     now = datetime.now(timezone.utc)
@@ -92,14 +104,9 @@ def video(id, title):
 def videos():
     now = datetime.now(timezone.utc)
     now_unix = int(now.timestamp())
-
-    # Get live videos for navigation (unfiltered)
-    live_videos = db_session.query(Video).filter(
-        and_(
-            Video.unixstart <= now_unix,
-            Video.unixend >= now_unix
-        )
-    ).all()
+    
+    # Get live videos using helper function
+    live_videos = get_live_videos()
     
     # First get videos with recordings
     recorded_videos = db_session.query(Video).filter(Video.recording.isnot(None)).all()
@@ -206,10 +213,14 @@ def video_player(title, id):
             .limit(3)\
             .all()
     
+    # Get live videos using helper function
+    live_videos = get_live_videos()
+    
     return flask.render_template(
         "video_player.html",
         video=video,
-        suggested_videos=suggested_videos
+        suggested_videos=suggested_videos,
+        live_videos=live_videos
     )
 
 @masterclasses.app_template_filter()
@@ -255,7 +266,10 @@ def random_video():
 def register():
     if "openid" not in flask.session:
         return flask.redirect("/login?next=/register")
-        
+    
+    # Get live videos using helper function
+    live_videos = get_live_videos()
+    
     form = MasterclassRegistrationForm()
     submission_status = None
     
@@ -289,5 +303,6 @@ def register():
     return flask.render_template(
         "register.html",
         form=form,
-        submission_status=submission_status
+        submission_status=submission_status,
+        live_videos=live_videos
     )
