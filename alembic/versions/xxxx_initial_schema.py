@@ -79,10 +79,25 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint('video_id', 'tag_id')
     )
 
+    op.create_table(
+        'video_submissions',
+        sa.Column('id', sa.Integer(), nullable=False),
+        sa.Column('title', sa.String(200), nullable=False),
+        sa.Column('description', sa.Text(), nullable=False),
+        sa.Column('duration', sa.String(50), nullable=False),
+        sa.Column('email', sa.String(200), nullable=False),
+        sa.Column('status', sa.String(50), nullable=False, server_default='pending'),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()')),
+        sa.Column('updated_at', sa.DateTime(timezone=True), onupdate=sa.text('now()')),
+        sa.Column('admin_notes', sa.Text(), nullable=True),
+        sa.PrimaryKeyConstraint('id')
+    )
+
 def downgrade() -> None:
     op.drop_table('video_tags')
     op.drop_table('video_presenters')
     op.drop_table('tag')
     op.drop_table('tag_category')
     op.drop_table('presenters')
-    op.drop_table('videos') 
+    op.drop_table('videos')
+    op.drop_table('video_submissions')

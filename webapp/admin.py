@@ -13,6 +13,7 @@ from models.presenter import Presenter
 from models.tag import Tag, TagCategory
 from models.associations import VideoPresenter, VideoTag
 from webapp.database import db_session
+from models.submission import VideoSubmission
 
 class RestrictedModelView(ModelView):
     # Admin view is accessible to Web&Design team
@@ -79,6 +80,33 @@ class SearchableSelect2Widget(Select2Widget):
         kwargs.setdefault('data-minimum-input-length', '2')
         kwargs.setdefault('data-placeholder', 'Search presenters...')
         return super(SearchableSelect2Widget, self).__call__(field, **kwargs)
+    
+class SubmissionModelView(RestrictedModelView):
+    column_list = ['title', 'email', 'duration', 'status', 'created_at']
+    column_searchable_list = ['title', 'email']
+    column_filters = ['status', 'created_at']
+    form_excluded_columns = ['created_at', 'updated_at']
+    
+    # Add sorting
+    column_default_sort = ('created_at', True)  # Sort by creation date, descending
+    
+    # Make the description viewable but not in the list
+    column_details_list = ['title', 'email', 'description', 'duration', 'status', 'created_at']
+    
+    # Add nice labels
+    column_labels = {
+        'created_at': 'Submitted At'
+    }
+    
+    def scaffold_form(self):
+        form_class = super(SubmissionModelView, self).scaffold_form()
+        form_class.status.choices = [
+            ('pending', 'Pending'),
+            ('approved', 'Approved'),
+            ('rejected', 'Rejected'),
+            ('scheduled', 'Scheduled')
+        ]
+        return form_class
 
 class VideoModelView(RestrictedModelView):
     # Display these columns in the list view using actual database column names

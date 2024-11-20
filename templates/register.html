@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="p-strip">
+  <div class="row">
+    <div class="col-8">
+      <h1>Register your Masterclass session</h1>
+
+      {% if submission_status %}
+        <div class="p-notification--{{ 'positive' if submission_status.success else 'negative' }}">
+          <div class="p-notification__content">
+            <h5 class="p-notification__title">{{ 'Success!' if submission_status.success else 'Error!' }}</h5>
+            <p class="p-notification__message">{{ submission_status.message }}</p>
+          </div>
+        </div>
+      {% endif %}
+
+      <p class="p-heading--4">
+        The purpose of Canonical Masterclasses is to provide a process and platform for members of Canonical 
+        to share medium to long form presentations about a topic or subject they are interested in.
+      </p>
+
+      <form method="POST" class="p-form">
+        {{ form.csrf_token }}
+        
+        <div class="p-form__group">
+          <label class="p-form__label" for="title">Name of session *</label>
+          <input type="text" id="title" name="title" class="p-form__control" required>
+        </div>
+
+        <div class="p-form__group">
+          <label class="p-form__label" for="description">Description *</label>
+          <textarea id="description" name="description" class="p-form__control" rows="5" required></textarea>
+        </div>
+
+        <div class="p-form__group">
+          <label class="p-form__label">Duration *</label>
+          <label class="p-radio">
+            <input type="radio" name="duration" value="30" class="p-radio__input" required>
+            <span class="p-radio__label">Up to 30 mins</span>
+          </label>
+          <label class="p-radio">
+            <input type="radio" name="duration" value="45" class="p-radio__input">
+            <span class="p-radio__label">Up to 45 mins</span>
+          </label>
+          <label class="p-radio">
+            <input type="radio" name="duration" value="60" class="p-radio__input">
+            <span class="p-radio__label">Up to 1 hour</span>
+          </label>
+          <label class="p-radio">
+            <input type="radio" name="duration" value="other" class="p-radio__input">
+            <span class="p-radio__label">Other:</span>
+            <input type="text" id="duration_other" name="duration_other" class="p-form__control" style="display: none;">
+          </label>
+        </div>
+
+        <div class="p-notification--information">
+          <div class="p-notification__content">
+            <h5 class="p-notification__title">What happens next?</h5>
+            <p class="p-notification__message">
+              After we review your submission, the Masterclasses team will schedule and confirm your slot. 
+              We'll publish the calendar event on our website for anyone interested to attend the Masterclass.
+              The recording of the event will then be published on the website.
+            </p>
+          </div>
+        </div>
+
+        <button type="submit" class="p-button--positive">Submit</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const otherRadio = document.querySelector('input[value="other"]');
+    const otherInput = document.getElementById('duration_other');
+
+    document.querySelectorAll('input[name="duration"]').forEach(radio => {
+      radio.addEventListener('change', function() {
+        otherInput.style.display = otherRadio.checked ? 'block' : 'none';
+        if (!otherRadio.checked) {
+          otherInput.value = '';
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}

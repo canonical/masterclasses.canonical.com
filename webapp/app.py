@@ -11,11 +11,13 @@ from webapp.sso import init_sso
 from webapp.database import db_session
 from webapp.admin import (
     Admin, DashboardView, VideoModelView, 
-    RestrictedModelView, TagModelView, TagCategoryModelView
+    RestrictedModelView, TagModelView, TagCategoryModelView,
+    SubmissionModelView
 )
 from models.video import Video
 from models.presenter import Presenter
 from models.tag import Tag, TagCategory
+from models.submission import VideoSubmission
 
 app = FlaskBase(
     __name__,
@@ -43,6 +45,7 @@ admin.add_view(VideoModelView(Video, db_session))
 admin.add_view(RestrictedModelView(Presenter, db_session))
 admin.add_view(TagModelView(Tag, db_session))
 admin.add_view(TagCategoryModelView(TagCategory, db_session))
+admin.add_view(SubmissionModelView(VideoSubmission, db_session))
 
 @app.route("/")
 def index():

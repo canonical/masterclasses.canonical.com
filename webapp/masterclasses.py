@@ -3,11 +3,17 @@ import flask
 from sqlalchemy import create_engine, func, nullslast, and_
 from sqlalchemy.orm import scoped_session, sessionmaker
 from datetime import datetime, timezone
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import logging
 
 from models.video import Video
 from models.presenter import Presenter
 from models.tag import Tag, TagCategory
 from webapp.database import db_session
+from webapp.forms import MasterclassRegistrationForm
+from models.submission import VideoSubmission
 
 masterclasses = flask.Blueprint(
     "masterclasses",
@@ -15,6 +21,8 @@ masterclasses = flask.Blueprint(
     template_folder="/templates",
     static_folder="/static",
 )
+
+logger = logging.getLogger(__name__)
 
 @masterclasses.route("/")
 def index():
@@ -239,4 +247,45 @@ def random_video():
             title=flask.current_app.jinja_env.filters['slugify'](video.title),
             id=video.id
         )
+    )
+
+@masterclasses.route("/register", methods=["GET", "POST"])
+def register():
+    if "openid" not in flask.session:
+        return flask.redirect("/login?next=/register")
+        
+    form = MasterclassRegistrationForm()
+    submission_status = None
+    
+    if form.validate_on_submit():
+        try:
+            submission = VideoSubmission(
+                title=form.title.data,
+                description=form.description.data,
+                duration=form.duration_other.data if form.duration.data == 'other' else form.duration.data,
+                email=flask.session["openid"]["email"]
+            )
+            
+            db_session.add(submission)
+            db_session.commit()
+            
+            # Clear the form after successful submission
+            form = MasterclassRegistrationForm(None)
+            submission_status = {
+                'success': True,
+                'message': "Your masterclass submission has been received successfully! We'll review it and get back to you soon."
+            }
+            
+        except Exception as e:
+            db_session.rollback()
+            logger.error(f"Failed to save submission: {e}")
+            submission_status = {
+                'success': False,
+                'message': "There was an error submitting your masterclass. Please try again."
+            }
+    
+    return flask.render_template(
+        "register.html",
+        form=form,
+        submission_status=submission_status
     )
