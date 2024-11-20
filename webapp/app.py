@@ -19,6 +19,7 @@ from models.video import Video
 from models.presenter import Presenter
 from models.tag import Tag, TagCategory
 from models.submission import VideoSubmission
+from webapp.api import api
 
 app = FlaskBase(
     __name__,
@@ -37,6 +38,7 @@ app.add_template_filter(slugify)
 init_sso(app)
 
 app.register_blueprint(masterclasses, url_prefix="/")
+app.register_blueprint(api, url_prefix="/api")
 
 # Initialize Flask-Admin
 admin = Admin(app, name='Masterclasses Admin', template_mode='bootstrap3', index_view=DashboardView())

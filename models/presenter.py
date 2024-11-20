@@ -8,7 +8,7 @@ class Presenter(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     email = Column(String, nullable=True)
-    hrc_id = Column(Integer, nullable=True)
+    hrc_id = Column(String, unique=True)
     headshot = Column(String, nullable=True)
 
     # Relationships

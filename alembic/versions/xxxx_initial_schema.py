@@ -36,7 +36,7 @@ def upgrade() -> None:
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('name', sa.String(), nullable=False),
         sa.Column('email', sa.String(), nullable=True),
-        sa.Column('hrc_id', sa.Integer(), nullable=True),
+        sa.Column('hrc_id', sa.String(), nullable=False, unique=True),
         sa.Column('headshot', sa.String(), nullable=True),
         sa.PrimaryKeyConstraint('id')
     )

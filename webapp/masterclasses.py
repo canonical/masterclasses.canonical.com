@@ -14,6 +14,8 @@ from models.tag import Tag, TagCategory
 from webapp.database import db_session
 from webapp.forms import MasterclassRegistrationForm
 from models.submission import VideoSubmission
+from webapp.auth import require_api_token
+from flask import jsonify
 
 masterclasses = flask.Blueprint(
     "masterclasses",
