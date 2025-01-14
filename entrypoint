@@ -5,7 +5,12 @@ set -e
 RUN_COMMAND="talisker.gunicorn.gevent webapp.app:app --bind $1 --worker-class gevent --name talisker-`hostname`"
 
 alembic upgrade head
-python3 dummy-data_import.py
+
+# Only run dummy data import in development mode
+if [ "${FLASK_DEBUG}" = true ] || [ "${FLASK_DEBUG}" = 1 ] || [ "${DEVEL}" = True ]; then
+    echo "Running dummy data import"
+    python3 dummy-data_import.py
+fi
 
 if [ "${FLASK_DEBUG}" = true ] || [ "${FLASK_DEBUG}" = 1 ]; then
     RUN_COMMAND="${RUN_COMMAND} --reload --log-level debug --timeout 9999"
