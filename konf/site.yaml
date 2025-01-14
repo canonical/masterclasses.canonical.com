@@ -41,3 +41,5 @@ demo:
   env:
     - name: OPENID_LAUNCHPAD_TEAM
       value: canonical-content-people
+    - name: FLASK_DEBUG
+      value: true
