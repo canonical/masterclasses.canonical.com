@@ -13,7 +13,7 @@ from webapp.database import db_session
 from webapp.admin import (
     Admin, DashboardView, VideoModelView, 
     RestrictedModelView, TagModelView, TagCategoryModelView,
-    SubmissionModelView
+    SubmissionModelView, PresenterModelView
 )
 from models.video import Video
 from models.presenter import Presenter
@@ -45,7 +45,7 @@ admin = Admin(app, name='Masterclasses Admin', template_mode='bootstrap3', index
 
 # Register models with admin interface
 admin.add_view(VideoModelView(Video, db_session))
-admin.add_view(RestrictedModelView(Presenter, db_session))
+admin.add_view(PresenterModelView(Presenter, db_session))
 admin.add_view(TagModelView(Tag, db_session))
 admin.add_view(TagCategoryModelView(TagCategory, db_session))
 admin.add_view(SubmissionModelView(VideoSubmission, db_session))
