@@ -25,46 +25,35 @@
         
         <div class="p-form__group">
           <label class="p-form__label" for="title">Name of session *</label>
-          <input type="text" id="title" name="title" class="p-form__control" required>
+          {{ form.title(class="p-form__control") }}
+          {% if form.title.errors %}
+            <p class="p-form__help-text u-text-danger">{{ form.title.errors[0] }}</p>
+          {% endif %}
         </div>
 
         <div class="p-form__group">
           <label class="p-form__label" for="description">Description *</label>
-          <textarea id="description" name="description" class="p-form__control" rows="5" required></textarea>
+          {{ form.description(class="p-form__control", rows="5") }}
+          {% if form.description.errors %}
+            <p class="p-form__help-text u-text-danger">{{ form.description.errors[0] }}</p>
+          {% endif %}
         </div>
 
         <div class="p-form__group">
           <label class="p-form__label">Duration *</label>
-          <label class="p-radio">
-            <input type="radio" name="duration" value="30" class="p-radio__input" required>
-            <span class="p-radio__label">Up to 30 mins</span>
-          </label>
-          <label class="p-radio">
-            <input type="radio" name="duration" value="45" class="p-radio__input">
-            <span class="p-radio__label">Up to 45 mins</span>
-          </label>
-          <label class="p-radio">
-            <input type="radio" name="duration" value="60" class="p-radio__input">
-            <span class="p-radio__label">Up to 1 hour</span>
-          </label>
-          <label class="p-radio">
-            <input type="radio" name="duration" value="other" class="p-radio__input">
-            <span class="p-radio__label">Other:</span>
-            <input type="text" id="duration_other" name="duration_other" class="p-form__control" style="display: none;">
-          </label>
+          {% for subfield in form.duration %}
+            <label class="p-radio">
+              {{ subfield(class="p-radio__input") }}
+              <span class="p-radio__label">{{ subfield.label.text }}</span>
+              {% if subfield.data == 'other' %}
+                {{ form.duration_other(class="p-form__control", style="display: none;") }}
+              {% endif %}
+            </label>
+          {% endfor %}
+          {% if form.duration.errors %}
+            <p class="p-form__help-text u-text-danger">{{ form.duration.errors[0] }}</p>
+          {% endif %}
         </div>
-
-        <div class="p-notification--information">
-          <div class="p-notification__content">
-            <h5 class="p-notification__title">What happens next?</h5>
-            <p class="p-notification__message">
-              After we review your submission, the Masterclasses team will schedule and confirm your slot. 
-              We'll publish the calendar event on our website for anyone interested to attend the Masterclass.
-              The recording of the event will then be published on the website.
-            </p>
-          </div>
-        </div>
-
         <button type="submit" class="p-button--positive">Submit</button>
       </form>
     </div>

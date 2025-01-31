@@ -20,6 +20,7 @@ from models.presenter import Presenter
 from models.tag import Tag, TagCategory
 from models.submission import VideoSubmission
 from webapp.api import api
+from webapp.forms import MasterclassSubmissionForm
 
 app = FlaskBase(
     __name__,
@@ -83,3 +84,46 @@ def markdown_filter(text):
     if not text:
         return ''
     return markdown(text, extensions=['extra'])
+
+@app.route("/register", methods=['GET', 'POST'])
+def register():
+    form = MasterclassSubmissionForm()
+    submission_status = None
+
+    if form.validate_on_submit():
+        try:
+            # Get the duration value
+            duration = form.duration_other.data if form.duration.data == 'other' else form.duration.data
+            
+            # Create submission
+            submission = VideoSubmission(
+                title=form.title.data,
+                description=form.description.data,
+                duration=duration,
+                email=session.get('openid', {}).get('email', ''),
+                status='pending'
+            )
+            
+            db_session.add(submission)
+            db_session.commit()
+
+            submission_status = {
+                'success': True,
+                'message': 'Your masterclass submission has been received. The team will review it and get back to you soon.'
+            }
+
+            # TODO: Add email notification after submission to form has been made.
+            # I have started this in ./utils/email.py, but we need a service account before it can be finished.
+
+        except Exception as e:
+            db_session.rollback()
+            submission_status = {
+                'success': False,
+                'message': 'There was an error submitting your masterclass. Please try again.'
+            }
+
+    return flask.render_template(
+        "register.html",
+        form=form,
+        submission_status=submission_status
+    )
