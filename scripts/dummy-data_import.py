@@ -6,6 +6,10 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from datetime import datetime, timedelta, timezone
 import time
 import random
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).parent.parent))
 
 from models.video import Video
 from models.presenter import Presenter

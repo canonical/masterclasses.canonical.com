@@ -1,16 +1,22 @@
-"""initial schema
+"""Initial DB
 
-Revision ID: xxxx
+Revision ID: f82af780bcbe
 Revises: 
-Create Date: 2024-xx-xx
+Create Date: 2025-01-31 15:32:04.797584
+
 """
+from typing import Sequence, Union
+
 from alembic import op
 import sqlalchemy as sa
 
-revision = 'xxxx'
-down_revision = None
-branch_labels = None
-depends_on = None
+
+# revision identifiers, used by Alembic.
+revision: str = 'f82af780bcbe'
+down_revision: Union[str, None] = None
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
+
 
 def upgrade() -> None:
     # Create videos table

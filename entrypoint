@@ -4,15 +4,16 @@ set -e
 
 RUN_COMMAND="talisker.gunicorn.gevent webapp.app:app --bind $1 --worker-class gevent --name talisker-`hostname`"
 
+echo "Running alembic migrations"
 alembic upgrade head
 
 # Only run dummy data import in development mode
-if [ "${FLASK_DEBUG}" = True ] || [ "${FLASK_DEBUG}" = 1 ] || [ "${DEVEL}" = True ]; then
+if [ "${FLASK_DEBUG,,}" = "true" ] || [ "${FLASK_DEBUG}" = "True" ] || [ "${FLASK_DEBUG}" = "1" ] || [ "${FLASK_DEBUG}" = "yes" ]; then
     echo "Running dummy data import"
-    python3 dummy-data_import.py
+    python3 scripts/dummy-data_import.py
 fi
 
-if [ "${FLASK_DEBUG}" = True ] || [ "${FLASK_DEBUG}" = 1 ]; then
+if [ "${FLASK_DEBUG,,}" = "true" ] || [ "${FLASK_DEBUG}" = "True" ] || [ "${FLASK_DEBUG}" = "1" ] || [ "${FLASK_DEBUG}" = "yes" ]; then
     RUN_COMMAND="${RUN_COMMAND} --reload --log-level debug --timeout 9999"
 fi
 

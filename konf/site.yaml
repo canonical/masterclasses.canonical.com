@@ -43,3 +43,5 @@ demo:
       value: canonical-content-people
     - name: FLASK_DEBUG
       value: true
+    - name: API_TOKEN
+      value: super-secret-token
