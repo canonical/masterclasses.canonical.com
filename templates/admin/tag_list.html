@@ -1,0 +1,42 @@
+{% extends 'admin/model/list.html' %}
+
+{% block list_header %}
+<div class="panel panel-default" style="margin-bottom: 20px;">
+    <div class="panel-heading">
+        <h3 class="panel-title">Import/Export Tags</h3>
+    </div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-md-8">
+                <form action="{{ url_for('.import_json') }}" method="POST" enctype="multipart/form-data">
+                    <div class="input-group">
+                        <label class="input-group-btn">
+                            <span class="btn btn-primary">
+                                Browse&hellip; <input type="file" id="json_file" name="json_file" accept=".json" style="display: none;">
+                            </span>
+                        </label>
+                        <input type="text" id="file-display" class="form-control" readonly placeholder="Choose JSON file...">
+                        <span class="input-group-btn">
+                            <button type="submit" class="btn btn-success">Upload</button>
+                        </span>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-4 text-right">
+                <a href="{{ url_for('.export_json') }}" class="btn btn-info">
+                    <span class="glyphicon glyphicon-download"></span> Export Tags
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{ super() }}
+
+<script>
+document.getElementById('json_file').addEventListener('change', function() {
+    var fileName = this.value.split('\\').pop();
+    document.getElementById('file-display').value = fileName;
+});
+</script>
+{% endblock %} 

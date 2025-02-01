@@ -5,7 +5,7 @@ from wtforms import SelectField, SelectMultipleField, TextAreaField
 from flask_admin.model.form import converts
 from flask_admin.form.widgets import Select2Widget
 from wtforms.widgets import Select as SelectWidget, TextArea
-from flask import jsonify, redirect, url_for, session, abort, flash
+from flask import jsonify, redirect, url_for, session, abort, flash, request
 from wtforms.fields import DateTimeField
 from datetime import datetime
 from models.video import Video
@@ -20,6 +20,9 @@ import logging as log
 from sqlalchemy import and_, or_
 from flask_admin.contrib.sqla.filters import BaseSQLAFilter, FilterEqual
 import os
+import csv
+import io
+import json
 
 class RestrictedModelView(ModelView):
     # Admin view is accessible to Web&Design team
@@ -35,39 +38,87 @@ class RestrictedModelView(ModelView):
 
 class TagModelView(RestrictedModelView):
     column_list = ['name', 'category']
-    form_columns = ['name', 'tag_type_id']
-    
-    # Format the category display in list view
-    column_formatters = {
-        'category': lambda v, c, m, p: m.category.name if m.category else ''
-    }
-    
-    def scaffold_form(self):
-        form_class = super(TagModelView, self).scaffold_form()
-        
-        # Add name field explicitly
-        form_class.name = TextAreaField(
-            'Name',
-            validators=[validators.DataRequired()],
-            render_kw={'placeholder': 'Tag name'}
-        )
-        
-        # Use query_factory for dynamic category loading
-        form_class.tag_type_id = SelectField(
-            'Category',
-            validators=[validators.DataRequired()],
-            coerce=int,
-            choices=lambda: [(c.id, c.name) for c in db_session.query(TagCategory).order_by(TagCategory.name).all()]
-        )
-        
-        return form_class
+    form_columns = ['name', 'category']
 
-    def on_model_change(self, form, model, is_created):
-        """Ensure the category relationship is properly set"""
-        if form.tag_type_id.data:
-            category = db_session.query(TagCategory).get(form.tag_type_id.data)
-            model.category = category
-            model.tag_type_id = category.id
+    @property
+    def list_template(self):
+        return 'admin/tag_list.html'
+
+    @expose('/import-json', methods=['POST'])
+    def import_json(self):
+        if 'json_file' not in request.files:
+            flash('No file uploaded', 'error')
+            return redirect(url_for('.index_view'))
+            
+        file = request.files['json_file']
+        if file.filename == '':
+            flash('No file selected', 'error')
+            return redirect(url_for('.index_view'))
+            
+        if not file.filename.endswith('.json'):
+            flash('File must be a JSON', 'error')
+            return redirect(url_for('.index_view'))
+            
+        try:
+            # Read JSON file
+            json_data = json.loads(file.read().decode('UTF8'))
+            
+            # Process each tag
+            for tag_data in json_data:
+                if not tag_data.get('name') or not tag_data.get('category'):
+                    continue
+                
+                # Get category (must exist)
+                category = db_session.query(TagCategory).filter_by(name=tag_data['category']).first()
+                if not category:
+                    continue
+                
+                # Create tag if it doesn't exist
+                existing_tag = db_session.query(Tag).join(TagCategory).filter(
+                    Tag.name == tag_data['name'],
+                    TagCategory.id == category.id
+                ).first()
+                
+                if not existing_tag:
+                    tag = Tag(name=tag_data['name'], tag_type_id=category.id)
+                    db_session.add(tag)
+            
+            db_session.commit()
+            flash('Tags imported successfully', 'success')
+            
+        except Exception as e:
+            db_session.rollback()
+            log.error(f"Error importing JSON: {e}")
+            flash('Error importing JSON file', 'error')
+            
+        return redirect(url_for('.index_view'))
+
+    @expose('/export-json', methods=['GET'])
+    def export_json(self):
+        try:
+            # Query all tags with their categories
+            tags = db_session.query(Tag, TagCategory).join(TagCategory).order_by(TagCategory.name, Tag.name).all()
+            
+            # Create JSON data
+            tag_list = []
+            for tag, category in tags:
+                tag_data = {
+                    'name': tag.name,
+                    'category': category.name
+                }
+                tag_list.append(tag_data)
+            
+            # Create the response
+            response = flask.make_response(json.dumps(tag_list, indent=2))
+            response.headers["Content-Disposition"] = "attachment; filename=tags.json"
+            response.headers["Content-type"] = "application/json"
+            
+            return response
+            
+        except Exception as e:
+            log.error(f"Error exporting JSON: {e}")
+            flash('Error exporting JSON file', 'error')
+            return redirect(url_for('.index_view'))
 
 class TagCategoryModelView(RestrictedModelView):
     column_list = ['name', 'tags']
@@ -76,6 +127,76 @@ class TagCategoryModelView(RestrictedModelView):
     column_formatters = {
         'tags': lambda v, c, m, p: ', '.join([tag.name for tag in m.tags]) if m.tags else ''
     }
+
+    @property
+    def list_template(self):
+        return 'admin/tag_category_list.html'
+
+    @expose('/import-json', methods=['POST'])
+    def import_json(self):
+        if 'json_file' not in request.files:
+            flash('No file uploaded', 'error')
+            return redirect(url_for('.index_view'))
+            
+        file = request.files['json_file']
+        if file.filename == '':
+            flash('No file selected', 'error')
+            return redirect(url_for('.index_view'))
+            
+        if not file.filename.endswith('.json'):
+            flash('File must be a JSON', 'error')
+            return redirect(url_for('.index_view'))
+            
+        try:
+            # Read JSON file
+            json_data = json.loads(file.read().decode('UTF8'))
+            
+            # Process each category
+            for category_data in json_data:
+                if not category_data.get('name'):
+                    continue
+                
+                # Get or create category
+                category = db_session.query(TagCategory).filter_by(name=category_data['name']).first()
+                if not category:
+                    category = TagCategory(name=category_data['name'])
+                    db_session.add(category)
+            
+            db_session.commit()
+            flash('Categories imported successfully', 'success')
+            
+        except Exception as e:
+            db_session.rollback()
+            log.error(f"Error importing JSON: {e}")
+            flash('Error importing JSON file', 'error')
+            
+        return redirect(url_for('.index_view'))
+
+    @expose('/export-json', methods=['GET'])
+    def export_json(self):
+        try:
+            # Query all categories
+            categories = db_session.query(TagCategory).order_by(TagCategory.name).all()
+            
+            # Create JSON data
+            category_list = []
+            for category in categories:
+                category_data = {
+                    'name': category.name
+                }
+                category_list.append(category_data)
+            
+            # Create the response
+            response = flask.make_response(json.dumps(category_list, indent=2))
+            response.headers["Content-Disposition"] = "attachment; filename=tag_categories.json"
+            response.headers["Content-type"] = "application/json"
+            
+            return response
+            
+        except Exception as e:
+            log.error(f"Error exporting JSON: {e}")
+            flash('Error exporting JSON file', 'error')
+            return redirect(url_for('.index_view'))
 
 class DashboardView(AdminIndexView):
     def is_visible(self):
@@ -686,6 +807,136 @@ class VideoModelView(RestrictedModelView):
             self.session.rollback()
             return False
 
+    @property
+    def list_template(self):
+        """Override list template to add upload form"""
+        return 'admin/video_list.html'
+
+    @expose('/import-json', methods=['POST'])
+    def import_json(self):
+        if 'json_file' not in request.files:
+            flash('No file uploaded', 'error')
+            return redirect(url_for('.index_view'))
+            
+        file = request.files['json_file']
+        if file.filename == '':
+            flash('No file selected', 'error')
+            return redirect(url_for('.index_view'))
+            
+        if not file.filename.endswith('.json'):
+            flash('File must be a JSON', 'error')
+            return redirect(url_for('.index_view'))
+            
+        try:
+            # Read JSON file
+            json_data = json.loads(file.read().decode('UTF8'))
+            
+            # Process each video
+            for video_data in json_data:
+                # Convert timestamps
+                try:
+                    unixstart = int(datetime.strptime(video_data['start_time'], '%Y-%m-%d %H:%M').timestamp())
+                    unixend = int(datetime.strptime(video_data['end_time'], '%Y-%m-%d %H:%M').timestamp())
+                except (ValueError, KeyError):
+                    continue
+
+                # Create or update video
+                video = db_session.query(Video).filter_by(title=video_data['title']).first()
+                if not video:
+                    video = Video(
+                        title=video_data['title'],
+                        description=video_data.get('description', ''),
+                        unixstart=unixstart,
+                        unixend=unixend,
+                        stream=video_data.get('stream'),
+                        slides=video_data.get('slides'),
+                        recording=video_data.get('recording'),
+                        chat_log=video_data.get('chat_log'),
+                        thumbnails=video_data.get('thumbnails'),
+                        calendar_event=video_data.get('calendar_event')
+                    )
+                    db_session.add(video)
+                else:
+                    video.description = video_data.get('description', '')
+                    video.unixstart = unixstart
+                    video.unixend = unixend
+                    video.stream = video_data.get('stream')
+                    video.slides = video_data.get('slides')
+                    video.recording = video_data.get('recording')
+                    video.chat_log = video_data.get('chat_log')
+                    video.thumbnails = video_data.get('thumbnails')
+                    video.calendar_event = video_data.get('calendar_event')
+
+                # Handle presenters
+                presenter_names = video_data.get('presenters', [])
+                video.presenters = []
+                for name in presenter_names:
+                    presenter = db_session.query(Presenter).filter_by(name=name).first()
+                    if presenter:
+                        video.presenters.append(presenter)
+
+                # Handle tags
+                tag_data = video_data.get('tags', [])
+                video.tags = []
+                for tag_info in tag_data:
+                    tag = db_session.query(Tag).join(TagCategory).filter(
+                        Tag.name == tag_info['name'],
+                        TagCategory.name == tag_info['category']
+                    ).first()
+                    if tag:
+                        video.tags.append(tag)
+            
+            db_session.commit()
+            flash('Videos imported successfully', 'success')
+            
+        except Exception as e:
+            db_session.rollback()
+            log.error(f"Error importing JSON: {e}")
+            flash('Error importing JSON file', 'error')
+            
+        return redirect(url_for('.index_view'))
+
+    @expose('/export-json', methods=['GET'])
+    def export_json(self):
+        try:
+            # Query all videos with their relationships
+            videos = db_session.query(Video).order_by(Video.unixstart.desc()).all()
+            
+            # Create JSON data
+            video_list = []
+            for video in videos:
+                # Format timestamps
+                start_time = datetime.fromtimestamp(video.unixstart).strftime('%Y-%m-%d %H:%M')
+                end_time = datetime.fromtimestamp(video.unixend).strftime('%Y-%m-%d %H:%M')
+                
+                video_data = {
+                    'title': video.title,
+                    'description': video.description or '',
+                    'start_time': start_time,
+                    'end_time': end_time,
+                    'stream': video.stream or '',
+                    'slides': video.slides or '',
+                    'recording': video.recording or '',
+                    'chat_log': video.chat_log or '',
+                    'thumbnails': video.thumbnails or '',
+                    'calendar_event': video.calendar_event or '',
+                    'presenters': [p.name for p in video.presenters] if video.presenters else [],
+                    'tags': [{'name': t.name, 'category': t.category.name} for t in video.tags] if video.tags else []
+                }
+                video_list.append(video_data)
+            
+            # Create the response
+            response = flask.make_response(json.dumps(video_list, indent=2))
+            response.headers["Content-Disposition"] = "attachment; filename=videos.json"
+            response.headers["Content-type"] = "application/json"
+            
+            return response
+            
+        except Exception as e:
+            log.error(f"Error exporting JSON: {e}")
+            flash('Error exporting JSON file', 'error')
+            return redirect(url_for('.index_view'))
+
 class MarkdownTextArea(TextArea):
     def __call__(self, field, **kwargs):
         # Add a help text below the textarea
@@ -702,50 +953,89 @@ class MarkdownTextArea(TextArea):
         return f"{html}{help_text}"
 
 class PresenterModelView(RestrictedModelView):
-    # List view configuration
     column_list = ['name', 'email', 'hrc_id', 'headshot']
-    column_searchable_list = ['name', 'email', 'hrc_id']
-    
-    # Form configuration
     form_columns = ['name', 'email', 'hrc_id', 'headshot']
-    
-    # Add nice labels and descriptions
-    column_labels = {
-        'hrc_id': 'HRC ID',
-    }
 
-    def scaffold_form(self):
-        form_class = super(PresenterModelView, self).scaffold_form()
-        
-        # Explicitly define form fields
-        form_class.name = TextAreaField(
-            'Name',
-            validators=[validators.DataRequired()],
-            render_kw={'placeholder': 'Full name of the presenter'}
-        )
-        
-        form_class.email = TextAreaField(
-            'Email',
-            validators=[validators.Optional()],  # Removed Email() validator
-            render_kw={'placeholder': 'Email address'}
-        )
-        
-        form_class.hrc_id = TextAreaField(
-            'HRC ID',
-            validators=[validators.DataRequired()],
-            render_kw={'placeholder': 'Unique HRC identifier'}
-        )
-        
-        form_class.headshot = TextAreaField(
-            'Headshot',
-            validators=[validators.Optional()],  # Removed URL() validator
-            render_kw={'placeholder': 'URL to presenter\'s headshot image'}
-        )
-        
-        return form_class
+    @property
+    def list_template(self):
+        return 'admin/presenter_list.html'
 
-    def on_model_change(self, form, model, is_created):
-        """Ensure data is properly formatted before saving"""
-        # Convert hrc_id to string if it isn't already
-        if model.hrc_id is not None:
-            model.hrc_id = str(model.hrc_id)
+    @expose('/import-json', methods=['POST'])
+    def import_json(self):
+        if 'json_file' not in request.files:
+            flash('No file uploaded', 'error')
+            return redirect(url_for('.index_view'))
+            
+        file = request.files['json_file']
+        if file.filename == '':
+            flash('No file selected', 'error')
+            return redirect(url_for('.index_view'))
+            
+        if not file.filename.endswith('.json'):
+            flash('File must be a JSON', 'error')
+            return redirect(url_for('.index_view'))
+            
+        try:
+            # Read JSON file
+            json_data = json.loads(file.read().decode('UTF8'))
+            
+            # Process each presenter
+            for presenter_data in json_data:
+                if not presenter_data.get('name') or not presenter_data.get('hrc_id'):
+                    continue
+                
+                # Check if presenter exists by hrc_id
+                presenter = db_session.query(Presenter).filter_by(hrc_id=presenter_data['hrc_id']).first()
+                if not presenter:
+                    presenter = Presenter(
+                        name=presenter_data['name'],
+                        email=presenter_data.get('email'),
+                        hrc_id=presenter_data['hrc_id'],
+                        headshot=presenter_data.get('headshot')
+                    )
+                    db_session.add(presenter)
+                else:
+                    # Update existing presenter
+                    presenter.name = presenter_data['name']
+                    presenter.email = presenter_data.get('email')
+                    if presenter_data.get('headshot'):
+                        presenter.headshot = presenter_data['headshot']
+            
+            db_session.commit()
+            flash('Presenters imported successfully', 'success')
+            
+        except Exception as e:
+            db_session.rollback()
+            log.error(f"Error importing JSON: {e}")
+            flash('Error importing JSON file', 'error')
+            
+        return redirect(url_for('.index_view'))
+
+    @expose('/export-json', methods=['GET'])
+    def export_json(self):
+        try:
+            # Query all presenters
+            presenters = db_session.query(Presenter).order_by(Presenter.name).all()
+            
+            # Create JSON data
+            presenter_list = []
+            for presenter in presenters:
+                presenter_data = {
+                    'name': presenter.name,
+                    'email': presenter.email or '',
+                    'hrc_id': presenter.hrc_id,
+                    'headshot': presenter.headshot or ''
+                }
+                presenter_list.append(presenter_data)
+            
+            # Create the response
+            response = flask.make_response(json.dumps(presenter_list, indent=2))
+            response.headers["Content-Disposition"] = "attachment; filename=presenters.json"
+            response.headers["Content-type"] = "application/json"
+            
+            return response
+            
+        except Exception as e:
+            log.error(f"Error exporting JSON: {e}")
+            flash('Error exporting JSON file', 'error')
+            return redirect(url_for('.index_view'))

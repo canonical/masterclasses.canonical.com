@@ -48,7 +48,7 @@ admin = Admin(app, name='Masterclasses Admin', template_mode='bootstrap3', index
 admin.add_view(VideoModelView(Video, db_session))
 admin.add_view(PresenterModelView(Presenter, db_session))
 admin.add_view(TagModelView(Tag, db_session))
-admin.add_view(TagCategoryModelView(TagCategory, db_session))
+admin.add_view(TagCategoryModelView(TagCategory, db_session, name='Tag Categories'))
 admin.add_view(SubmissionModelView(VideoSubmission, db_session))
 
 @app.route("/")
