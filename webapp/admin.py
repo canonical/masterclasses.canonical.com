@@ -17,6 +17,9 @@ from models.submission import VideoSubmission
 import flask
 from wtforms import validators
 import logging as log
+from sqlalchemy import and_, or_
+from flask_admin.contrib.sqla.filters import BaseSQLAFilter, FilterEqual
+import os
 
 class RestrictedModelView(ModelView):
     # Admin view is accessible to Web&Design team
@@ -127,6 +130,159 @@ class SubmissionModelView(RestrictedModelView):
         ]
         return form_class
 
+class ContainsFilter(BaseSQLAFilter):
+    def __init__(self, column, name, options=None):
+        super(ContainsFilter, self).__init__(column, name, options)
+
+    def apply(self, query, value, alias=None):
+        if value is None:
+            return query
+        return query.filter(self.column.ilike(f'%{value}%'))
+
+    def operation(self):
+        return 'contains'
+
+    def validate(self, value):
+        return True
+
+class MultiSelectFilter(FilterEqual):
+    def __init__(self, column, name, options=None):
+        super(MultiSelectFilter, self).__init__(column, name, options)
+        self.multiple = True  # Enable multiple selection
+
+    def apply(self, query, value, alias=None):
+        if value is None:
+            return query
+        return query.filter(self.column.in_(value))
+
+class MultiSelectContainsFilter(MultiSelectFilter):
+    def apply(self, query, values, alias=None):
+        if not values:
+            return query
+        conditions = [self.column.ilike(f'%{value}%') for value in values]
+        return query.filter(or_(*conditions))
+
+class PresenterFilter(MultiSelectFilter):
+    def apply(self, query, values, alias=None):
+        if not values:
+            return query
+        # Convert single value to list if needed
+        if isinstance(values, str):
+            values = [values]
+        return (query.join(Video.presenters)
+               .filter(Presenter.name.in_(values)))
+
+    def get_options(self, view):
+        presenters = db_session.query(Presenter).order_by(Presenter.name).all()
+        return [(p.name, p.name) for p in presenters]
+
+class TagCategoryMultiFilter(MultiSelectContainsFilter):
+    def __init__(self, column, name, category):
+        super(TagCategoryMultiFilter, self).__init__(column, name)
+        self.category = category
+
+    def apply(self, query, values, alias=None):
+        if not values:
+            return query
+        # Convert single value to list if needed
+        if isinstance(values, str):
+            values = [values]
+        return (query.join(Video.tags)
+                .join(Tag.category)
+                .filter(and_(
+                    TagCategory.name == self.category,
+                    Tag.name.in_(values)  # Change to exact matches with in_
+                )))
+
+    def get_options(self, view):
+        tags = (db_session.query(Tag)
+                .join(TagCategory)
+                .filter(TagCategory.name == self.category)
+                .order_by(Tag.name)
+                .all())
+        return [(t.name, t.name) for t in tags]
+
+class DateAfterFilter(BaseSQLAFilter):
+    def apply(self, query, value, alias=None):
+        if not value:
+            return query
+        try:
+            # Add debug logging
+            log.info(f"Filtering after date: {value}, type: {type(value)}")
+            
+            # Try multiple datetime formats
+            try:
+                timestamp = int(datetime.strptime(value, '%Y-%m-%d %H:%M').timestamp())
+            except ValueError:
+                try:
+                    timestamp = int(datetime.strptime(value, '%Y-%m-%d %H:%M:%S').timestamp())
+                except ValueError:
+                    if isinstance(value, datetime):
+                        timestamp = int(value.timestamp())
+                    else:
+                        return query
+
+            log.info(f"Converted timestamp: {timestamp}")
+            return query.filter(self.column >= timestamp)
+        except Exception as e:
+            log.error(f"Error in DateAfterFilter: {e}")
+            return query
+
+    def operation(self):
+        return 'greater'
+
+class DateBeforeFilter(BaseSQLAFilter):
+    def apply(self, query, value, alias=None):
+        if not value:
+            return query
+        try:
+            try:
+                timestamp = int(datetime.strptime(value, '%Y-%m-%d %H:%M').timestamp())
+            except ValueError:
+                try:
+                    timestamp = int(datetime.strptime(value, '%Y-%m-%d %H:%M:%S').timestamp())
+                except ValueError:
+                    if isinstance(value, datetime):
+                        timestamp = int(value.timestamp())
+                    else:
+                        return query
+
+            return query.filter(self.column <= timestamp)
+        except Exception as e:
+            log.error(f"Error in DateBeforeFilter: {e}")
+            return query
+
+    def operation(self):
+        return 'less'
+
+class DateEqualsFilter(BaseSQLAFilter):
+    def apply(self, query, value, alias=None):
+        if not value:
+            return query
+        try:
+            try:
+                timestamp = int(datetime.strptime(value, '%Y-%m-%d %H:%M').timestamp())
+            except ValueError:
+                try:
+                    timestamp = int(datetime.strptime(value, '%Y-%m-%d %H:%M:%S').timestamp())
+                except ValueError:
+                    if isinstance(value, datetime):
+                        timestamp = int(value.timestamp())
+                    else:
+                        return query
+
+            next_day = timestamp + 86400  # Add 24 hours
+            return query.filter(and_(
+                self.column >= timestamp,
+                self.column < next_day
+            ))
+        except Exception as e:
+            log.error(f"Error in DateEqualsFilter: {e}")
+            return query
+
+    def operation(self):
+        return 'equals'
+
 class VideoModelView(RestrictedModelView):
     # Display these columns in the list view using actual database column names
     column_list = ['title', 'presenters', 'topic_tags', 'event_tags', 'date_tags', 'unixstart', 'unixend', 'recording']
@@ -174,6 +330,68 @@ class VideoModelView(RestrictedModelView):
 
     # Exclude relationship fields from form population
     form_excluded_columns = ('presenters', 'tags')
+
+    # Remove the default column_filters since we're using custom ones
+    column_filters = None
+
+    # Remove search functionality
+    column_searchable_list = None
+
+    def get_filters(self):
+        filters = []
+        
+        filters.extend([
+            ContainsFilter(
+                Video.title, 'Title'
+            ),
+            PresenterFilter(
+                Video.presenters, 'Presenters'
+            ),
+            TagCategoryMultiFilter(
+                Video.tags, 'Topic Tags', 'Topic'
+            ),
+            TagCategoryMultiFilter(
+                Video.tags, 'Event Tags', 'Event'
+            ),
+            TagCategoryMultiFilter(
+                Video.tags, 'Date Tags', 'Date'
+            ),
+            DateAfterFilter(
+                Video.unixstart, 'Start Date After'
+            ),
+            DateBeforeFilter(
+                Video.unixstart, 'Start Date Before'
+            ),
+            DateAfterFilter(
+                Video.unixend, 'End Date After'
+            ),
+            DateBeforeFilter(
+                Video.unixend, 'End Date Before'
+            )
+        ])
+        
+        return filters
+
+    # Keep the query methods for proper joining
+    def get_query(self):
+        return (
+            super(VideoModelView, self)
+            .get_query()
+            .outerjoin(Video.presenters)
+            .outerjoin(Video.tags)
+            .outerjoin(Tag.category)
+            .distinct()
+        )
+
+    def get_count_query(self):
+        return (
+            super(VideoModelView, self)
+            .get_count_query()
+            .outerjoin(Video.presenters)
+            .outerjoin(Video.tags)
+            .outerjoin(Tag.category)
+            .distinct()
+        )
 
     @expose('/api/presenters')
     def presenters_api(self):
@@ -257,6 +475,14 @@ class VideoModelView(RestrictedModelView):
         self.extra_css = [
             'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css'
         ]
+        
+        # Set template paths
+        self.edit_template = 'admin/model/edit.html'
+        self.create_template = 'admin/model/create.html'
+        self.named_filter_urls = True
+        
+        # Add model templates directory
+        self.model_template_path = 'admin/model'
 
     # Allow HTML in the title column
     column_formatters_args = {
