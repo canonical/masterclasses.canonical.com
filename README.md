@@ -17,7 +17,7 @@ It uses [dotrun](https://github.com/canonical/dotrun) for local development, def
 3. Run the docker-compose file to start the database:
 
 ```bash
-docker compose up -d
+docker-compose up -d
 ```
 
 4. Launch it from the head of this repo by running the following command:
@@ -30,7 +30,12 @@ dotrun
 
 # API Access
 
-To set up API access, configure the API key as an environment variable.
+To set up API access, configure the API key as an environment variable. To use the example CURL commands below, please set these two environment variables:
+
+```bash
+export API_TOKEN="xxxxxxxxxx"
+export BASE_URL="http://127.0.0.1:8409/api/v1"
+```
 
 ## Endpoints
 
@@ -46,6 +51,13 @@ To set up API access, configure the API key as an environment variable.
     - `email` (string)  
 - **Status Codes:**  
   - `200 OK`  
+
+Example CURL usage:
+```
+curl -X GET "${BASE_URL}/presenters" \
+  -H "Authorization: Bearer ${API_TOKEN}" \
+  -H "Content-Type: application/json"
+```
 
 ---
 
@@ -63,6 +75,14 @@ To set up API access, configure the API key as an environment variable.
     - `email` (string)  
 - **Status Codes:**  
   - `200 OK`  
+
+Example CURL usage:
+```
+# Replace {PRESENTER_ID} with an actual presenter ID (e.g., 1)
+curl -X GET "${BASE_URL}/presenters/{PRESENTER_ID}" \
+  -H "Authorization: Bearer ${API_TOKEN}" \
+  -H "Content-Type: application/json"
+```
 
 ---
 
@@ -91,6 +111,14 @@ To set up API access, configure the API key as an environment variable.
   - `200 OK`  
   - `404 Not Found`  
 
+Example CURL usage:
+```
+# Replace {HRC_ID} with an actual HRC ID (e.g., ABC123)
+curl -X GET "${BASE_URL}/presenters/{HRC_ID}/talks" \
+  -H "Authorization: Bearer ${API_TOKEN}" \
+  -H "Content-Type: application/json"
+```
+
 ---
 
 ### **Retrieve Talks by Presenter (Email)**
@@ -117,3 +145,11 @@ To set up API access, configure the API key as an environment variable.
 - **Status Codes:**  
   - `200 OK`  
   - `404 Not Found`  
+
+Example CURL usage:
+```
+# Replace {EMAIL} with an actual email.
+curl -X GET "${BASE_URL}/presenters/email/{EMAIL}/talks" \
+  -H "Authorization: Bearer ${API_TOKEN}" \
+  -H "Content-Type: application/json"
+```
