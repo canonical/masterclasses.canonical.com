@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from "shared/_video_card.html" import video_card %}
+{% from "shared/_video_card_small.html" import video_card_small %}
 
 {% block content %}
 <script>
@@ -98,10 +99,12 @@ function togglePresenters(event) {
 
     <div class="col-3">
       {% if suggested_videos %}
-      <div class="suggested-videos">
+      <div class="">
         {% for suggested_video in suggested_videos %}
           <div class="col-4 u-sv1">
-            {{ video_card(suggested_video) }}
+            <div class="u-hide--small u-hide--medium">
+              {{ video_card(suggested_video) }}
+            </div>
           </div>
         {% endfor %}
       </div>
