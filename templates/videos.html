@@ -8,7 +8,13 @@
       <div class="p-divider u-no-margin--bottom">
         <div class="col-3">
           <div class="filters">
-            <aside class="p-accordion">
+            {# Show filters button on small and medium screens, hide on large #}
+            <button class="p-button u-hide--large" aria-controls="filter-accordion">
+              Show filters
+            </button>
+
+            {# Hide accordion by default on small and medium screens #}
+            <aside class="p-accordion u-hide--small u-hide--medium" id="filter-accordion">
               <ul class="p-accordion__list">
                 {{ filter_section('Topic', topic_tags, 'topic') }}
                 {{ filter_section('Event', event_tags, 'event') }}
@@ -182,6 +188,26 @@
 
     // Restore filters on page load
     restoreFiltersFromURL();
+
+    // Add toggle functionality for filter button on mobile and medium screens
+    const filterButton = document.querySelector('[aria-controls="filter-accordion"]');
+    const filterAccordion = document.getElementById('filter-accordion');
+
+    if (filterButton && filterAccordion) {
+      filterButton.addEventListener('click', () => {
+        const isHidden = filterAccordion.classList.contains('u-hide--small') || 
+                        filterAccordion.classList.contains('u-hide--medium');
+        if (isHidden) {
+          filterAccordion.classList.remove('u-hide--small');
+          filterAccordion.classList.remove('u-hide--medium');
+          filterButton.textContent = 'Hide filters';
+        } else {
+          filterAccordion.classList.add('u-hide--small');
+          filterAccordion.classList.add('u-hide--medium');
+          filterButton.textContent = 'Show filters';
+        }
+      });
+    }
   });
 
   function toggleExpanded(element, show) {
