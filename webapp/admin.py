@@ -892,13 +892,21 @@ class VideoModelView(RestrictedModelView):
                 flash('Invalid JSON format. Expected a list of videos.', 'error')
                 return redirect(url_for('.index_view'))
 
+            created_count = 0
+            updated_count = 0
+            warnings = []  # Store actual warning messages
+            error_count = 0
+            major_errors = []
+
             for video_data in json_data:
                 try:
-                    # Validate required fields
-                    required_fields = ['title', 'description', 'start_time', 'end_time']
+                    # Validate required fields - removed description from required fields
+                    required_fields = ['title', 'start_time', 'end_time']
                     missing_fields = [field for field in required_fields if field not in video_data]
                     if missing_fields:
-                        flash(f'Video "{video_data.get("title", "Unknown")}" is missing required fields: {", ".join(missing_fields)}', 'error')
+                        error_count += 1
+                        if error_count <= 3:  # Only show first 3 errors in detail
+                            major_errors.append(f'Video "{video_data.get("title", "Unknown")}" missing: {", ".join(missing_fields)}')
                         continue
 
                     # Convert timestamps
@@ -906,17 +914,20 @@ class VideoModelView(RestrictedModelView):
                         unixstart = int(datetime.strptime(video_data['start_time'], '%Y-%m-%d %H:%M').timestamp())
                         unixend = int(datetime.strptime(video_data['end_time'], '%Y-%m-%d %H:%M').timestamp())
                     except ValueError as e:
-                        flash(f'Invalid date format for video "{video_data.get("title")}": {str(e)}', 'error')
+                        error_count += 1
+                        if error_count <= 3:
+                            major_errors.append(f'Invalid date in "{video_data.get("title")}"')
                         continue
 
                     # Check if video exists by title
                     video = db_session.query(Video).filter_by(title=video_data['title']).first()
+                    is_new = not video
                     if not video:
                         video = Video()
 
                     # Update basic fields
                     video.title = video_data['title']
-                    video.description = video_data['description']
+                    video.description = video_data.get('description', '')  # Set empty string as default if missing
                     video.unixstart = unixstart
                     video.unixend = unixend
                     video.stream = video_data.get('stream')
@@ -934,14 +945,14 @@ class VideoModelView(RestrictedModelView):
                             if presenter:
                                 video.presenters.append(presenter)
                             else:
-                                flash(f'Presenter not found: {presenter_name}', 'warning')
+                                warnings.append(f'Presenter not found: "{presenter_name}" for video "{video_data["title"]}"')
 
                     # Handle tags
                     if 'tags' in video_data:
                         video.tags = []
                         for tag_data in video_data['tags']:
                             if 'name' not in tag_data or 'category' not in tag_data:
-                                flash(f'Invalid tag data in video "{video.title}": Missing name or category', 'warning')
+                                warnings.append(f'Invalid tag data in video "{video.title}": Missing name or category')
                                 continue
                                 
                             tag = db_session.query(Tag).join(TagCategory).filter(
@@ -952,21 +963,46 @@ class VideoModelView(RestrictedModelView):
                             if tag:
                                 video.tags.append(tag)
                             else:
-                                flash(f'Tag not found: {tag_data["name"]} ({tag_data["category"]})', 'warning')
+                                warnings.append(f'Tag not found: "{tag_data.get("name", "Unknown")}" ({tag_data.get("category", "Unknown")}) for video "{video.title}"')
 
-                    if not video.id:
+                    if is_new:
                         db_session.add(video)
-                        flash(f'Created video: {video.title}', 'success')
+                        created_count += 1
                     else:
-                        flash(f'Updated video: {video.title}', 'success')
+                        updated_count += 1
 
                 except Exception as e:
-                    db_session.rollback()
-                    flash(f'Error processing video "{video_data.get("title", "Unknown")}": {str(e)}', 'error')
+                    error_count += 1
+                    if error_count <= 3:
+                        major_errors.append(f'Error with "{video_data.get("title", "Unknown")}": {str(e)}')
                     continue
 
             db_session.commit()
+
+            # Create summary message
+            summary = []
+            if created_count:
+                summary.append(f'Created {created_count} videos')
+            if updated_count:
+                summary.append(f'Updated {updated_count} videos')
+            if warnings:
+                summary.append(f'{len(warnings)} warnings')
+            if error_count:
+                summary.append(f'{error_count} errors')
             
+            if summary:
+                flash(f'Import complete: {", ".join(summary)}', 'success')
+            
+            # Show major errors if any
+            if major_errors:
+                flash(f'Errors:\n' + '\n'.join(major_errors[:3]) + 
+                      ('\n...and more' if error_count > 3 else ''), 'error')
+            
+            # Show warnings if any (limit to first 10 for readability)
+            if warnings:
+                flash('Warnings:\n' + '\n'.join(warnings[:10]) + 
+                      ('\n...and more' if len(warnings) > 10 else ''), 'warning')
+
         except json.JSONDecodeError as e:
             flash(f'Invalid JSON format: {str(e)}', 'error')
         except Exception as e:
