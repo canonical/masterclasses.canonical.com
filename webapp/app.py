@@ -6,6 +6,10 @@ from canonicalwebteam.flask_base.app import FlaskBase
 from slugify import slugify as py_slugify
 from datetime import datetime, timezone
 from markdown import markdown
+from flask_apscheduler import APScheduler
+from scripts.update_presenters import update_presenters
+from apscheduler.schedulers.background import BackgroundScheduler
+from zoneinfo import ZoneInfo
 
 from webapp.masterclasses import masterclasses
 from webapp.sso import init_sso
@@ -30,6 +34,30 @@ app = FlaskBase(
     template_404="404.html",
     template_500="500.html",
 )
+
+# Initialize scheduler with explicit timezone
+background_scheduler = BackgroundScheduler(
+    timezone=ZoneInfo('Europe/London')
+)
+scheduler = APScheduler(scheduler=background_scheduler)
+app.config['SCHEDULER_API_ENABLED'] = True
+scheduler.init_app(app)
+
+# Add scheduled job to run immediately and then every 60 minutes
+@scheduler.task(
+    'interval', 
+    id='update_presenters', 
+    days=1,
+    next_run_time=datetime.now(ZoneInfo('Europe/London'))  # Run immediately on startup
+)
+def scheduled_update_presenters():
+    try:
+        update_presenters()
+    except Exception as e:
+        app.logger.error(f"Failed to update presenters: {e}")
+
+# Start the scheduler
+scheduler.start()
 
 def slugify(text):
     return py_slugify(text)
