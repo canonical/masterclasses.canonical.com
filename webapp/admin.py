@@ -472,8 +472,9 @@ class DateEqualsFilter(BaseSQLAFilter):
         return 'equals'
 
 class VideoModelView(RestrictedModelView):
-    # Display these columns in the list view using actual database column names
-    column_list = ['title', 'presenters', 'topic_tags', 'event_tags', 'date_tags', 'unixstart', 'unixend', 'recording']
+    column_list = ['title', 'description', 'unixstart', 'unixend', 'stream', 'slides', 
+                   'recording', 'chat_log', 'thumbnails', 'calendar_event', 'presenters', 
+                   'topic_tags', 'event_tags', 'date_tags', 'location_tags']
     
     # Format the relationships display in list view
     column_formatters = {
@@ -488,6 +489,8 @@ class VideoModelView(RestrictedModelView):
             ', '.join([tag.name for tag in model.tags if tag.category.name == 'Event']) if model.tags else '',
         'date_tags': lambda view, context, model, name:
             ', '.join([tag.name for tag in model.tags if tag.category.name == 'Date']) if model.tags else '',
+        'location_tags': lambda view, context, model, name:
+            ', '.join([tag.name for tag in model.tags if tag.category.name == 'Location']) if model.tags else '',
         'unixstart': lambda v, c, m, p: datetime.fromtimestamp(m.unixstart).strftime('%Y-%m-%d %H:%M') if m.unixstart else '',
         'unixend': lambda v, c, m, p: datetime.fromtimestamp(m.unixend).strftime('%Y-%m-%d %H:%M') if m.unixend else ''
     }
@@ -543,6 +546,9 @@ class VideoModelView(RestrictedModelView):
             ),
             TagCategoryMultiFilter(
                 Video.tags, 'Date Tags', 'Date'
+            ),
+            TagCategoryMultiFilter(
+                Video.tags, 'Location Tags', 'Location'
             ),
             DateAfterFilter(
                 Video.unixstart, 'Start Date After'
@@ -732,32 +738,17 @@ class VideoModelView(RestrictedModelView):
         # Replace the tags field with three separate dynamic fields
         delattr(form_class, 'tags')
         
-        form_class.topic_tags = SelectMultipleField(
-            'Topics',
-            coerce=int,
-            widget=Select2Widget(multiple=True),
-            choices=lambda: [(t.id, t.name) for t in db_session.query(Tag).join(TagCategory)
-                .filter(TagCategory.name == 'Topic')
-                .order_by(Tag.name).all()]
-        )
+        # Get tag choices for each category
+        topic_tags = [(str(t.id), t.name) for t in db_session.query(Tag).join(TagCategory).filter(TagCategory.name == 'Topic').order_by(Tag.name)]
+        event_tags = [(str(t.id), t.name) for t in db_session.query(Tag).join(TagCategory).filter(TagCategory.name == 'Event').order_by(Tag.name)]
+        date_tags = [(str(t.id), t.name) for t in db_session.query(Tag).join(TagCategory).filter(TagCategory.name == 'Date').order_by(Tag.name)]
+        location_tags = [(str(t.id), t.name) for t in db_session.query(Tag).join(TagCategory).filter(TagCategory.name == 'Location').order_by(Tag.name)]
         
-        form_class.event_tags = SelectMultipleField(
-            'Event Type',
-            coerce=int,
-            widget=Select2Widget(),
-            choices=lambda: [(t.id, t.name) for t in db_session.query(Tag).join(TagCategory)
-                .filter(TagCategory.name == 'Event')
-                .order_by(Tag.name).all()]
-        )
-        
-        form_class.date_tags = SelectMultipleField(
-            'Date',
-            coerce=int,
-            widget=Select2Widget(),
-            choices=lambda: [(t.id, t.name) for t in db_session.query(Tag).join(TagCategory)
-                .filter(TagCategory.name == 'Date')
-                .order_by(Tag.name).all()]
-        )
+        # Add fields to form
+        form_class.topic_tags = SelectMultipleField('Topics', choices=topic_tags, widget=Select2Widget())
+        form_class.event_tags = SelectMultipleField('Events', choices=event_tags, widget=Select2Widget())
+        form_class.date_tags = SelectMultipleField('Dates', choices=date_tags, widget=Select2Widget())
+        form_class.location_tags = SelectMultipleField('Locations', choices=location_tags, widget=Select2Widget())
         
         # Replace description field with custom markdown textarea
         form_class.description = TextAreaField(
@@ -790,6 +781,7 @@ class VideoModelView(RestrictedModelView):
                     form.topic_tags.data = [t.id for t in obj.tags if t.category.name == 'Topic']
                     form.event_tags.data = [t.id for t in obj.tags if t.category.name == 'Event']
                     form.date_tags.data = [t.id for t in obj.tags if t.category.name == 'Date']
+                    form.location_tags.data = [t.id for t in obj.tags if t.category.name == 'Location']
         else:
             log.info("Form submission - using submitted data")
             log.info(f"Submitted form data: {flask.request.form}")
@@ -854,6 +846,8 @@ class VideoModelView(RestrictedModelView):
                 all_tag_ids.extend(form.event_tags.data)
             if form.date_tags.data:
                 all_tag_ids.extend(form.date_tags.data)
+            if form.location_tags.data:
+                all_tag_ids.extend(form.location_tags.data)
             
             if all_tag_ids:
                 tags = db_session.query(Tag).filter(
@@ -1097,6 +1091,38 @@ class VideoModelView(RestrictedModelView):
             log.error(f"Error exporting JSON: {e}")
             flash('Error exporting JSON file', 'error')
             return redirect(url_for('.index_view'))
+
+    @property
+    def location_tags(self):
+        """Get location tags for a video."""
+        return [tag for tag in self.tags if tag.category.name == 'Location']
+
+    def on_model_change(self, form, model, is_created):
+        """Handle form submission and update relationships."""
+        # ... existing tag handling code ...
+        
+        # Update tags
+        model.tags = []
+        
+        # Add topic tags
+        if form.topic_tags.data:
+            topic_tags = db_session.query(Tag).filter(Tag.id.in_(form.topic_tags.data)).all()
+            model.tags.extend(topic_tags)
+            
+        # Add event tags
+        if form.event_tags.data:
+            event_tags = db_session.query(Tag).filter(Tag.id.in_(form.event_tags.data)).all()
+            model.tags.extend(event_tags)
+            
+        # Add date tags
+        if form.date_tags.data:
+            date_tags = db_session.query(Tag).filter(Tag.id.in_(form.date_tags.data)).all()
+            model.tags.extend(date_tags)
+
+        # Add location tags
+        if form.location_tags.data:
+            location_tags = db_session.query(Tag).filter(Tag.id.in_(form.location_tags.data)).all()
+            model.tags.extend(location_tags)
 
 class MarkdownTextArea(TextArea):
     def __call__(self, field, **kwargs):
