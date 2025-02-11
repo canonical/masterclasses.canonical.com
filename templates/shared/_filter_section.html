@@ -1,6 +1,10 @@
 {% macro filter_section(title, items, filter_class) %}
-{# Sort items alphabetically by name #}
-{% set sorted_items = items|sort(attribute='name') %}
+{# Sort items alphabetically by name, except for dates #}
+{% if filter_class != 'date' %}
+  {% set sorted_items = items|sort(attribute='name') %}
+{% else %}
+  {% set sorted_items = items %}
+{% endif %}
 
 <li class="p-accordion__group">
   <div role="heading" aria-level="3" class="p-accordion__heading">

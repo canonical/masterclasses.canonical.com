@@ -38,6 +38,31 @@ def get_live_videos():
         )
     ).all()
 
+def get_tags_by_category(category_name):
+    """Helper function to get tags by category name that have associated videos with recordings."""
+    query = (db_session.query(Tag)
+            .join(TagCategory)
+            .join(Tag.videos)  # Join with videos
+            .filter(TagCategory.name == category_name)
+            .filter(Video.recording.isnot(None))  # Only count videos with recordings
+            .group_by(Tag.id, TagCategory.id)  # Group by to avoid duplicates
+            .having(func.count(Video.id) > 0))  # Only include tags with at least one video
+    
+    if category_name == 'Date':
+        # For date tags, we'll sort them in reverse chronological order
+        tags = query.all()
+        
+        def date_sort_key(tag):
+            # Parse "Q1 2024" format
+            quarter = int(tag.name[1])  # Get the quarter number
+            year = int(tag.name[-4:])   # Get the year
+            return (-year, -quarter)     # Negative for reverse order
+            
+        return sorted(tags, key=date_sort_key)
+    else:
+        # For other categories, sort alphabetically
+        return query.order_by(Tag.name).all()
+
 @masterclasses.route("/")
 def index():
     now = datetime.now(timezone.utc)
@@ -102,63 +127,35 @@ def video(id, title):
 
 @masterclasses.route("/videos")
 def videos():
-    now = datetime.now(timezone.utc)
-    now_unix = int(now.timestamp())
+    # Get all videos with recordings ordered by start time descending (newest first)
+    recorded_videos = (
+        db_session.query(Video)
+        .filter(Video.recording.isnot(None))  # Only get videos with recordings
+        .order_by(Video.unixstart.desc())  # Order by start time descending
+        .all()
+    )
+
+    # Get all tags by category
+    topic_tags = get_tags_by_category('Topic')
+    event_tags = get_tags_by_category('Event')
+    date_tags = get_tags_by_category('Date')
     
-    # Get live videos using helper function
-    live_videos = get_live_videos()
-    
-    # First get videos with recordings
-    recorded_videos = db_session.query(Video).filter(Video.recording.isnot(None)).all()
-    
-    # Get tags and presenters only for videos that have recordings
-    video_ids = [v.id for v in recorded_videos]
-    
-    # Query tags only for videos with recordings
-    topic_tags = (db_session.query(Tag)
-                 .join(TagCategory)
-                 .join(Tag.videos)
-                 .filter(TagCategory.name == "Topic")
-                 .filter(Video.id.in_(video_ids))
-                 .filter(Video.recording.isnot(None))
-                 .distinct()
-                 .all())
-    
-    event_tags = (db_session.query(Tag)
-                 .join(TagCategory)
-                 .join(Tag.videos)
-                 .filter(TagCategory.name == "Event")
-                 .filter(Video.id.in_(video_ids))
-                 .filter(Video.recording.isnot(None))
-                 .distinct()
-                 .all())
-    
-    date_tags = (db_session.query(Tag)
-                .join(TagCategory)
-                .join(Tag.videos)
-                .filter(TagCategory.name == "Date")
-                .filter(Video.id.in_(video_ids))
-                .filter(Video.recording.isnot(None))
-                .distinct()
-                .all())
-    
-    # Get presenters only for videos with recordings
+    # Get only presenters who have videos with recordings
     presenters = (db_session.query(Presenter)
                  .join(Presenter.videos)
-                 .filter(Video.id.in_(video_ids))
                  .filter(Video.recording.isnot(None))
-                 .distinct()
+                 .group_by(Presenter.id)
+                 .having(func.count(Video.id) > 0)
+                 .order_by(Presenter.name)
                  .all())
 
     return flask.render_template(
         "videos.html",
         recorded_videos=recorded_videos,
-        live_videos=live_videos,
         topic_tags=topic_tags,
         event_tags=event_tags,
         date_tags=date_tags,
-        presenters=presenters,
-        now=now_unix
+        presenters=presenters
     )
 
 @masterclasses.route("/videos/<title>-class-<id>")
