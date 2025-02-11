@@ -40,6 +40,73 @@ class TagModelView(RestrictedModelView):
     column_list = ['name', 'category']
     form_columns = ['name', 'category']
 
+    def scaffold_form(self):
+        """Create form with explicit field definitions"""
+        from wtforms import StringField, SelectField
+        from wtforms.validators import DataRequired
+        
+        class TagForm(self.form_base_class):
+            name = StringField('Name', validators=[DataRequired()])
+            category = SelectField('Category', 
+                                 validators=[DataRequired()],
+                                 coerce=int)
+            
+            def __init__(self, *args, **kwargs):
+                super(TagForm, self).__init__(*args, **kwargs)
+                # Dynamically load categories for the select field
+                self.category.choices = [
+                    (c.id, c.name) for c in db_session.query(TagCategory).order_by(TagCategory.name).all()
+                ]
+        
+        return TagForm
+
+    def create_model(self, form):
+        """Override create_model to handle the category relationship properly"""
+        try:
+            model = self.model()
+            
+            # Set the name
+            model.name = form.name.data
+            
+            # Get the category object and set it
+            category = db_session.query(TagCategory).get(form.category.data)
+            if category:
+                model.tag_type_id = category.id  # Assuming the foreign key field is named tag_type_id
+            
+            self.session.add(model)
+            self._on_model_change(form, model, True)
+            self.session.commit()
+            return model
+        except Exception as ex:
+            if not self.handle_view_exception(ex):
+                flash('Failed to create record. %(error)s', 'error')
+                log.exception('Failed to create record.')
+            
+            self.session.rollback()
+            return False
+
+    def update_model(self, form, model):
+        """Override update_model to handle the category relationship properly"""
+        try:
+            # Update the name
+            model.name = form.name.data
+            
+            # Get the category object and update it
+            category = db_session.query(TagCategory).get(form.category.data)
+            if category:
+                model.tag_type_id = category.id
+            
+            self._on_model_change(form, model, False)
+            self.session.commit()
+            return True
+        except Exception as ex:
+            if not self.handle_view_exception(ex):
+                flash('Failed to update record. %(error)s', 'error')
+                log.exception('Failed to update record.')
+            
+            self.session.rollback()
+            return False
+
     @property
     def list_template(self):
         return 'admin/tag_list.html'
@@ -529,15 +596,9 @@ class VideoModelView(RestrictedModelView):
         } for p in presenters])
 
     def create_model(self, form):
-        """Override create_model to handle relationships properly"""
+        """Override create_model to handle datetime conversion properly"""
         try:
             model = self.model()
-            
-            # Handle datetime fields
-            if form.start_time.data:
-                model.unixstart = int(form.start_time.data.timestamp())
-            if form.end_time.data:
-                model.unixend = int(form.end_time.data.timestamp())
             
             # Handle basic fields
             form_fields = form._fields.copy()
@@ -553,6 +614,30 @@ class VideoModelView(RestrictedModelView):
             # Populate remaining fields
             for name, field in form_fields.items():
                 field.populate_obj(model, name)
+            
+            # Handle datetime fields
+            if form.start_time.data:
+                try:
+                    # Ensure the timestamp is within valid range
+                    timestamp = int(form.start_time.data.timestamp())
+                    if timestamp < 2147483647:  # Max 32-bit integer
+                        model.unixstart = timestamp
+                    else:
+                        raise ValueError("Start date too far in the future")
+                except (AttributeError, ValueError) as e:
+                    flash(f'Invalid start time: {str(e)}', 'error')
+                    return False
+
+            if form.end_time.data:
+                try:
+                    timestamp = int(form.end_time.data.timestamp())
+                    if timestamp < 2147483647:  # Max 32-bit integer
+                        model.unixend = timestamp
+                    else:
+                        raise ValueError("End date too far in the future")
+                except (AttributeError, ValueError) as e:
+                    flash(f'Invalid end time: {str(e)}', 'error')
+                    return False
             
             # Handle presenters
             if form.presenters.data:
@@ -712,96 +797,78 @@ class VideoModelView(RestrictedModelView):
         return form
 
     def update_model(self, form, model):
-        """Override update_model to handle relationships properly"""
+        """Override update_model to handle datetime conversion properly"""
         try:
-            # Log initial form data
-            log.info(f"Updating video {model.id} with form data:")
-            log.info(f"Start time: {form.start_time.data}")
-            log.info(f"End time: {form.end_time.data}")
-            log.info(f"Presenters: {form.presenters.data}")
-            log.info(f"Topic tags: {form.topic_tags.data}")
-            log.info(f"Event tags: {form.event_tags.data}")
-            log.info(f"Date tags: {form.date_tags.data}")
-            
-            # Get the data before removing fields
-            start_time = form.start_time.data
-            end_time = form.end_time.data
-            presenter_data = form.presenters.data
-            topic_tags_data = form.topic_tags.data
-            event_tags_data = form.event_tags.data
-            date_tags_data = form.date_tags.data
-
-            # Handle basic fields first
+            # Handle basic fields
             form_fields = form._fields.copy()
-            for field_name in ['start_time', 'end_time', 'presenters', 'topic_tags', 'event_tags', 'date_tags']:
-                form_fields.pop(field_name, None)
-
-            # Populate remaining basic fields
+            
+            # Remove fields we'll handle manually
+            form_fields.pop('start_time', None)
+            form_fields.pop('end_time', None)
+            form_fields.pop('presenters', None)
+            form_fields.pop('topic_tags', None)
+            form_fields.pop('event_tags', None)
+            form_fields.pop('date_tags', None)
+            
+            # Populate remaining fields
             for name, field in form_fields.items():
                 field.populate_obj(model, name)
-
-            # Handle datetime fields
-            if start_time:
-                try:
-                    model.unixstart = int(start_time.timestamp())
-                except AttributeError as e:
-                    log.error(f"Failed to set start time: {e}")
-                
-            if end_time:
-                try:
-                    model.unixend = int(end_time.timestamp())
-                except AttributeError as e:
-                    log.error(f"Failed to set end time: {e}")
-
-            # Clear existing relationships
-            if hasattr(model, 'presenters'):
-                model.presenters.clear()
-            if hasattr(model, 'tags'):
-                model.tags.clear()
             
-            # Explicitly commit the relationship clearing
-            self.session.flush()
+            # Handle datetime fields
+            if form.start_time.data:
+                try:
+                    timestamp = int(form.start_time.data.timestamp())
+                    if timestamp < 2147483647:
+                        model.unixstart = timestamp
+                    else:
+                        raise ValueError("Start date too far in the future")
+                except (AttributeError, ValueError) as e:
+                    flash(f'Invalid start time: {str(e)}', 'error')
+                    return False
 
+            if form.end_time.data:
+                try:
+                    timestamp = int(form.end_time.data.timestamp())
+                    if timestamp < 2147483647:
+                        model.unixend = timestamp
+                    else:
+                        raise ValueError("End date too far in the future")
+                except (AttributeError, ValueError) as e:
+                    flash(f'Invalid end time: {str(e)}', 'error')
+                    return False
+            
             # Handle presenters
-            if presenter_data:
+            if form.presenters.data:
                 presenters = db_session.query(Presenter).filter(
-                    Presenter.id.in_(presenter_data)
+                    Presenter.id.in_(form.presenters.data)
                 ).all()
                 model.presenters = presenters
-
+            else:
+                model.presenters = []
+            
             # Handle tags
             all_tag_ids = []
-            if topic_tags_data:
-                all_tag_ids.extend(topic_tags_data)
-            if event_tags_data:
-                all_tag_ids.extend(event_tags_data)
-            if date_tags_data:
-                all_tag_ids.extend(date_tags_data)
-
+            if form.topic_tags.data:
+                all_tag_ids.extend(form.topic_tags.data)
+            if form.event_tags.data:
+                all_tag_ids.extend(form.event_tags.data)
+            if form.date_tags.data:
+                all_tag_ids.extend(form.date_tags.data)
+            
             if all_tag_ids:
-                # Create a new query to ensure we get fresh data
                 tags = db_session.query(Tag).filter(
                     Tag.id.in_(all_tag_ids)
                 ).all()
-                
-                # Clear any existing tags and set new ones
-                model.tags = []
-                self.session.flush()
                 model.tags = tags
-
-            # Call model change hook and commit
+            else:
+                model.tags = []
+            
             self._on_model_change(form, model, False)
             self.session.commit()
-            
-            # Verify the changes
-            self.session.refresh(model)
-            log.info(f"Final tags after update: {[t.name for t in model.tags]}")
-            
             return True
-
         except Exception as ex:
             if not self.handle_view_exception(ex):
-                flash(f'Failed to update record. Error: {str(ex)}', 'error')
+                flash('Failed to update record. %(error)s', 'error')
                 log.exception('Failed to update record.')
             
             self.session.rollback()
@@ -955,6 +1022,19 @@ class MarkdownTextArea(TextArea):
 class PresenterModelView(RestrictedModelView):
     column_list = ['name', 'email', 'hrc_id', 'headshot']
     form_columns = ['name', 'email', 'hrc_id', 'headshot']
+
+    def scaffold_form(self):
+        """Create form with explicit field definitions"""
+        from wtforms import StringField
+        from wtforms.validators import DataRequired, Email, Optional
+        
+        class PresenterForm(self.form_base_class):
+            name = StringField('Name', validators=[DataRequired()])
+            email = StringField('Email', validators=[Optional(), Email()])
+            hrc_id = StringField('HRC ID', validators=[Optional()])
+            headshot = StringField('Headshot URL', validators=[Optional()])
+        
+        return PresenterForm
 
     @property
     def list_template(self):
