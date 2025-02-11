@@ -17,7 +17,7 @@ from models.submission import VideoSubmission
 import flask
 from wtforms import validators
 import logging as log
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, or_, func
 from flask_admin.contrib.sqla.filters import BaseSQLAFilter, FilterEqual
 import os
 import csv
@@ -881,50 +881,42 @@ class VideoModelView(RestrictedModelView):
 
     @expose('/import-json', methods=['POST'])
     def import_json(self):
-        if 'json_file' not in request.files:
-            flash('No file uploaded', 'error')
-            return redirect(url_for('.index_view'))
-            
-        file = request.files['json_file']
-        if file.filename == '':
-            flash('No file selected', 'error')
-            return redirect(url_for('.index_view'))
-            
-        if not file.filename.endswith('.json'):
-            flash('File must be a JSON', 'error')
-            return redirect(url_for('.index_view'))
-            
         try:
-            # Read JSON file
-            json_data = json.loads(file.read().decode('UTF8'))
-            
-            # Process each video
-            for video_data in json_data:
-                # Convert timestamps
-                try:
-                    unixstart = int(datetime.strptime(video_data['start_time'], '%Y-%m-%d %H:%M').timestamp())
-                    unixend = int(datetime.strptime(video_data['end_time'], '%Y-%m-%d %H:%M').timestamp())
-                except (ValueError, KeyError):
-                    continue
+            file = request.files.get('json_file')
+            if not file:
+                flash('No file uploaded', 'error')
+                return redirect(url_for('.index_view'))
 
-                # Create or update video
-                video = db_session.query(Video).filter_by(title=video_data['title']).first()
-                if not video:
-                    video = Video(
-                        title=video_data['title'],
-                        description=video_data.get('description', ''),
-                        unixstart=unixstart,
-                        unixend=unixend,
-                        stream=video_data.get('stream'),
-                        slides=video_data.get('slides'),
-                        recording=video_data.get('recording'),
-                        chat_log=video_data.get('chat_log'),
-                        thumbnails=video_data.get('thumbnails'),
-                        calendar_event=video_data.get('calendar_event')
-                    )
-                    db_session.add(video)
-                else:
-                    video.description = video_data.get('description', '')
+            json_data = json.loads(file.read())
+            if not isinstance(json_data, list):
+                flash('Invalid JSON format. Expected a list of videos.', 'error')
+                return redirect(url_for('.index_view'))
+
+            for video_data in json_data:
+                try:
+                    # Validate required fields
+                    required_fields = ['title', 'description', 'start_time', 'end_time']
+                    missing_fields = [field for field in required_fields if field not in video_data]
+                    if missing_fields:
+                        flash(f'Video "{video_data.get("title", "Unknown")}" is missing required fields: {", ".join(missing_fields)}', 'error')
+                        continue
+
+                    # Convert timestamps
+                    try:
+                        unixstart = int(datetime.strptime(video_data['start_time'], '%Y-%m-%d %H:%M').timestamp())
+                        unixend = int(datetime.strptime(video_data['end_time'], '%Y-%m-%d %H:%M').timestamp())
+                    except ValueError as e:
+                        flash(f'Invalid date format for video "{video_data.get("title")}": {str(e)}', 'error')
+                        continue
+
+                    # Check if video exists by title
+                    video = db_session.query(Video).filter_by(title=video_data['title']).first()
+                    if not video:
+                        video = Video()
+
+                    # Update basic fields
+                    video.title = video_data['title']
+                    video.description = video_data['description']
                     video.unixstart = unixstart
                     video.unixend = unixend
                     video.stream = video_data.get('stream')
@@ -934,34 +926,100 @@ class VideoModelView(RestrictedModelView):
                     video.thumbnails = video_data.get('thumbnails')
                     video.calendar_event = video_data.get('calendar_event')
 
-                # Handle presenters
-                presenter_names = video_data.get('presenters', [])
-                video.presenters = []
-                for name in presenter_names:
-                    presenter = db_session.query(Presenter).filter_by(name=name).first()
-                    if presenter:
-                        video.presenters.append(presenter)
+                    # Handle presenters (by name)
+                    if 'presenters' in video_data:
+                        video.presenters = []
+                        for presenter_name in video_data['presenters']:
+                            presenter = db_session.query(Presenter).filter_by(name=presenter_name).first()
+                            if presenter:
+                                video.presenters.append(presenter)
+                            else:
+                                flash(f'Presenter not found: {presenter_name}', 'warning')
 
-                # Handle tags
-                tag_data = video_data.get('tags', [])
-                video.tags = []
-                for tag_info in tag_data:
-                    tag = db_session.query(Tag).join(TagCategory).filter(
-                        Tag.name == tag_info['name'],
-                        TagCategory.name == tag_info['category']
-                    ).first()
-                    if tag:
-                        video.tags.append(tag)
-            
+                    # Handle tags
+                    if 'tags' in video_data:
+                        video.tags = []
+                        for tag_data in video_data['tags']:
+                            if 'name' not in tag_data or 'category' not in tag_data:
+                                flash(f'Invalid tag data in video "{video.title}": Missing name or category', 'warning')
+                                continue
+                                
+                            tag = db_session.query(Tag).join(TagCategory).filter(
+                                Tag.name == tag_data['name'],
+                                TagCategory.name == tag_data['category']
+                            ).first()
+                            
+                            if tag:
+                                video.tags.append(tag)
+                            else:
+                                flash(f'Tag not found: {tag_data["name"]} ({tag_data["category"]})', 'warning')
+
+                    if not video.id:
+                        db_session.add(video)
+                        flash(f'Created video: {video.title}', 'success')
+                    else:
+                        flash(f'Updated video: {video.title}', 'success')
+
+                except Exception as e:
+                    db_session.rollback()
+                    flash(f'Error processing video "{video_data.get("title", "Unknown")}": {str(e)}', 'error')
+                    continue
+
             db_session.commit()
-            flash('Videos imported successfully', 'success')
             
+        except json.JSONDecodeError as e:
+            flash(f'Invalid JSON format: {str(e)}', 'error')
         except Exception as e:
             db_session.rollback()
-            log.error(f"Error importing JSON: {e}")
-            flash('Error importing JSON file', 'error')
+            flash(f'Error importing JSON: {str(e)}', 'error')
+            log.exception('Error importing JSON')
             
         return redirect(url_for('.index_view'))
+
+    def _handle_presenters(self, video, presenters_data):
+        """Handle presenter relationships for a video"""
+        if not isinstance(presenters_data, list):
+            raise ValueError("Presenters data must be a list")
+
+        # Clear existing presenters
+        video.presenters = []
+        
+        for presenter_data in presenters_data:
+            if not isinstance(presenter_data, dict):
+                raise ValueError(f"Invalid presenter data format: {presenter_data}")
+            
+            if 'email' not in presenter_data:
+                raise ValueError(f"Presenter data missing email: {presenter_data}")
+                
+            presenter = db_session.query(Presenter).filter(
+                Presenter.email == presenter_data['email']
+            ).first()
+            
+            if not presenter:
+                raise ValueError(f"Presenter not found with email: {presenter_data['email']}")
+                
+            video.presenters.append(presenter)
+
+    def _handle_tags(self, video, tags_data):
+        """Handle tag relationships for a video"""
+        if not isinstance(tags_data, list):
+            raise ValueError("Tags data must be a list")
+
+        # Clear existing tags
+        video.tags = []
+        
+        for tag_data in tags_data:
+            if not isinstance(tag_data, dict):
+                raise ValueError(f"Invalid tag data format: {tag_data}")
+            
+            if 'name' not in tag_data:
+                raise ValueError(f"Tag data missing name: {tag_data}")
+                
+            tag = db_session.query(Tag).filter_by(name=tag_data['name']).first()
+            if not tag:
+                raise ValueError(f"Tag not found with name: {tag_data['name']}")
+                
+            video.tags.append(tag)
 
     @expose('/export-json', methods=['GET'])
     def export_json(self):
@@ -1022,6 +1080,42 @@ class MarkdownTextArea(TextArea):
 class PresenterModelView(RestrictedModelView):
     column_list = ['name', 'email', 'hrc_id', 'headshot']
     form_columns = ['name', 'email', 'hrc_id', 'headshot']
+
+    def get_filters(self):
+        filters = []
+        
+        filters.extend([
+            ContainsFilter(
+                Presenter.name, 'Name'
+            ),
+            ContainsFilter(
+                Presenter.email, 'Email'
+            ),
+            ContainsFilter(
+                Presenter.hrc_id, 'HRC ID'
+            ),
+            VideoCountFilter(
+                Presenter.videos, 'Video Count'
+            )
+        ])
+        
+        return filters
+
+    def get_query(self):
+        return (
+            super(PresenterModelView, self)
+            .get_query()
+            .outerjoin(Presenter.videos)
+            .distinct()
+        )
+
+    def get_count_query(self):
+        return (
+            super(PresenterModelView, self)
+            .get_count_query()
+            .outerjoin(Presenter.videos)
+            .distinct()
+        )
 
     def scaffold_form(self):
         """Create form with explicit field definitions"""
@@ -1119,3 +1213,43 @@ class PresenterModelView(RestrictedModelView):
             log.error(f"Error exporting JSON: {e}")
             flash('Error exporting JSON file', 'error')
             return redirect(url_for('.index_view'))
+
+class VideoCountFilter(BaseSQLAFilter):
+    def apply(self, query, value):
+        if value:
+            try:
+                count = int(value)
+                video_counts = (
+                    db_session.query(
+                        Presenter.id,
+                        func.count(Video.id).label('video_count')
+                    )
+                    .outerjoin(Presenter.videos)
+                    .group_by(Presenter.id)
+                    .subquery()
+                )
+                
+                return query.join(
+                    video_counts,
+                    Presenter.id == video_counts.c.id
+                ).filter(video_counts.c.video_count == count)
+            except ValueError:
+                pass
+        return query
+
+    def operation(self):
+        return 'equals'
+
+    def get_options(self, view):
+        # Get unique video counts
+        counts = (
+            db_session.query(
+                func.count(Video.id).label('count')
+            )
+            .join(Video.presenters)
+            .group_by(Presenter.id)
+            .distinct()
+            .order_by('count')
+            .all()
+        )
+        return [(str(c[0]), str(c[0])) for c in counts]
