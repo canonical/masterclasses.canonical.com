@@ -62,6 +62,12 @@
       search: ''
     };
 
+    function normalizeText(text) {
+      return text.normalize('NFKD')  // Decompose characters into base form and diacritics
+        .replace(/[\u0300-\u036f]/g, '')  // Remove diacritics
+        .toLowerCase();
+    }
+
     // Function to update URL parameters
     function updateURLParameters() {
       const params = new URLSearchParams();
@@ -115,14 +121,14 @@
         const cardDates = card.dataset.dates.split(' ').filter(Boolean);
         const cardPresenters = card.dataset.presenters.split(' ').filter(Boolean);
         
-        // Get searchable content from the card
-        const title = card.querySelector('.video-title').textContent.toLowerCase();
-        const tags = [...cardTopics, ...cardEvents, ...cardDates].join(' ').toLowerCase();
-        const presenters = cardPresenters.join(' ').toLowerCase();
+        // Get searchable content from the card and normalize it
+        const title = normalizeText(card.querySelector('.video-title').textContent);
+        const tags = normalizeText([...cardTopics, ...cardEvents, ...cardDates].join(' '));
+        const presenters = normalizeText(cardPresenters.join(' '));
         const searchContent = `${title} ${tags} ${presenters}`;
 
-        // Split search terms and check if all terms are included
-        const searchTerms = filters.search.toLowerCase().split(' ').filter(Boolean);
+        // Split search terms and normalize them
+        const searchTerms = normalizeText(filters.search).split(' ').filter(Boolean);
         const searchMatch = !filters.search || 
           searchTerms.every(term => searchContent.includes(term));
 
