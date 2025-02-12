@@ -1,0 +1,52 @@
+{% macro upcoming_session(video, session_type='future', now=none) %}
+<li class="p-list__item">
+  {% if session_type == 'live' %}
+    <div class="u-no-margin--bottom">
+      <a href="{{ video.stream }}" class="" style="display: flex; align-items: center;">
+        <div style="display: flex; align-items: center;" class="live-dot-container">    
+          <span style="margin-right: 0.3rem;" class="live-dot"></span>
+          <span style="color: #c7162b;"></span>
+          <span>{{ video.title }}</span>
+        </div>
+      </a>
+    </div>
+  {% else %}
+    <div class="u-no-margin--bottom">
+      <a href="{{ video.calendar_event }}" class="">{{ video.title }}</a>
+    </div>
+  {% endif %}
+
+  <p class="p-text u-text-muted description-truncate">{{ video.description|markdown|safe }}</p>
+
+  <p class="p-text--small u-text-muted">
+    <i class="p-icon--user"></i>
+    {% set presenters = video.presenters %}
+    {% if presenters|length <= 2 %}
+      {% for presenter in presenters %}
+        {{ presenter.name }}{% if not loop.last %}, {% endif %}
+      {% endfor %}
+    {% else %}
+      {{ presenters[0].name }}, {{ presenters[1].name }} et al.
+    {% endif %}
+  </p>
+
+  {% if session_type == 'soon' %}
+    <p class="p-text--small u-text-muted">
+      <i class="p-icon--notifications"></i>
+      {% set time_diff = video.unixstart - now %}
+      {% set hours = (time_diff / 3600)|int %}
+      {% set minutes = ((time_diff % 3600) / 60)|int %}
+      {% if hours > 0 %}
+        {{ hours }}h {{ minutes }}m
+      {% else %}
+        {{ minutes }}m
+      {% endif %}
+    </p>
+  {% elif session_type == 'future' %}
+    <p class="p-text--small u-text-muted">
+      <i class="p-icon--revisions"></i>
+      {{ video.unixstart|format_date }}
+    </p>
+  {% endif %}
+</li>
+{% endmacro %} 

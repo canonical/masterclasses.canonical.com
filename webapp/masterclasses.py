@@ -1,18 +1,21 @@
 import os
 import flask
-from sqlalchemy import create_engine, func, nullslast
+from sqlalchemy import create_engine, func, nullslast, and_
 from sqlalchemy.orm import scoped_session, sessionmaker
-from datetime import datetime
+from datetime import datetime, timezone
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import logging
 
-from models.PreviousSession import PreviousSession
-from models.UpcomingSession import UpcomingSession
-from models.SprintSession import SprintSession
-
-db_engine = create_engine(os.getenv("DATABASE_URL"))
-db_session = scoped_session(
-    sessionmaker(autocommit=False, autoflush=False, bind=db_engine)
-)
-
+from models.video import Video
+from models.presenter import Presenter
+from models.tag import Tag, TagCategory
+from webapp.database import db_session
+from webapp.forms import MasterclassRegistrationForm
+from models.submission import VideoSubmission
+from webapp.auth import require_api_token
+from flask import jsonify
 
 masterclasses = flask.Blueprint(
     "masterclasses",
@@ -21,109 +24,282 @@ masterclasses = flask.Blueprint(
     static_folder="/static",
 )
 
+logger = logging.getLogger(__name__)
+
+def get_live_videos():
+    """Helper function to get currently live videos."""
+    now = datetime.now(timezone.utc)
+    now_unix = int(now.timestamp())
+    
+    return db_session.query(Video).filter(
+        and_(
+            Video.unixstart <= now_unix,
+            Video.unixend >= now_unix
+        )
+    ).all()
+
+def get_tags_by_category(category_name):
+    """Helper function to get tags by category name that have associated videos with recordings."""
+    query = (db_session.query(Tag)
+            .join(TagCategory)
+            .join(Tag.videos)  # Join with videos
+            .filter(TagCategory.name == category_name)
+            .filter(Video.recording.isnot(None))  # Only count videos with recordings
+            .group_by(Tag.id, TagCategory.id)  # Group by to avoid duplicates
+            .having(func.count(Video.id) > 0))  # Only include tags with at least one video
+    
+    if category_name == 'Date':
+        # For date tags, we'll sort them in reverse chronological order
+        tags = query.all()
+        
+        def date_sort_key(tag):
+            # Parse "Q1 2024" format
+            quarter = int(tag.name[1])  # Get the quarter number
+            year = int(tag.name[-4:])   # Get the year
+            return (-year, -quarter)     # Negative for reverse order
+            
+        return sorted(tags, key=date_sort_key)
+    else:
+        # For other categories, sort alphabetically
+        return query.order_by(Tag.name).all()
 
 @masterclasses.route("/")
 def index():
-    previous_sessions = get_previous_sessions()
-    upcoming_sessions = get_upcoming_sessions()
-    sprint_sessions = get_sprint_sessions()
-    tags = get_tags()
+    now = datetime.now(timezone.utc)
+    now_unix = int(now.timestamp())
+    
+    # Live videos (started but not ended)
+    live_videos = db_session.query(Video).filter(
+        and_(
+            Video.unixstart <= now_unix,
+            Video.unixend >= now_unix
+        )
+    ).all()
+
+    # Videos in next 24 hours
+    upcoming_videos_24h = db_session.query(Video).filter(
+        and_(
+            Video.unixstart > now_unix,
+            Video.unixstart <= now_unix + 86400  # 24 hours in seconds
+        )
+    ).order_by(Video.unixstart).all()
+
+    # Future videos (beyond 24 hours)
+    upcoming_videos_future = db_session.query(Video).filter(
+        Video.unixstart > now_unix + 86400
+    ).order_by(Video.unixstart).all()
+
+    # Query tag categories and their associated tags
+    topic_tags = db_session.query(Tag).join(TagCategory).filter(TagCategory.name == "Topic").all()
+    event_tags = db_session.query(Tag).join(TagCategory).filter(TagCategory.name == "Event").all()
+    date_tags = db_session.query(Tag).join(TagCategory).filter(TagCategory.name == "Date").all()
+    presenters = db_session.query(Presenter).all()
 
     return flask.render_template(
         "masterclasses.html",
-        previous_sessions=previous_sessions,
-        upcoming_sessions=upcoming_sessions,
-        sprint_sessions=sprint_sessions,
-        tags=tags,
+        live_videos=live_videos,
+        upcoming_videos_24h=upcoming_videos_24h,
+        upcoming_videos_future=upcoming_videos_future,
+        topic_tags=topic_tags,
+        event_tags=event_tags,
+        date_tags=date_tags,
+        presenters=presenters,
+        now=now_unix
     )
 
 @masterclasses.route("/<title>-class-<id>")
-def previous_video(id,title):
-    session = get_session_by_id(id, "previous")
-    return flask.render_template("video.html", session=session)
+def video(id, title):
+    video = get_video_by_id(id)
+    if not video:
+        flask.abort(404)
+        
+    # Verify the title slug matches
+    if flask.current_app.jinja_env.filters['slugify'](video.title) != title:
+        return flask.redirect(
+            flask.url_for(
+                'masterclasses.video',
+                title=flask.current_app.jinja_env.filters['slugify'](video.title),
+                id=id
+            )
+        )
+    
+    return flask.render_template("video.html", video=video)
 
-@masterclasses.route("/<title>-sprint-<id>")
-def sprint_video(id,title):
-    session = get_session_by_id(id, "sprint")
-    return flask.render_template("video.html", session=session)
+@masterclasses.route("/videos")
+def videos():
+    # Get all videos with recordings ordered by start time descending (newest first)
+    recorded_videos = (
+        db_session.query(Video)
+        .filter(Video.recording.isnot(None))  # Only get videos with recordings
+        .order_by(Video.unixstart.desc())  # Order by start time descending
+        .all()
+    )
 
+    # Get all tags by category
+    topic_tags = get_tags_by_category('Topic')
+    event_tags = get_tags_by_category('Event')
+    date_tags = get_tags_by_category('Date')
+    
+    # Get only presenters who have videos with recordings
+    presenters = (db_session.query(Presenter)
+                 .join(Presenter.videos)
+                 .filter(Video.recording.isnot(None))
+                 .group_by(Presenter.id)
+                 .having(func.count(Video.id) > 0)
+                 .order_by(Presenter.name)
+                 .all())
 
-def get_video_id(url):
-    if "drive.google.com/file/d/" in url:
-        return url.split("/")[-2]
-    elif "drive.google.com/open?id=" in url:
-        return url.split("=")[-1]
+    return flask.render_template(
+        "videos.html",
+        recorded_videos=recorded_videos,
+        topic_tags=topic_tags,
+        event_tags=event_tags,
+        date_tags=date_tags,
+        presenters=presenters
+    )
+
+@masterclasses.route("/videos/<title>-class-<id>")
+def video_player(title, id):
+    video = db_session.query(Video)\
+        .filter(Video.id == id)\
+        .first()
+    
+    if not video:
+        flask.abort(404)
+        
+    # Verify the title slug matches
+    if flask.current_app.jinja_env.filters['slugify'](video.title) != title:
+        return flask.redirect(
+            flask.url_for(
+                'masterclasses.video_player',
+                title=flask.current_app.jinja_env.filters['slugify'](video.title),
+                id=id
+            )
+        )
+    
+    # Get topic tags for the current video
+    topic_tags = [tag.id for tag in video.tags if tag.category.name == "Topic"]
+    
+    # Base query for suggested videos
+    suggested_query = db_session.query(Video)\
+        .filter(Video.id != video.id)\
+        .filter(Video.recording.isnot(None))
+
+    if topic_tags:
+        # If we have topic tags, try to find videos with matching tags
+        suggested_videos = suggested_query\
+            .join(Tag, Video.tags)\
+            .join(TagCategory)\
+            .filter(TagCategory.name == "Topic")\
+            .filter(Tag.id.in_(topic_tags))\
+            .group_by(Video.id)\
+            .order_by(func.count(Tag.id).desc())\
+            .limit(3)\
+            .all()
     else:
+        # If no topic tags, just get recent videos
+        suggested_videos = suggested_query\
+            .order_by(Video.unixstart.desc())\
+            .limit(3)\
+            .all()
+
+    # If still no suggestions, get random videos
+    if not suggested_videos:
+        suggested_videos = suggested_query\
+            .order_by(func.random())\
+            .limit(3)\
+            .all()
+    
+    # Get live videos using helper function
+    live_videos = get_live_videos()
+    
+    return flask.render_template(
+        "video_player.html",
+        video=video,
+        suggested_videos=suggested_videos,
+        live_videos=live_videos
+    )
+
+@masterclasses.app_template_filter()
+def timestamp_to_date(value, format='%d %b %Y'):
+    """Convert unix timestamp to formatted date string."""
+    if not value:
+        return ''
+    try:
+        return datetime.fromtimestamp(int(value)).strftime(format)
+    except (ValueError, TypeError):
+        return ''
+
+@masterclasses.app_template_filter('google_drive_id')
+def google_drive_id(url):
+    """Extract Google Drive ID from URL."""
+    if not url:
+        return ''
+    try:
+        # Handle URLs in format: https://drive.google.com/file/d/FILEID/view?usp=sharing
+        return url.split('/d/')[1].split('/')[0]
+    except (IndexError, AttributeError):
         return url
 
-def format_date(date):
-    # change the date format, like 23 May 2024
-    if isinstance(date, str):
-        # If date is already a string, try to parse it
+@masterclasses.route("/random")
+def random_video():
+    video = db_session.query(Video)\
+        .filter(Video.recording.isnot(None))\
+        .order_by(func.random())\
+        .first()
+    
+    if not video:
+        return flask.redirect(flask.url_for('masterclasses.videos'))
+        
+    return flask.redirect(
+        flask.url_for(
+            'masterclasses.video_player',
+            title=flask.current_app.jinja_env.filters['slugify'](video.title),
+            id=video.id
+        )
+    )
+
+@masterclasses.route("/register", methods=["GET", "POST"])
+def register():
+    if "openid" not in flask.session:
+        return flask.redirect("/login?next=/register")
+    
+    # Get live videos using helper function
+    live_videos = get_live_videos()
+    
+    form = MasterclassRegistrationForm()
+    submission_status = None
+    
+    if form.validate_on_submit():
         try:
-            date = datetime.strptime(date, "%Y-%m-%d")
-        except ValueError:
-            # If parsing fails, return the original string
-            return date
-    return date.strftime("%d %b %Y")
-
-def enrich_session(session):
-    session.date = format_date(session.date)
-    session.video_id = get_video_id(session.recording)
-    return session
-
-
-def get_upcoming_sessions():
-    upcoming_sessions = (
-        db_session.query(UpcomingSession)
-        .order_by(nullslast(UpcomingSession.date.desc()))
-        .all()
+            submission = VideoSubmission(
+                title=form.title.data,
+                description=form.description.data,
+                duration=form.duration_other.data if form.duration.data == 'other' else form.duration.data,
+                email=flask.session["openid"]["email"]
+            )
+            
+            db_session.add(submission)
+            db_session.commit()
+            
+            # Clear the form after successful submission
+            form = MasterclassRegistrationForm(None)
+            submission_status = {
+                'success': True,
+                'message': "Your masterclass submission has been received successfully! We'll review it and get back to you soon."
+            }
+            
+        except Exception as e:
+            db_session.rollback()
+            logger.error(f"Failed to save submission: {e}")
+            submission_status = {
+                'success': False,
+                'message': "There was an error submitting your masterclass. Please try again."
+            }
+    
+    return flask.render_template(
+        "register.html",
+        form=form,
+        submission_status=submission_status,
+        live_videos=live_videos
     )
-    for s in upcoming_sessions:
-        s.date = format_date(s.date)
-    return upcoming_sessions
-
-def get_previous_sessions():
-    previous_sessions = (
-        db_session.query(PreviousSession).order_by(PreviousSession.date.desc()).all()
-    )
-    return [enrich_session(s) for s in previous_sessions]
-
-def get_sprint_sessions():
-    sprint_sessions = db_session.query(SprintSession).order_by(SprintSession.date.desc()).all()
-    return [enrich_session(s) for s in sprint_sessions]
-
-
-def get_session_by_id(id, session_type):
-    if session_type == "previous":
-        session = (
-            db_session.query(PreviousSession)
-            .filter(PreviousSession.id == id)
-            .first()
-        )
-    elif session_type == "sprint":
-        session = (
-            db_session.query(SprintSession)
-            .filter(SprintSession.id == id)
-            .first()
-        )
-    return enrich_session(session)
-
-
-def get_tags():
-    tag_counts = (
-        db_session.query(PreviousSession.tags, func.count(PreviousSession.tags))
-        .filter(PreviousSession.tags.isnot(None))
-        .group_by(PreviousSession.tags)
-        .all()
-    )
-    tags = {}
-    for tag, count in tag_counts:
-        for t in tag.split(","):
-            t = t.strip()
-            if t:
-                if t not in tags:
-                    tags[t] = count
-                else:
-                    tags[t] += count
-    return tags

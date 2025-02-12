@@ -1,0 +1,282 @@
+{% extends "base.html" %}
+{% from "shared/_filter_section.html" import filter_section %}
+{% from "shared/_video_card.html" import video_card %}
+{% block content %}
+<div tabindex="0" role="tabpanel" id="masterclasses-tab" aria-labelledby="masterclasses">
+  <section class="p-strip is-shallow u-no-padding--bottom is-bordered" id="masterclasses">
+    <div class="row">
+      <div class="p-divider u-no-margin--bottom">
+        <div class="col-3">
+          <div class="filters">
+            {# Show filters button on small and medium screens, hide on large #}
+            <button class="p-button u-hide--large" aria-controls="filter-accordion">
+              Show filters
+            </button>
+
+            {# Hide accordion by default on small and medium screens #}
+            <aside class="p-accordion u-hide--small u-hide--medium" id="filter-accordion">
+              <ul class="p-accordion__list">
+                {{ filter_section('Topic', topic_tags, 'topic') }}
+                {{ filter_section('Event', event_tags, 'event') }}
+                {{ filter_section('Date', date_tags, 'date') }}
+                {{ filter_section('Presenter', presenters, 'presenter') }}
+              </ul>
+            </aside>
+          </div>
+        </div>
+
+        <div class="col-9 p-divider__block">
+          <div class="row">
+            <form class="p-search-box">
+              <label class="u-off-screen" for="search-input">Search</label>
+              <input type="search" id="search-input" class="p-search-box__input" name="search" placeholder="Search" required="" autocomplete="on">
+              <button id="reset-search" type="reset" class="p-search-box__reset"><i class="p-icon--close">Close</i></button>
+              <button id="submit-search" type="submit" class="p-search-box__button"><i class="p-icon--search">Search</i></button>
+            </form>
+          </div>
+
+          <div class="u-equal-height" style="padding-bottom: 1rem;">              
+            {% for video in recorded_videos %}
+            <div class="col-4">
+              {{ video_card(video) }}
+            </div>
+            {% endfor %}
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script defer>
+  document.addEventListener("DOMContentLoaded", () => {
+    const videoCards = document.querySelectorAll('.p-card');
+    const searchInput = document.getElementById('search-input');
+    const resetSearch = document.getElementById('reset-search');
+    const filters = {
+      topic: new Set(),
+      event: new Set(),
+      date: new Set(),
+      presenter: new Set(),
+      search: ''
+    };
+
+    function normalizeText(text) {
+      return text.normalize('NFKD')  // Decompose characters into base form and diacritics
+        .replace(/[\u0300-\u036f]/g, '')  // Remove diacritics
+        .toLowerCase();
+    }
+
+    // Function to update URL parameters
+    function updateURLParameters() {
+      const params = new URLSearchParams();
+      
+      // Add each filter type to URL parameters
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value instanceof Set && value.size > 0) {
+          params.append(key, Array.from(value).join(','));
+        } else if (typeof value === 'string' && value) {
+          params.append(key, value);
+        }
+      });
+
+      // Update URL without reloading page
+      const newURL = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
+      window.history.pushState({}, '', newURL);
+    }
+
+    // Function to restore filters from URL parameters
+    function restoreFiltersFromURL() {
+      const params = new URLSearchParams(window.location.search);
+      
+      // Restore each filter type
+      params.forEach((value, key) => {
+        if (key in filters) {
+          if (filters[key] instanceof Set) {
+            value.split(',').forEach(val => {
+              filters[key].add(val);
+              // Check corresponding checkbox
+              document.querySelector(`.${key}-filter[value="${val}"]`).checked = true;
+            });
+          } else {
+            filters[key] = value;
+            if (key === 'search') {
+              searchInput.value = value;
+            }
+          }
+        }
+      });
+      
+      updateVisibility();
+    }
+
+    function updateVisibility() {
+      const container = document.querySelector('.u-equal-height');
+      let visibleCount = 0;
+      
+      videoCards.forEach(card => {
+        const cardTopics = card.dataset.topics.split(' ').filter(Boolean);
+        const cardEvents = card.dataset.events.split(' ').filter(Boolean);
+        const cardDates = card.dataset.dates.split(' ').filter(Boolean);
+        const cardPresenters = card.dataset.presenters.split(' ').filter(Boolean);
+        
+        // Get searchable content from the card and normalize it
+        const title = normalizeText(card.querySelector('.video-title').textContent);
+        const tags = normalizeText([...cardTopics, ...cardEvents, ...cardDates].join(' '));
+        const presenters = normalizeText(cardPresenters.join(' '));
+        const searchContent = `${title} ${tags} ${presenters}`;
+
+        // Split search terms and normalize them
+        const searchTerms = normalizeText(filters.search).split(' ').filter(Boolean);
+        const searchMatch = !filters.search || 
+          searchTerms.every(term => searchContent.includes(term));
+
+        // Check filters using OR logic within categories
+        const topicsMatch = filters.topic.size === 0 || 
+          [...filters.topic].some(topic => cardTopics.includes(topic));
+        const eventsMatch = filters.event.size === 0 || 
+          [...filters.event].some(event => cardEvents.includes(event));
+        const datesMatch = filters.date.size === 0 || 
+          [...filters.date].some(date => cardDates.includes(date));
+        const presentersMatch = filters.presenter.size === 0 || 
+          [...filters.presenter].some(presenter => cardPresenters.includes(presenter));
+
+        // Show/hide card based on filters
+        const isVisible = searchMatch && topicsMatch && eventsMatch && datesMatch && presentersMatch;
+        const cardWrapper = card.closest('.col-4');
+        
+        if (isVisible) {
+          cardWrapper.style.display = '';
+          visibleCount++;
+        } else {
+          cardWrapper.style.display = 'none';
+        }
+      });
+
+      // Update grid layout based on visible items
+      if (visibleCount === 0) {
+        // No results found - could add a "no results" message here
+        container.style.display = 'block';
+      } else {
+        container.style.display = 'flex';
+      }
+    }
+
+    // Modify existing checkbox handler
+    document.querySelectorAll('.topic-filter, .event-filter, .date-filter, .presenter-filter')
+      .forEach(checkbox => {
+        checkbox.addEventListener('change', (e) => {
+          const filterType = e.target.classList[1].split('-')[0];
+          if (e.target.checked) {
+            filters[filterType].add(e.target.value);
+          } else {
+            filters[filterType].delete(e.target.value);
+          }
+          updateVisibility();
+          updateURLParameters();
+        });
+      });
+
+    // Modify search handlers
+    searchInput.addEventListener('input', (e) => {
+      filters.search = e.target.value;
+      updateVisibility();
+      updateURLParameters();
+    });
+
+    resetSearch.addEventListener('click', () => {
+      filters.search = '';
+      searchInput.value = '';
+      updateVisibility();
+      updateURLParameters();
+    });
+
+    // Restore filters on page load
+    restoreFiltersFromURL();
+
+    // Add toggle functionality for filter button on mobile and medium screens
+    const filterButton = document.querySelector('[aria-controls="filter-accordion"]');
+    const filterAccordion = document.getElementById('filter-accordion');
+
+    if (filterButton && filterAccordion) {
+      filterButton.addEventListener('click', () => {
+        const isHidden = filterAccordion.classList.contains('u-hide--small') || 
+                        filterAccordion.classList.contains('u-hide--medium');
+        if (isHidden) {
+          filterAccordion.classList.remove('u-hide--small');
+          filterAccordion.classList.remove('u-hide--medium');
+          filterButton.textContent = 'Hide filters';
+        } else {
+          filterAccordion.classList.add('u-hide--small');
+          filterAccordion.classList.add('u-hide--medium');
+          filterButton.textContent = 'Show filters';
+        }
+      });
+    }
+  });
+
+  function toggleExpanded(element, show) {
+    var target = document.getElementById(element.getAttribute('aria-controls'));
+    if (target) {
+      element.setAttribute('aria-expanded', show);
+      target.setAttribute('aria-hidden', !show);
+    }
+  }
+
+  /**
+    Attaches event listeners for the accordion open and close click events.
+    @param {HTMLElement} accordionContainer The accordion container element.
+  */
+  function setupAccordion(accordionContainer) {
+    // Finds any open panels within the container and closes them.
+    function closeAllPanels() {
+      var openPanels = accordionContainer.querySelectorAll('[aria-expanded=true]');
+      for (var i = 0, l = openPanels.length; i < l; i++) {
+        toggleExpanded(openPanels[i], false);
+      }
+    }
+
+    // Set up an event listener on the container so that panels can be added
+    // and removed and events do not need to be managed separately.
+    accordionContainer.addEventListener('click', function (event) {
+      var target = event.target;
+      if (target.closest) {
+        target = target.closest('[class*="p-accordion__tab"]');
+      }
+      if (target) {
+        var isTargetOpen = target.getAttribute('aria-expanded') === 'true';
+        // closeAllPanels();
+        // Toggle visibility of the target panel.
+        toggleExpanded(target, !isTargetOpen);
+      }
+    });
+  }
+
+  // Setup all accordions on the page.
+  var accordions = document.querySelectorAll('.p-accordion');
+  for (var i = 0, l = accordions.length; i < l; i++) {
+    setupAccordion(accordions[i]);
+  }
+
+  document.querySelectorAll('.toggle-filters').forEach(button => {
+    button.addEventListener('click', (e) => {
+      const btn = e.target;
+      const hiddenItems = btn.closest('.p-accordion__panel').querySelectorAll('.p-checkbox');
+      const isShowingLess = btn.dataset.showing === 'less';
+
+      // Show/hide items after the first 3
+      hiddenItems.forEach((item, index) => {
+        if (index > 2) {
+          item.style.display = isShowingLess ? 'block' : 'none';
+        }
+      });
+
+      // Update button text and state
+      const filterType = btn.closest('section').getAttribute('aria-labelledby').split('-')[0];
+      btn.textContent = isShowingLess ? 'See less' : `See all ${hiddenItems.length} ${filterType}(s)`;
+      btn.dataset.showing = isShowingLess ? 'more' : 'less';
+    });
+  });
+</script> 
+{% endblock %}

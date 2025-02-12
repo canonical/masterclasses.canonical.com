@@ -51,14 +51,20 @@ def init_sso(app):
 
     @app.before_request
     def before_request():
-        if flask.request.path in ["/login", "/logout"]:
+        # Get the current path
+        path = flask.request.path
+        
+        # Skip authentication for API routes and specific paths
+        if path.startswith("/api/"):
             return
-        if flask.request.path.startswith("/_status") or flask.request.path.startswith(
-            "/static"
-        ):
+        
+        # Skip authentication for other specific paths
+        if path in ["/login", "/logout"] or path.startswith("/_status") or path.startswith("/static"):
             return
+        
+        # Require SSO for all other routes
         if "openid" not in flask.session:
-            return flask.redirect("/login?next=" + flask.request.path)
+            return flask.redirect("/login?next=" + path)
 
     @app.after_request
     def add_headers(response):

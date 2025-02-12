@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="p-strip is-bordered">
+  <div class="row">
+    <div class="col-8">
+      <h1>Register your Masterclass session</h1>
+
+      {% if submission_status %}
+        <div class="p-notification--{{ 'positive' if submission_status.success else 'negative' }}">
+          <div class="p-notification__content">
+            <h5 class="p-notification__title">{{ 'Success!' if submission_status.success else 'Error!' }}</h5>
+            <p class="p-notification__message">{{ submission_status.message }}</p>
+          </div>
+        </div>
+      {% endif %}
+
+      <p class="p-heading--4">
+        Have an idea for a talk you'd like to share with the rest of Canonical? Fill out the form below with your session details and we'll get you scheduled.
+      </p>
+
+      <form method="POST" class="p-form">
+        {{ form.csrf_token }}
+        
+        <div class="p-form__group">
+          <label class="p-form__label" for="title">Name of session *</label>
+          {{ form.title(class="p-form__control") }}
+          {% if form.title.errors %}
+            <p class="p-form__help-text u-text-danger">{{ form.title.errors[0] }}</p>
+          {% endif %}
+        </div>
+
+        <div class="p-form__group">
+          <label class="p-form__label" for="description">Description *</label>
+          {{ form.description(class="p-form__control", rows="5") }}
+          {% if form.description.errors %}
+            <p class="p-form__help-text u-text-danger">{{ form.description.errors[0] }}</p>
+          {% endif %}
+        </div>
+
+        <div class="p-form__group">
+          <label class="p-form__label">Duration *</label>
+          {% for subfield in form.duration %}
+            <label class="p-radio">
+              {{ subfield(class="p-radio__input") }}
+              <span class="p-radio__label">{{ subfield.label.text }}</span>
+              {% if subfield.data == 'other' %}
+                {{ form.duration_other(class="p-form__control", style="display: none;") }}
+              {% endif %}
+            </label>
+          {% endfor %}
+          {% if form.duration.errors %}
+            <p class="p-form__help-text u-text-danger">{{ form.duration.errors[0] }}</p>
+          {% endif %}
+        </div>
+        <button type="submit" class="p-button--positive">Submit</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const otherRadio = document.querySelector('input[value="other"]');
+    const otherInput = document.getElementById('duration_other');
+
+    document.querySelectorAll('input[name="duration"]').forEach(radio => {
+      radio.addEventListener('change', function() {
+        otherInput.style.display = otherRadio.checked ? 'block' : 'none';
+        if (!otherRadio.checked) {
+          otherInput.value = '';
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}

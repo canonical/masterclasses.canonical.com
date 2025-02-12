@@ -1,0 +1,49 @@
+{% macro video_card_small(video) %}
+
+<div class="p-card"
+    data-topics="{{ video.tags|selectattr('category.name', 'equalto', 'Topic')|map(attribute='name')|map('lower')|map('replace', ' ', '-')|join(' ') }}"
+    data-events="{{ video.tags|selectattr('category.name', 'equalto', 'Event')|map(attribute='name')|map('lower')|map('replace', ' ', '-')|join(' ') }}"
+    data-dates="{{ video.tags|selectattr('category.name', 'equalto', 'Date')|map(attribute='name')|map('lower')|map('replace', ' ', '-')|join(' ') }}"
+    data-presenters="{{ video.presenters|map(attribute='name')|map('lower')|map('replace', ' ', '-')|join(' ') }}">
+
+<div class="p-section u-no-padding--bottom">
+    <div class="row--25-75">
+        
+        <div class="col">
+            <a href="/videos/{{ video.title|slugify }}-class-{{ video.id }}">
+                <div class="thumbnail-wrapper">
+                    <img loading="lazy" alt="{{ video.title }} video"
+                        src="{{ video.thumbnails or 'https://assets.ubuntu.com/v1/8e1d3bf5-juju-hero-juju.is.svg' }}"
+                        class="u-image-position--bottom">
+                </div>
+            </a>
+        </div>
+
+        <div class="col">
+            <h4 class="u-no-margin--bottom">
+                <a class="video-title p-link--soft" href="/videos/{{ video.title|slugify }}-class-{{ video.id }}">{{ video.title }}</a>
+            </h4>
+
+            {% if video.unixstart %}
+            <p class="u-text--muted video-tags u-no-margin--bottom u-no-padding--top">
+                {{ video.unixstart|format_date }}
+            </p>
+            {% endif %}
+            
+            {% if video.presenters %}
+            <p class="video-presenters u-text--muted u-no-margin--bottom">
+                {% if video.presenters|length <= 2 %}
+                    {% for presenter in video.presenters %}
+                        {{ presenter.name }}{% if not loop.last %} and {% endif %}
+                    {% endfor %}
+                {% else %}
+                    {{ video.presenters[0].name }}, {{ video.presenters[1].name }}, et al.
+                {% endif %}
+            </p>
+            {% endif %}
+            
+        </div>
+    </div>
+</div>
+
+{% endmacro %}

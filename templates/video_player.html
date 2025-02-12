@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% from "shared/_video_card.html" import video_card %}
+{% from "shared/_video_card_small.html" import video_card_small %}
+
+{% block content %}
+<script>
+// Define the function globally
+function togglePresenters(event) {
+    event.preventDefault();
+    const morePresenters = document.getElementById('more-presenters');
+    const showMoreLink = document.getElementById('show-more-presenters');
+    
+    if (morePresenters.style.display === 'none') {
+        morePresenters.style.display = 'inline';
+        showMoreLink.style.display = 'none';  // Hide the "..." when expanded
+    }
+}
+</script>
+
+<div class="p-strip is-shallow u-no-padding--bottom is-bordered">
+  <div class="row">
+    <div class="col-9">
+      <iframe 
+        src="https://drive.google.com/file/d/{{ video.recording|google_drive_id }}/preview" 
+        allow="autoplay" 
+        allowfullscreen 
+        class="iframe-video"
+      ></iframe>
+
+      <h1 class="p-heading--2">{{ video.title }}</h1>
+      
+      <ul class="p-inline-list u-no-margin--bottom">
+        {% if video.presenters %}
+        <li class="p-inline-list__item">
+          <span style="white-space: nowrap">
+            <i class="p-icon--user"></i>
+            {% if video.presenters|length <= 2 %}
+              {% for presenter in video.presenters %}
+                <a href="{{ url_for('masterclasses.videos', presenter=presenter.name|lower|replace(' ', '-')) }}">{{ presenter.name }}</a>{% if not loop.last %} and {% endif %}
+              {% endfor %}
+            {% else %}
+              <span id="presenter-list">
+                <a href="{{ url_for('masterclasses.videos', presenter=video.presenters[0].name|lower|replace(' ', '-')) }}">{{ video.presenters[0].name }}</a>, <a href="{{ url_for('masterclasses.videos', presenter=video.presenters[1].name|lower|replace(' ', '-')) }}">{{ video.presenters[1].name }}</a><span id="more-presenters" style="display: none;">{% for presenter in video.presenters[2:] %}, <a href="{{ url_for('masterclasses.videos', presenter=presenter.name|lower|replace(' ', '-')) }}">{{ presenter.name }}</a>{% endfor %}</span><a href="#" id="show-more-presenters" onclick="togglePresenters(event)">...</a>
+              </span>
+            {% endif %}
+          </span>
+        </li>
+        {% endif %}
+        
+        {% if video.unixstart %}
+        <li class="p-inline-list__item">
+          <span style="white-space: nowrap">
+            <i class="p-icon--revisions"></i>
+            {{ video.unixstart|format_date }}
+          </span>
+        </li>
+        {% endif %}
+
+        {% if video.slides %}
+        <li class="p-inline-list__item">
+          <a href="{{ video.slides }}" class="p-button--neutral u-no-margin--bottom">
+            <span style="white-space: nowrap">
+              <i class="p-icon--file"></i>
+              View slides
+            </span>
+          </a>
+        </li>
+        {% endif %}
+
+        {% if video.recording %}
+        <li class="p-inline-list__item">
+          <a href="{{ video.recording }}" class="p-button--neutral u-no-margin--bottom">
+            <span style="white-space: nowrap">
+              <i class="p-icon--video-play"></i>
+              Download video
+            </span>
+          </a>
+        </li>
+        {% endif %}
+      </ul>
+
+      {% if video.tags %}
+      <div class="u-sv1">
+        <p class="u-no-margin--bottom">
+          <span style="white-space: nowrap">
+            <i class="p-icon--tag"></i>
+            {{ video.tags|map(attribute='name')|join(' • ') }}
+          </span>
+        </p>
+      </div>
+      {% endif %}
+
+      {% if video.description %}
+      <div class="p-strip is-shallow u-no-padding--top">
+        <p>{{ video.description|markdown|safe }}</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="col-3">
+      {% if suggested_videos %}
+      <div class="">
+        {% for suggested_video in suggested_videos %}
+          <div class="col-4 u-sv1">
+            <div class="u-hide--small u-hide--medium">
+              {{ video_card(suggested_video) }}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

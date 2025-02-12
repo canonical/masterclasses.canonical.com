@@ -12,23 +12,144 @@ Canonical is known for its brilliant people, both in terms of intelligence and v
 
 It uses [dotrun](https://github.com/canonical/dotrun) for local development, defining standard endpoints for `serve`, `build`, `test`, `watch` etc. within the package.json. This allows for a consistent development experience across all Canonical projects.
 
-1. Create a `.env.local` file locally in the repo head directory with the following contents:
+1. Create a `.env` file locally in the repo head directory, an example configuration can be found in `.env.example`
+2. Install dotrun as described in https://github.com/canonical/dotrun#installation
+3. Run the docker-compose file to start the database:
 
 ```bash
-PRIVATE_KEY_ID=your_private_key_id
-PRIVATE_KEY=your_private_key
-DATABASE_URL=production_database_url
+docker-compose up -d
 ```
 
-Ask a member of the team for the values of these keys.
-
-these keys are [mastermasterclasses-canonical-com](https://github.com/canonical/masterclasses.canonical.com/blob/main/konf/site.yaml#L12) google drive keys.
-
-2. Install dotrun as described in https://github.com/canonical/dotrun#installation
-3. Launch it from the head of this repo by running the following command:
+4. Launch it from the head of this repo by running the following command:
 
 ```bash
 dotrun
 ```
 
-4. Once the containers are started, you can visit <http://127.0.0.1:8409> in your browser.
+5. Once the containers are started, you can visit <http://127.0.0.1:8409> in your browser.
+
+# API Access
+
+To set up API access, configure the API key as an environment variable. To use the example CURL commands below, please set these two environment variables:
+
+```bash
+export API_TOKEN="xxxxxxxxxx"
+export BASE_URL="http://127.0.0.1:8409/api/v1"
+```
+
+## Endpoints
+
+### **Retrieve All Presenters**
+**GET** `/v1/presenters`  
+- **Description:** Retrieves all presenters.  
+- **Authentication:** Required (API token).  
+- **Response:**  
+  - Array of presenter objects containing:  
+    - `id` (integer)  
+    - `name` (string)  
+    - `hrc_id` (string)  
+    - `email` (string)  
+- **Status Codes:**  
+  - `200 OK`  
+
+Example CURL usage:
+```
+curl -X GET "${BASE_URL}/presenters" \
+  -H "Authorization: Bearer ${API_TOKEN}" \
+  -H "Content-Type: application/json"
+```
+
+---
+
+### **Retrieve a Specific Presenter by ID**
+**GET** `/v1/presenters/{id}`  
+- **Description:** Retrieves a specific presenter by ID.  
+- **Authentication:** Required (API token).  
+- **Parameters:**  
+  - `id` (path parameter, integer) – Presenter’s unique identifier.  
+- **Response:**  
+  - Presenter object containing:  
+    - `id` (integer)  
+    - `name` (string)  
+    - `hrc_id` (string)  
+    - `email` (string)  
+- **Status Codes:**  
+  - `200 OK`  
+
+Example CURL usage:
+```
+# Replace {PRESENTER_ID} with an actual presenter ID (e.g., 1)
+curl -X GET "${BASE_URL}/presenters/{PRESENTER_ID}" \
+  -H "Authorization: Bearer ${API_TOKEN}" \
+  -H "Content-Type: application/json"
+```
+
+---
+
+### **Retrieve Talks by Presenter (HRC ID)**
+**GET** `/v1/presenters/{hrc_id}/talks`  
+- **Description:** Retrieves all talks for a presenter using their HRC ID.  
+- **Authentication:** Required (API token).  
+- **Parameters:**  
+  - `hrc_id` (path parameter, string) – Presenter’s HRC ID.  
+- **Response:**  
+  - Object containing an array of talk objects with:  
+    - `id` (integer)  
+    - `title` (string)  
+    - `description` (string)  
+    - `start_time` (ISO 8601 datetime)  
+    - `end_time` (ISO 8601 datetime)  
+    - `recording_url` (string, URL)  
+    - `slides_url` (string, URL)  
+    - `presenters`: Array of objects containing:  
+      - `name` (string)  
+      - `hrc_id` (string)  
+    - `tags`: Array of objects containing:  
+      - `name` (string)  
+      - `category` (string)  
+- **Status Codes:**  
+  - `200 OK`  
+  - `404 Not Found`  
+
+Example CURL usage:
+```
+# Replace {HRC_ID} with an actual HRC ID (e.g., ABC123)
+curl -X GET "${BASE_URL}/presenters/{HRC_ID}/talks" \
+  -H "Authorization: Bearer ${API_TOKEN}" \
+  -H "Content-Type: application/json"
+```
+
+---
+
+### **Retrieve Talks by Presenter (Email)**
+**GET** `/v1/presenters/email/{email}/talks`  
+- **Description:** Retrieves all talks for a presenter using their email address.  
+- **Authentication:** Required (API token).  
+- **Parameters:**  
+  - `email` (path parameter, string) – Presenter’s email address.  
+- **Response:**  
+  - Object containing an array of talk objects with:  
+    - `id` (integer)  
+    - `title` (string)  
+    - `description` (string)  
+    - `start_time` (ISO 8601 datetime)  
+    - `end_time` (ISO 8601 datetime)  
+    - `recording_url` (string, URL)  
+    - `slides_url` (string, URL)  
+    - `presenters`: Array of objects containing:  
+      - `name` (string)  
+      - `email` (string)  
+    - `tags`: Array of objects containing:  
+      - `name` (string)  
+      - `category` (string)  
+- **Status Codes:**  
+  - `200 OK`  
+  - `404 Not Found`  
+
+Example CURL usage:
+```
+# Replace {EMAIL} with an actual email.
+curl -X GET "${BASE_URL}/presenters/email/{EMAIL}/talks" \
+  -H "Authorization: Bearer ${API_TOKEN}" \
+  -H "Content-Type: application/json"
+```

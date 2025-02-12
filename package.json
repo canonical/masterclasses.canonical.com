@@ -8,13 +8,13 @@
     "watch-css": "yarn build-css && sass --load-path=node_modules -w src:static/css --style=compressed",
     "format-python": "black --line-length 79 webapp",
     "test": "yarn run lint-python && yarn run test-python",
-    "test-python": "python3 -m unittest discover tests",
+    "test-python": "pytest",
     "lint-python": "flake8 webapp tests && black --check --line-length 79 webapp tests"
   },
   "dependencies": {
     "autoprefixer": "10.4.13",
-    "sass": "1.57.1",
-    "vanilla-framework": "3.14.0",
+    "sass": "^1.69.0",
+    "vanilla-framework": "4.18.2",
     "postcss": "8.4.31",
     "postcss-cli": "10.1.0"
   }

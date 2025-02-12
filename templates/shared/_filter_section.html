@@ -1,0 +1,36 @@
+{% macro filter_section(title, items, filter_class) %}
+{# Sort items alphabetically by name, except for dates #}
+{% if filter_class != 'date' %}
+  {% set sorted_items = items|sort(attribute='name') %}
+{% else %}
+  {% set sorted_items = items %}
+{% endif %}
+
+<li class="p-accordion__group">
+  <div role="heading" aria-level="3" class="p-accordion__heading">
+    <button type="button" class="p-accordion__tab" id="{{ filter_class }}-tab" aria-controls="{{ filter_class }}-section" aria-expanded="true">
+      {{ title }}
+    </button>
+  </div>
+  <section class="p-accordion__panel has-tick-elements" id="{{ filter_class }}-section" aria-labelledby="{{ filter_class }}-tab" aria-hidden="false">
+    {% for item in sorted_items[:3] %}
+    <label class="p-checkbox">
+      <input type="checkbox" class="p-checkbox__input {{ filter_class }}-filter" value="{{ item.name|lower|replace(' ', '-') }}">
+      <span class="p-checkbox__label">{{ item.name }}</span>
+      <span class="p-badge">{{ item.videos|selectattr('recording')|list|length }}</span>
+    </label>
+    {% endfor %}
+    {% if sorted_items|length > 3 %}
+      {% for item in sorted_items[3:] %}
+      <label class="p-checkbox" style="display: none;">
+        <input type="checkbox" class="p-checkbox__input {{ filter_class }}-filter" value="{{ item.name|lower|replace(' ', '-') }}">
+        <span class="p-checkbox__label">{{ item.name }}</span>
+        <span class="p-badge">{{ item.videos|selectattr('recording')|list|length }}</span>
+      </label>
+      {% endfor %}
+    <button class="p-button--link toggle-filters u-no-margin--bottom" data-showing="less">See all {{ sorted_items|length }} {{ title|lower }}(s)</button>
+    {% endif %}
+    <div class="u-sv2"></div>
+  </section>
+</li>
+{% endmacro %}
