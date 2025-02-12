@@ -711,19 +711,19 @@ class VideoModelView(RestrictedModelView):
         # Add datetime picker fields with the correct format
         form_class.start_time = DateTimeField(
             'Start Time',
-            format='%Y-%m-%dT%H:%M',  # HTML5 datetime-local format
+            format='%Y-%m-%dT%H:%M',
             render_kw={
                 "type": "datetime-local",
-                "step": "60"  # 1 minute steps
+                "step": "60"
             }
         )
         
         form_class.end_time = DateTimeField(
             'End Time',
-            format='%Y-%m-%dT%H:%M',  # HTML5 datetime-local format
+            format='%Y-%m-%dT%H:%M',
             render_kw={
                 "type": "datetime-local",
-                "step": "60"  # 1 minute steps
+                "step": "60"
             }
         )
         
@@ -735,26 +735,48 @@ class VideoModelView(RestrictedModelView):
             choices=lambda: [(c.id, c.name) for c in db_session.query(Presenter).order_by(Presenter.name).all()]
         )
         
-        # Replace the tags field with three separate dynamic fields
+        # Replace the tags field with separate dynamic fields
         delattr(form_class, 'tags')
         
-        # Get tag choices for each category
-        topic_tags = [(str(t.id), t.name) for t in db_session.query(Tag).join(TagCategory).filter(TagCategory.name == 'Topic').order_by(Tag.name)]
-        event_tags = [(str(t.id), t.name) for t in db_session.query(Tag).join(TagCategory).filter(TagCategory.name == 'Event').order_by(Tag.name)]
-        date_tags = [(str(t.id), t.name) for t in db_session.query(Tag).join(TagCategory).filter(TagCategory.name == 'Date').order_by(Tag.name)]
-        location_tags = [(str(t.id), t.name) for t in db_session.query(Tag).join(TagCategory).filter(TagCategory.name == 'Location').order_by(Tag.name)]
+        # Get tag choices for each category using lambda functions
+        form_class.topic_tags = SelectMultipleField(
+            'Topics', 
+            coerce=int,
+            choices=lambda: [(t.id, t.name) for t in db_session.query(Tag)
+                    .join(TagCategory)
+                    .filter(TagCategory.name == 'Topic')
+                    .order_by(Tag.name).all()],
+            widget=Select2Widget(multiple=True)
+        )
         
-        # Add fields to form
-        form_class.topic_tags = SelectMultipleField('Topics', choices=topic_tags, widget=Select2Widget())
-        form_class.event_tags = SelectMultipleField('Events', choices=event_tags, widget=Select2Widget())
-        form_class.date_tags = SelectMultipleField('Dates', choices=date_tags, widget=Select2Widget())
-        form_class.location_tags = SelectMultipleField('Locations', choices=location_tags, widget=Select2Widget())
+        form_class.event_tags = SelectMultipleField(
+            'Events',
+            coerce=int,
+            choices=lambda: [(t.id, t.name) for t in db_session.query(Tag)
+                    .join(TagCategory)
+                    .filter(TagCategory.name == 'Event')
+                    .order_by(Tag.name).all()],
+            widget=Select2Widget(multiple=True)
+        )
         
-        # Replace description field with custom markdown textarea
-        form_class.description = TextAreaField(
-            'Description',
-            widget=MarkdownTextArea(),
-            description='Use markdown for formatting: **bold**, *italic*, [link text](url)'
+        form_class.date_tags = SelectMultipleField(
+            'Dates',
+            coerce=int,
+            choices=lambda: [(t.id, t.name) for t in db_session.query(Tag)
+                    .join(TagCategory)
+                    .filter(TagCategory.name == 'Date')
+                    .order_by(Tag.name).all()],
+            widget=Select2Widget(multiple=True)
+        )
+        
+        form_class.location_tags = SelectMultipleField(
+            'Locations',
+            coerce=int,
+            choices=lambda: [(t.id, t.name) for t in db_session.query(Tag)
+                    .join(TagCategory)
+                    .filter(TagCategory.name == 'Location')
+                    .order_by(Tag.name).all()],
+            widget=Select2Widget(multiple=True)
         )
         
         return form_class
@@ -764,7 +786,6 @@ class VideoModelView(RestrictedModelView):
         
         # Only populate with existing data if this is not a form submission
         if not flask.request.form:
-            log.info("Initial form load - populating with existing data")
             # Populate datetime fields
             if obj:
                 if obj.unixstart:
@@ -778,10 +799,16 @@ class VideoModelView(RestrictedModelView):
                 
                 # Populate tag fields
                 if obj.tags:
-                    form.topic_tags.data = [t.id for t in obj.tags if t.category.name == 'Topic']
-                    form.event_tags.data = [t.id for t in obj.tags if t.category.name == 'Event']
-                    form.date_tags.data = [t.id for t in obj.tags if t.category.name == 'Date']
-                    form.location_tags.data = [t.id for t in obj.tags if t.category.name == 'Location']
+                    topic_tags = [t.id for t in obj.tags if t.category.name == 'Topic']
+                    event_tags = [t.id for t in obj.tags if t.category.name == 'Event']
+                    date_tags = [t.id for t in obj.tags if t.category.name == 'Date']
+                    location_tags = [t.id for t in obj.tags if t.category.name == 'Location']
+                    
+                    form.topic_tags.data = topic_tags
+                    form.event_tags.data = event_tags
+                    form.date_tags.data = date_tags
+                    form.location_tags.data = location_tags
+
         else:
             log.info("Form submission - using submitted data")
             log.info(f"Submitted form data: {flask.request.form}")
