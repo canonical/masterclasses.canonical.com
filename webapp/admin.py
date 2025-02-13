@@ -727,6 +727,12 @@ class VideoModelView(RestrictedModelView):
             }
         )
         
+        # Add markdown support for description
+        form_class.description = TextAreaField(
+            'Description',
+            widget=MarkdownTextArea(),
+        )
+        
         # Configure presenters field with dynamic choices
         form_class.presenters = SelectMultipleField(
             'Presenters',
