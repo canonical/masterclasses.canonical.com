@@ -4,12 +4,16 @@
     "serve": "./entrypoint 0.0.0.0:$PORT",
     "start": "yarn run build && yarn run serve",
     "build": "yarn run build-css",
+    "lint": "yarn run lint-scss && yarn run lint-python && yarn run lint-templates",
     "build-css": "sass src:static/css --load-path=node_modules --style=compressed && postcss --use autoprefixer --replace 'static/css/**/*.css' --no-map",
     "watch-css": "yarn build-css && sass --load-path=node_modules -w src:static/css --style=compressed",
-    "format-python": "black --line-length 79 webapp",
+    "lint-scss": "sass-lint static/**/*.scss --exclude node_modules --verbose --no-exit",
     "test": "yarn run lint-python && yarn run test-python",
     "test-python": "pytest",
-    "lint-python": "flake8 webapp tests && black --check --line-length 79 webapp tests"
+    "format-python": "black --line-length 79 webapp",
+    "lint-python": "flake8 webapp tests && black --check --line-length 79 webapp tests",
+    "format-templates": "djlint --profile jinja --reformat ./templates/**",
+    "lint-templates": "djlint --profile jinja --lint ./templates/**"
   },
   "dependencies": {
     "autoprefixer": "10.4.20",
@@ -17,5 +21,8 @@
     "vanilla-framework": "4.21.0",
     "postcss": "8.5.2",
     "postcss-cli": "11.0.0"
+  },
+  "devDependencies": {
+    "sass-lint": "1.13.1"
   }
 }

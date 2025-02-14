@@ -1,0 +1,58 @@
+name: PR checks
+on: [push, pull_request]
+
+jobs:
+  run-image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: pw
+          POSTGRES_DB: db
+        ports:
+          - 5432:5432
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: DOCKER_BUILDKIT=1 docker build --tag masterclasses-canonical-com .
+
+      - name: Run image
+        run: |
+          docker run --env SECRET_KEY=insecure_secret_key --network host masterclasses-canonical-com &
+          sleep 1
+          curl --head --fail --retry-delay 1 --retry 30 --retry-connrefused http://localhost
+
+      - name: Install dotrun
+        run: |
+          curl -sSL https://raw.githubusercontent.com/canonical/dotrun/main/scripts/install.sh | bash
+
+      - name: Run lint
+        run: dotrun lint
+
+      - name: Build project
+        run: dotrun build
+
+      - name: Install additional dependencies
+        run: dotrun exec pip3 install coverage
+
+      - name: Run tests with coverage
+        run: dotrun exec coverage run --source=. --module unittest discover tests && bash <(curl -s https://codecov.io/bash) -cF python
+
+  check-inclusive-naming:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Check inclusive naming
+        uses: canonical-web-and-design/inclusive-naming@main
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          fail-on-error: true
