@@ -7,7 +7,8 @@
     "lint": "yarn run lint-scss && yarn run lint-python && yarn run lint-templates",
     "build-css": "sass src:static/css --load-path=node_modules --style=compressed && postcss --use autoprefixer --replace 'static/css/**/*.css' --no-map",
     "watch-css": "yarn build-css && sass --load-path=node_modules -w src:static/css --style=compressed",
-    "lint-scss": "sass-lint static/**/*.scss --exclude node_modules --verbose --no-exit",
+    "lint-scss": "stylelint 'src/**/*.scss'",
+    "format-scss": "stylelint --fix 'src/**/*.scss'",
     "test": "yarn run lint-python && yarn run test-python",
     "test-python": "pytest",
     "format-python": "black --line-length 79 webapp",
@@ -23,6 +24,8 @@
     "postcss-cli": "11.0.0"
   },
   "devDependencies": {
-    "sass-lint": "1.13.1"
+    "stylelint": "16.14.1",
+    "stylelint-config-recommended-scss": "14.1.0",
+    "stylelint-order": "6.0.4"
   }
 }

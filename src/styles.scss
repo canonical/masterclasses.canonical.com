@@ -2,7 +2,7 @@
 @include vanilla;
 
 // Import icons from vanilla-framework
-@import 'vanilla-framework/scss/patterns_icons';
+@import "vanilla-framework/scss/patterns_icons";
 @include vf-p-icons-common;
 @include vf-p-icon-notifications;
 @include vf-p-icon-video-play;
@@ -15,7 +15,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
-  
+
   > .col-4 {
     flex: 0 0 100%;
     max-width: 100%;
@@ -65,11 +65,6 @@
   margin-left: auto !important;
 }
 
-.p-navigation__item--live .p-navigation__link {
-  display: flex;
-  align-items: center;
-}
-
 .live-dot {
   display: inline-block;
   width: 8px;
@@ -85,17 +80,22 @@
   display: flex;
   align-items: center;
   color: #fff;
-}
-
-.p-navigation__item--live .p-navigation__link:hover {
-  color: #fff;
-  text-decoration: underline;
+  &:hover {
+    color: #fff;
+    text-decoration: underline;
+  }
 }
 
 @keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 .video-card {
@@ -153,9 +153,8 @@
   .duration-badge {
     position: absolute;
     padding: 0.25rem;
-    background: rgba(17, 17, 17, 0.80);
+    background: rgba(17, 17, 17, 0.8);
     color: #fff;
-    border-radius: 2px;
     font-size: 0.75rem;
     line-height: 1.5;
     margin: 0.5rem;
