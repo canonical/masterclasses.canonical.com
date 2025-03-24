@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="p-strip is-bordered">
+<section class="p-strip">
   <div class="row">
     <div class="col-8">
       <h1>Register your Masterclass session</h1>
@@ -21,7 +21,7 @@
 
       <form method="POST" class="p-form">
         {{ form.csrf_token }}
-        
+
         <div class="p-form__group">
           <label class="p-form__label" for="title">Name of session *</label>
           {{ form.title(class="p-form__control") }}

@@ -3,7 +3,7 @@
 {% from "shared/_video_card.html" import video_card %}
 {% block content %}
 <div tabindex="0" role="tabpanel" id="masterclasses-tab" aria-labelledby="masterclasses">
-  <section class="p-strip is-shallow u-no-padding--bottom is-bordered" id="masterclasses">
+  <section class="p-strip is-shallow u-no-padding--bottom" id="masterclasses">
     <div class="row">
       <div class="p-divider u-no-margin--bottom">
         <div class="col-3">
@@ -35,7 +35,7 @@
             </form>
           </div>
 
-          <div class="u-equal-height" style="padding-bottom: 1rem;">              
+          <div class="u-equal-height" style="padding-bottom: 1rem;">
             {% for video in recorded_videos %}
             <div class="col-4">
               {{ video_card(video) }}
@@ -71,7 +71,7 @@
     // Function to update URL parameters
     function updateURLParameters() {
       const params = new URLSearchParams();
-      
+
       // Add each filter type to URL parameters
       Object.entries(filters).forEach(([key, value]) => {
         if (value instanceof Set && value.size > 0) {
@@ -89,7 +89,7 @@
     // Function to restore filters from URL parameters
     function restoreFiltersFromURL() {
       const params = new URLSearchParams(window.location.search);
-      
+
       // Restore each filter type
       params.forEach((value, key) => {
         if (key in filters) {
@@ -107,20 +107,20 @@
           }
         }
       });
-      
+
       updateVisibility();
     }
 
     function updateVisibility() {
       const container = document.querySelector('.u-equal-height');
       let visibleCount = 0;
-      
+
       videoCards.forEach(card => {
         const cardTopics = card.dataset.topics.split(' ').filter(Boolean);
         const cardEvents = card.dataset.events.split(' ').filter(Boolean);
         const cardDates = card.dataset.dates.split(' ').filter(Boolean);
         const cardPresenters = card.dataset.presenters.split(' ').filter(Boolean);
-        
+
         // Get searchable content from the card and normalize it
         const title = normalizeText(card.querySelector('.video-title').textContent);
         const tags = normalizeText([...cardTopics, ...cardEvents, ...cardDates].join(' '));
@@ -129,23 +129,23 @@
 
         // Split search terms and normalize them
         const searchTerms = normalizeText(filters.search).split(' ').filter(Boolean);
-        const searchMatch = !filters.search || 
+        const searchMatch = !filters.search ||
           searchTerms.every(term => searchContent.includes(term));
 
         // Check filters using OR logic within categories
-        const topicsMatch = filters.topic.size === 0 || 
+        const topicsMatch = filters.topic.size === 0 ||
           [...filters.topic].some(topic => cardTopics.includes(topic));
-        const eventsMatch = filters.event.size === 0 || 
+        const eventsMatch = filters.event.size === 0 ||
           [...filters.event].some(event => cardEvents.includes(event));
-        const datesMatch = filters.date.size === 0 || 
+        const datesMatch = filters.date.size === 0 ||
           [...filters.date].some(date => cardDates.includes(date));
-        const presentersMatch = filters.presenter.size === 0 || 
+        const presentersMatch = filters.presenter.size === 0 ||
           [...filters.presenter].some(presenter => cardPresenters.includes(presenter));
 
         // Show/hide card based on filters
         const isVisible = searchMatch && topicsMatch && eventsMatch && datesMatch && presentersMatch;
         const cardWrapper = card.closest('.col-4');
-        
+
         if (isVisible) {
           cardWrapper.style.display = '';
           visibleCount++;
@@ -201,7 +201,7 @@
 
     if (filterButton && filterAccordion) {
       filterButton.addEventListener('click', () => {
-        const isHidden = filterAccordion.classList.contains('u-hide--small') || 
+        const isHidden = filterAccordion.classList.contains('u-hide--small') ||
                         filterAccordion.classList.contains('u-hide--medium');
         if (isHidden) {
           filterAccordion.classList.remove('u-hide--small');
@@ -278,5 +278,5 @@
       btn.dataset.showing = isShowingLess ? 'more' : 'less';
     });
   });
-</script> 
+</script>
 {% endblock %}
