@@ -13,20 +13,20 @@
       </div>
       <div class="p-section--shallow">
         <p>
-          All our internal talks are recorded and made available here for you to watch at your leisure. 
-          From product deep dives to technical talks, we've got you covered. Curated by the events team, 
-          these sessions cover everything from Ubuntu and cloud infrastructure to marketing and leadership. 
+          All our internal talks are recorded and made available here for you to watch at your leisure.
+          From product deep dives to technical talks, we've got you covered. Curated by the events team,
+          these sessions cover everything from Ubuntu and cloud infrastructure to marketing and leadership.
           Whether you're looking to expand your knowledge or catch up on a session you missed, you'll find valuable content here.
         </p>
       </div>
-      
+
       <a href="/videos" class="p-button--positive">Explore Catalog</a>
       <a class="p-button" id="lucky-button">I'm feeling lucky</a>
 
     </div>
     <div class="col u-align--center u-hide--medium u-hide--small u-vertically-center">
       <img src="https://res.cloudinary.com/canonical/image/fetch/f_auto,q_auto,fl_sanitize,h_366/https://assets.ubuntu.com/v1/3a4d4155-Training.svg"
-        srcset="https://res.cloudinary.com/canonical/image/fetch/f_auto,q_auto,fl_sanitize,w_900,h_732/https://assets.ubuntu.com/v1/3a4d4155-Training.svg 2x" 
+        srcset="https://res.cloudinary.com/canonical/image/fetch/f_auto,q_auto,fl_sanitize,w_900,h_732/https://assets.ubuntu.com/v1/3a4d4155-Training.svg 2x"
         alt="" width="450" height="366" loading="auto">
     </div>
   </div>
@@ -49,12 +49,12 @@
             {% set _=shown.append(1) %}
           {% endif %}
         {% endfor %}
-        
+
         {% if upcoming_videos_24h and shown|length < 2 %}
           {{ upcoming_session(upcoming_videos_24h[0], 'soon', now) }}
           {% set _=shown.append(1) %}
         {% endif %}
-        
+
         {% if upcoming_videos_future and shown|length < 2 %}
           {{ upcoming_session(upcoming_videos_future[0], 'future', now) }}
           {% set _=shown.append(1) %}
@@ -66,17 +66,17 @@
 {% endif %}
 
 
-<section class="p-strip--light is-shallow is-bordered">
+<section class="p-strip is-light">
   <div class="row">
     <div class="col-9">
       <h3 class="p-muted-heading u-sv2">Something missing?</h3>
       <p class="p-heading--3">If you would like to see a topic covered but you don't have the knowledge, submit an idea
         to the team.</p>
-      <p>
-        <a href="https://discourse.canonical.com/c/masterclasses/suggested-ideas/79" class="p-button u-no-margin--bottom">
-          Register an idea
-        </a>
-      </p>
+
+      <a href="/register" class="p-button u-no-margin--bottom">
+        Register an idea
+      </a>
+
     </div>
   </div>
 </section>

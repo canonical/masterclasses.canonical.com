@@ -9,7 +9,7 @@ function togglePresenters(event) {
     event.preventDefault();
     const morePresenters = document.getElementById('more-presenters');
     const showMoreLink = document.getElementById('show-more-presenters');
-    
+
     if (morePresenters.style.display === 'none') {
         morePresenters.style.display = 'inline';
         showMoreLink.style.display = 'none';  // Hide the "..." when expanded
@@ -17,18 +17,18 @@ function togglePresenters(event) {
 }
 </script>
 
-<div class="p-strip is-shallow u-no-padding--bottom is-bordered">
+<div class="p-strip is-shallow u-no-padding--bottom">
   <div class="row">
     <div class="col-9">
-      <iframe 
-        src="https://drive.google.com/file/d/{{ video.recording|google_drive_id }}/preview" 
-        allow="autoplay" 
-        allowfullscreen 
+      <iframe
+        src="https://drive.google.com/file/d/{{ video.recording|google_drive_id }}/preview"
+        allow="autoplay"
+        allowfullscreen
         class="iframe-video"
       ></iframe>
 
       <h1 class="p-heading--2">{{ video.title }}</h1>
-      
+
       <ul class="p-inline-list u-no-margin--bottom">
         {% if video.presenters %}
         <li class="p-inline-list__item">
@@ -46,7 +46,7 @@ function togglePresenters(event) {
           </span>
         </li>
         {% endif %}
-        
+
         {% if video.unixstart %}
         <li class="p-inline-list__item">
           <span style="white-space: nowrap">
