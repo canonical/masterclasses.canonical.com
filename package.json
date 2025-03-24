@@ -5,7 +5,7 @@
     "start": "yarn run build && yarn run serve",
     "build": "yarn run build-css",
     "lint": "yarn run lint-scss && yarn run lint-python && yarn run lint-templates",
-    "build-css": "sass src:static/css --load-path=node_modules --style=compressed && postcss --use autoprefixer --replace 'static/css/**/*.css' --no-map",
+    "build-css": "sass --quiet-deps --silence-deprecation=import src:static/css --load-path=node_modules --style=compressed && postcss --use autoprefixer --replace 'static/css/**/*.css' --no-map",
     "watch-css": "yarn build-css && sass --load-path=node_modules -w src:static/css --style=compressed",
     "lint-scss": "stylelint 'src/**/*.scss'",
     "format-scss": "stylelint --fix 'src/**/*.scss'",

@@ -1,12 +1,9 @@
 @import "vanilla-framework";
 @include vanilla;
 
-// Import icons from vanilla-framework
-@import "vanilla-framework/scss/patterns_icons";
-@include vf-p-icons-common;
+// Import additional icons from vanilla-framework
 @include vf-p-icon-notifications;
 @include vf-p-icon-video-play;
-@include vf-p-icon-user;
 @include vf-p-icon-tag;
 @include vf-p-icon-revisions;
 @include vf-p-icon-file;
