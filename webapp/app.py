@@ -26,6 +26,7 @@ from models.submission import VideoSubmission
 from webapp.api import api
 from webapp.forms import MasterclassSubmissionForm
 from canonicalwebteam import image_template
+from jinja2 import ChoiceLoader, FileSystemLoader
 
 app = FlaskBase(
     __name__,
@@ -35,6 +36,13 @@ app = FlaskBase(
     template_404="404.html",
     template_500="500.html",
 )
+
+# Allow loading pattern templates from Vanilla
+loader = ChoiceLoader([
+    FileSystemLoader('templates'),
+    FileSystemLoader('node_modules/vanilla-framework/templates/')
+])
+app.jinja_loader = loader
 
 @app.context_processor
 def utility_processor():

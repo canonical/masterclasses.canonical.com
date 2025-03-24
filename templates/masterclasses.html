@@ -1,42 +1,39 @@
 {% extends "base.html" %}
 {% from "shared/_upcoming_session.html" import upcoming_session %}
+{% from "_macros/vf_hero.jinja" import vf_hero %}
 
 {% block content %}
-<section class="p-section--hero u-no-padding--bottom">
-  <div class="row--50-50-on-large">
-    <div class="col">
-      <div class="p-section--shallow u-no-margin--bottom">
-        <h1>Masterclass</h1>
-        <p class="p-heading--2 ">
-          Your one-stop video library for Canonical talks.
-        </p>
-      </div>
-      <div class="p-section--shallow">
-        <p>
-          All our internal talks are recorded and made available here for you to watch at your leisure.
-          From product deep dives to technical talks, we've got you covered. Curated by the events team,
-          these sessions cover everything from Ubuntu and cloud infrastructure to marketing and leadership.
-          Whether you're looking to expand your knowledge or catch up on a session you missed, you'll find valuable content here.
-        </p>
-      </div>
-
-      <a href="/videos" class="p-button--positive">Explore Catalog</a>
-      <a href="/random" class="p-button">I'm feeling lucky</a>
-
-    </div>
-    <div class="col u-align--center u-hide--medium u-hide--small u-vertically-center">
-      {{ image(url="https://assets.ubuntu.com/v1/3a4d4155-Training.svg",
-        alt="",
-        width="480",
-        height="240",
-        hi_def=True,
-        loading="auto"
-        ) | safe
-      }}
-    </div>
-  </div>
-</section>
-
+{% call(slot) vf_hero(
+  title_text='Masterclass',
+  subtitle_text='Your one-stop video library for Canonical talks',
+  layout='50/50'
+) -%}
+{%- if slot == 'description' -%}
+<p>
+  All our internal talks are recorded and made available here for you to watch at your leisure.
+  From product deep dives to technical talks, we've got you covered. Curated by the events team,
+  these sessions cover everything from Ubuntu and cloud infrastructure to marketing and leadership.
+  Whether you're looking to expand your knowledge or catch up on a session you missed, you'll find valuable content here.
+</p>
+{%- endif -%}
+{%- if slot == 'cta' -%}
+<a href="/videos" class="p-button--positive">Explore Catalog</a>
+<a href="/random" class="p-button">I'm feeling lucky</a>
+{%- endif -%}
+{%- if slot == 'image' -%}
+<div class="p-image-container--3-2 u-hide--medium u-hide--small">
+  {{ image(url="https://assets.ubuntu.com/v1/3a4d4155-Training.svg",
+    alt="",
+    width="480",
+    height="240",
+    hi_def=True,
+    loading="auto",
+    attrs={"class": "p-image-container__image"}
+    ) | safe
+  }}
+</div>
+{%- endif -%}
+{% endcall -%}
 
 {% if live_videos or upcoming_videos_24h or upcoming_videos_future %}
 <section class="">
