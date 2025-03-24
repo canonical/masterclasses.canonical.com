@@ -15,7 +15,7 @@ from webapp.masterclasses import masterclasses
 from webapp.sso import init_sso
 from webapp.database import db_session
 from webapp.admin import (
-    Admin, DashboardView, VideoModelView, 
+    Admin, DashboardView, VideoModelView,
     RestrictedModelView, TagModelView, TagCategoryModelView,
     SubmissionModelView, PresenterModelView
 )
@@ -25,6 +25,7 @@ from models.tag import Tag, TagCategory
 from models.submission import VideoSubmission
 from webapp.api import api
 from webapp.forms import MasterclassSubmissionForm
+from canonicalwebteam import image_template
 
 app = FlaskBase(
     __name__,
@@ -34,6 +35,10 @@ app = FlaskBase(
     template_404="404.html",
     template_500="500.html",
 )
+
+@app.context_processor
+def utility_processor():
+    return {"image": image_template}
 
 # Initialize scheduler with explicit timezone
 background_scheduler = BackgroundScheduler(
@@ -45,8 +50,8 @@ scheduler.init_app(app)
 
 # Add scheduled job to run immediately and then every 60 minutes
 @scheduler.task(
-    'interval', 
-    id='update_presenters', 
+    'interval',
+    id='update_presenters',
     days=1,
     next_run_time=datetime.now(ZoneInfo('Europe/London'))  # Run immediately on startup
 )
@@ -93,10 +98,10 @@ def time_until_filter(timestamp):
     now = datetime.now(timezone.utc)
     event_time = datetime.fromtimestamp(timestamp, timezone.utc)
     diff = event_time - now
-    
+
     hours = int(diff.total_seconds() // 3600)
     minutes = int((diff.total_seconds() % 3600) // 60)
-    
+
     return f"{hours}h {minutes}m"
 
 @app.template_filter('format_date')
@@ -122,7 +127,7 @@ def register():
         try:
             # Get the duration value
             duration = form.duration_other.data if form.duration.data == 'other' else form.duration.data
-            
+
             # Create submission
             submission = VideoSubmission(
                 title=form.title.data,
@@ -131,7 +136,7 @@ def register():
                 email=session.get('openid', {}).get('email', ''),
                 status='pending'
             )
-            
+
             db_session.add(submission)
             db_session.commit()
 

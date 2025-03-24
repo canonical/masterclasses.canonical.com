@@ -21,13 +21,18 @@
       </div>
 
       <a href="/videos" class="p-button--positive">Explore Catalog</a>
-      <a class="p-button" id="lucky-button">I'm feeling lucky</a>
+      <a href="/random" class="p-button">I'm feeling lucky</a>
 
     </div>
     <div class="col u-align--center u-hide--medium u-hide--small u-vertically-center">
-      <img src="https://res.cloudinary.com/canonical/image/fetch/f_auto,q_auto,fl_sanitize,h_366/https://assets.ubuntu.com/v1/3a4d4155-Training.svg"
-        srcset="https://res.cloudinary.com/canonical/image/fetch/f_auto,q_auto,fl_sanitize,w_900,h_732/https://assets.ubuntu.com/v1/3a4d4155-Training.svg 2x"
-        alt="" width="450" height="366" loading="auto">
+      {{ image(url="https://assets.ubuntu.com/v1/3a4d4155-Training.svg",
+        alt="",
+        width="480",
+        height="240",
+        hi_def=True,
+        loading="auto"
+        ) | safe
+      }}
     </div>
   </div>
 </section>
@@ -65,7 +70,6 @@
 </section>
 {% endif %}
 
-
 <section class="p-strip is-light">
   <div class="row">
     <div class="col-9">
@@ -80,13 +84,5 @@
     </div>
   </div>
 </section>
-
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    document.querySelector('#lucky-button').addEventListener('click', () => {
-      window.location.href = '/random';
-    });
-  });
-</script>
 
 {% endblock %}
