@@ -55,6 +55,10 @@
   margin-bottom: 1rem;
   line-height: 1.5;
   max-height: 6em; /* fallback for non-webkit browsers: 1.5 line-height * 4 lines */
+
+  p:last-child {
+    margin-bottom: 0;
+  }
 }
 
 // Live video indicator

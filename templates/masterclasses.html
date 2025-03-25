@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% from "shared/_upcoming_session.html" import upcoming_session %}
 {% from "_macros/vf_hero.jinja" import vf_hero %}
+{% from "_macros/vf_tiered-list.jinja" import vf_tiered_list %}
 
 {% block content %}
 {% call(slot) vf_hero(
@@ -35,37 +36,84 @@
 {%- endif -%}
 {% endcall -%}
 
-{% if live_videos or upcoming_videos_24h or upcoming_videos_future %}
-<section class="">
-  <div class="u-fixed-width">
-    <hr>
-  </div>
-  <div class="row">
-    <div class="col-8">
-      <h4>Upcoming sessions</h4>
-      <ul class="p-list">
-        {% set shown = [] %}
-        {% for video in live_videos %}
-          {% if shown|length < 2 %}
-            {{ upcoming_session(video, 'live', now) }}
-            {% set _=shown.append(1) %}
-          {% endif %}
-        {% endfor %}
 
-        {% if upcoming_videos_24h and shown|length < 2 %}
-          {{ upcoming_session(upcoming_videos_24h[0], 'soon', now) }}
-          {% set _=shown.append(1) %}
-        {% endif %}
+{# prepare list of up to 4 upcoming sessions #}
+{# TODO: move the logic to backend? #}
+{% set upcoming = [] %}
+{% for video in live_videos %}
+  {% if upcoming|length < 4 %}
+    {% set _=upcoming.append([video, 'live']) %}
+  {% endif %}
+{% endfor %}
 
-        {% if upcoming_videos_future and shown|length < 2 %}
-          {{ upcoming_session(upcoming_videos_future[0], 'future', now) }}
-          {% set _=shown.append(1) %}
-        {% endif %}
-      </ul>
-    </div>
-  </div>
-</section>
+{% if upcoming_videos_24h and shown|length < 4 %}
+  {% set _=upcoming.append([upcoming_videos_24h[0], 'soon']) %}
 {% endif %}
+
+{% if upcoming_videos_future and shown|length < 4 %}
+  {% set _=upcoming.append([upcoming_videos_future[0], 'future']) %}
+{% endif %}
+
+{%- call(slot) vf_tiered_list(is_list_full_width_on_tablet=true) -%}
+{%- if slot == 'title' -%}
+<h2>Upcoming sessions</h2>
+{%- endif -%}
+
+{%- for session in upcoming -%}
+{%- set video = session[0] -%}
+{%- set session_type = session[1] -%}
+
+{%- if slot == ('list_item_title_' ~ loop.index) -%}
+{%- if session_type == 'live' -%}
+  <a href="{{ video.stream }}">
+    <h3 class="p-heading--5">
+      <span style="margin-right: 0.3rem;" class="live-dot"></span>
+      <span>{{ video.title }}</span>
+    </h3>
+  </a>
+{%- else -%}
+  <h3 class="p-heading--5">
+    <a href="{{ video.calendar_event }}">{{ video.title }}</a>
+  </h3>
+{%- endif -%}
+{%- endif -%}
+
+{# based on macro in _upcoming_session.html #}
+{# TODO: move some of the logic (time calculations?) to backend? #}
+{%- if slot == ('list_item_description_' ~ loop.index) -%}
+<div class="description-truncate">{{ video.description|markdown|safe }}</div>
+<p class="p-text--small u-text-muted">
+  <i class="p-icon--user"></i>
+  {%- set presenters = video.presenters -%}
+  {%- if presenters|length <= 2 -%}
+    {%- for presenter in presenters -%}
+      {{ presenter.name }}{% if not loop.last %}, {% endif %}
+    {%- endfor -%}
+  {%- else -%}
+    {{ presenters[0].name }}, {{ presenters[1].name }} et al.
+  {%- endif -%}
+</p>
+{%- if session_type == 'soon' -%}
+<p class="p-text--small u-text-muted">
+  <i class="p-icon--notifications"></i>
+  {%- set time_diff = video.unixstart - now -%}
+  {%- set hours = (time_diff / 3600)|int -%}
+  {%- set minutes = ((time_diff % 3600) / 60)|int -%}
+  {%- if hours > 0 %}
+    {{ hours }}h {{ minutes }}m
+  {%- else %}
+    {{ minutes }}m
+  {%- endif -%}
+</p>
+{%- elif session_type == 'future' -%}
+<p class="p-text--small u-text-muted">
+  <i class="p-icon--revisions"></i>
+  {{ video.unixstart|format_date }}
+</p>
+{%- endif -%}
+{%- endif -%}
+{%- endfor -%}
+{%- endcall -%}
 
 <section class="p-strip is-light">
   <div class="row">
