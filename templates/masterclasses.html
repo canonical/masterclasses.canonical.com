@@ -83,7 +83,7 @@
 {%- if slot == ('list_item_description_' ~ loop.index) -%}
 <div class="description-truncate">{{ video.description|markdown|safe }}</div>
 <p class="p-text--small u-text-muted">
-  <i class="p-icon--user"></i>
+  <i class="p-icon--user"></i>&nbsp;
   {%- set presenters = video.presenters -%}
   {%- if presenters|length <= 2 -%}
     {%- for presenter in presenters -%}
@@ -95,20 +95,19 @@
 </p>
 {%- if session_type == 'soon' -%}
 <p class="p-text--small u-text-muted">
-  <i class="p-icon--notifications"></i>
+  <i class="p-icon--notifications"></i>&nbsp;
   {%- set time_diff = video.unixstart - now -%}
   {%- set hours = (time_diff / 3600)|int -%}
   {%- set minutes = ((time_diff % 3600) / 60)|int -%}
-  {%- if hours > 0 %}
+  {%- if hours > 0 -%}
     {{ hours }}h {{ minutes }}m
-  {%- else %}
+  {%- else -%}
     {{ minutes }}m
   {%- endif -%}
 </p>
 {%- elif session_type == 'future' -%}
 <p class="p-text--small u-text-muted">
-  <i class="p-icon--revisions"></i>
-  {{ video.unixstart|format_date }}
+  <i class="p-icon--revisions"></i>&nbsp;{{ video.unixstart|format_date }}
 </p>
 {%- endif -%}
 {%- endif -%}
