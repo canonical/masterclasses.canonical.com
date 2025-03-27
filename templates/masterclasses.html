@@ -54,6 +54,7 @@
   {% set _=upcoming.append([upcoming_videos_future[0], 'future']) %}
 {% endif %}
 
+{%- if upcoming|length > 0 -%}
 {%- call(slot) vf_tiered_list(is_list_full_width_on_tablet=true) -%}
 {%- if slot == 'title' -%}
 <h2>Upcoming sessions</h2>
@@ -113,6 +114,7 @@
 {%- endif -%}
 {%- endfor -%}
 {%- endcall -%}
+{%- endif -%}
 
 <section class="p-strip is-light">
   <div class="row">
