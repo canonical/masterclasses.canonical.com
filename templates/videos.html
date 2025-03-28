@@ -35,7 +35,10 @@
             </form>
           </div>
 
-          <div class="u-equal-height" style="padding-bottom: 1rem;">
+          <!-- Filter results counter - moved here -->
+          <p id="filter-results-count" class="u-text-muted"></p>
+
+          <div id="video-container" class="u-equal-height" style="padding-bottom: 1rem;" data-total-items="{{ pagination.total_items }}">
             {% for video in recorded_videos %}
             <div class="col-4">
               {{ video_card(video) }}
@@ -43,6 +46,116 @@
             {% endfor %}
           </div>
 
+          <!-- No results message -->
+          <div id="no-results-message" style="display: none;" class="u-align--center p-strip">
+            <h3 class="u-align--center">No videos match your filters</h3>
+            <h4 class="u-align--center">Try adjusting your filter criteria</h4>
+            <div class="u-align--center">
+              <button id="reset-filters" class="p-button">Reset Filters</button>
+            </div>
+          </div>
+          
+          <!-- Pagination component -->
+          {% if pagination.total_pages > 1 %}
+          <nav id="pagination-container" class="p-pagination" aria-label="Pagination">
+            <ol class="p-pagination__items">
+              <!-- Previous page button -->
+              {% set base_url = url_for('masterclasses.videos') %}
+
+              <!-- Define a helper function for pagination URLs -->
+              {% macro pagination_url(page_num) -%}
+                {{ base_url }}?page={{ page_num }}
+                {%- if active_filters.topic -%}
+                  &topic={{ active_filter_slugs.topic|join(',') }}
+                {%- endif -%}
+                {%- if active_filters.event -%}
+                  &event={{ active_filter_slugs.event|join(',') }}
+                {%- endif -%}
+                {%- if active_filters.date -%}
+                  &date={{ active_filter_slugs.date|join(',') }}
+                {%- endif -%}
+                {%- if active_filters.presenter -%}
+                  &presenter={{ active_filter_slugs.presenter|join(',') }}
+                {%- endif -%}
+                {%- if active_filters.search -%}
+                  &search={{ active_filters.search }}
+                {%- endif -%}
+              {%- endmacro %}
+
+              <!-- Then use it in each pagination link -->
+              <li class="p-pagination__item">
+                {% if pagination.page > 1 %}
+                <a class="p-pagination__link--previous" 
+                   href="{{ pagination_url(pagination.page-1) }}" 
+                   title="Previous page">
+                  <i class="p-icon--chevron-down">Previous page</i>
+                </a>
+                {% else %}
+                <span class="p-pagination__link--previous is-disabled" aria-disabled="true">
+                  <i class="p-icon--chevron-down">Previous page</i>
+                </span>
+                {% endif %}
+              </li>
+              
+              <!-- First page -->
+              <li class="p-pagination__item">
+                <a class="p-pagination__link {% if pagination.page == 1 %}is-active{% endif %}" 
+                   {% if pagination.page == 1 %}aria-current="page"{% endif %}
+                   href="{{ pagination_url(1) }}" 
+                   aria-label="Page 1">1</a>
+              </li>
+              
+              <!-- Truncation if needed -->
+              {% if pagination.page > 3 %}
+              <li class="p-pagination__item p-pagination__item--truncation">…</li>
+              {% endif %}
+              
+              <!-- Pages around current page -->
+              {% set start_page = 2 if pagination.page <= 2 else pagination.page - 1 %}
+              {% set end_page = pagination.total_pages - 1 if pagination.page >= pagination.total_pages - 1 else pagination.page + 1 %}
+              {% for p in range(start_page, end_page + 1) %}
+                {% if p > 1 and p < pagination.total_pages %}
+                <li class="p-pagination__item">
+                  <a class="p-pagination__link {% if pagination.page == p %}is-active{% endif %}" 
+                     {% if pagination.page == p %}aria-current="page"{% endif %}
+                     href="{{ pagination_url(p) }}" 
+                     aria-label="Page {{ p }}">{{ p }}</a>
+                </li>
+                {% endif %}
+              {% endfor %}
+              
+              <!-- Truncation if needed -->
+              {% if pagination.page < pagination.total_pages - 2 %}
+              <li class="p-pagination__item p-pagination__item--truncation">…</li>
+              {% endif %}
+              
+              <!-- Last page (if more than 1 page) -->
+              {% if pagination.total_pages > 1 and pagination.total_pages != 1 %}
+              <li class="p-pagination__item">
+                <a class="p-pagination__link {% if pagination.page == pagination.total_pages %}is-active{% endif %}" 
+                   {% if pagination.page == pagination.total_pages %}aria-current="page"{% endif %}
+                   href="{{ pagination_url(pagination.total_pages) }}" 
+                   aria-label="Page {{ pagination.total_pages }}">{{ pagination.total_pages }}</a>
+              </li>
+              {% endif %}
+              
+              <!-- Next page button -->
+              <li class="p-pagination__item">
+                {% if pagination.page < pagination.total_pages %}
+                <a class="p-pagination__link--next" 
+                   href="{{ pagination_url(pagination.page+1) }}" 
+                   title="Next page">
+                  <i class="p-icon--chevron-down">Next page</i>
+                </a>
+                {% else %}
+                <span class="p-pagination__link--next is-disabled" aria-disabled="true">
+                  <i class="p-icon--chevron-down">Next page</i>
+                </span>
+                {% endif %}
+              </li>
+            </ol>
+          </nav>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -51,166 +164,420 @@
 
 <script defer>
   document.addEventListener("DOMContentLoaded", () => {
-    const videoCards = document.querySelectorAll('.p-card');
+    const videoContainer = document.getElementById('video-container');
     const searchInput = document.getElementById('search-input');
     const resetSearch = document.getElementById('reset-search');
-    const filters = {
-      topic: new Set(),
-      event: new Set(),
-      date: new Set(),
-      presenter: new Set(),
-      search: ''
+    const resetFiltersBtn = document.getElementById('reset-filters');
+    const noResultsMessage = document.getElementById('no-results-message');
+    const resultsCounter = document.getElementById('filter-results-count');
+    const paginationContainer = document.getElementById('pagination-container');
+    
+    // Create mappings between IDs and slugs
+    const idToSlug = {
+      // For topics
+      {% for tag in topic_tags %}
+      "{{ tag.id }}": "{{ tag.name|slugify }}",
+      {% endfor %}
+      // For events
+      {% for tag in event_tags %}
+      "{{ tag.id }}": "{{ tag.name|slugify }}",
+      {% endfor %}
+      // For dates
+      {% for tag in date_tags %}
+      "{{ tag.id }}": "{{ tag.name|slugify }}",
+      {% endfor %}
+      // For presenters
+      {% for presenter in presenters %}
+      "{{ presenter.id }}": "{{ presenter.name|slugify }}",
+      {% endfor %}
     };
 
-    function normalizeText(text) {
-      return text.normalize('NFKD')  // Decompose characters into base form and diacritics
-        .replace(/[\u0300-\u036f]/g, '')  // Remove diacritics
-        .toLowerCase();
-    }
+    const slugToId = {
+      // For topics
+      {% for tag in topic_tags %}
+      "{{ tag.name|slugify }}": "{{ tag.id }}",
+      {% endfor %}
+      // For events
+      {% for tag in event_tags %}
+      "{{ tag.name|slugify }}": "{{ tag.id }}",
+      {% endfor %}
+      // For dates
+      {% for tag in date_tags %}
+      "{{ tag.name|slugify }}": "{{ tag.id }}",
+      {% endfor %}
+      // For presenters
+      {% for presenter in presenters %}
+      "{{ presenter.name|slugify }}": "{{ presenter.id }}",
+      {% endfor %}
+    };
+    
+    // Initialize filters from active_filters - convert all IDs to strings for consistency
+    const filters = {
+      topic: new Set(Array.from({{ active_filters.topic|tojson }}).map(id => id.toString())),
+      event: new Set(Array.from({{ active_filters.event|tojson }}).map(id => id.toString())),
+      date: new Set(Array.from({{ active_filters.date|tojson }}).map(id => id.toString())),
+      presenter: new Set(Array.from({{ active_filters.presenter|tojson }}).map(id => id.toString())),
+      search: {{ active_filters.search|default('')|tojson }}
+    };
 
-    // Function to update URL parameters
-    function updateURLParameters() {
+    // Function to update URL and fetch new content
+    let currentRequest = null;
+
+    async function updateFilteredContent(page = 1, pushState = true) {
+      // Cancel any in-progress request
+      if (currentRequest) {
+        currentRequest.abort();
+      }
+      
+      // Create an AbortController for the new request
+      const abortController = new AbortController();
+      currentRequest = abortController;
+      
+      // Hide UI elements while loading
+      if (paginationContainer) paginationContainer.style.display = 'none';
+      if (resultsCounter) resultsCounter.style.display = 'none';
+      if (noResultsMessage) noResultsMessage.style.display = 'none';
+      
+      // Build the URL with current filters
       const params = new URLSearchParams();
-
-      // Add each filter type to URL parameters
+      
+      // Add each filter type to URL parameters, using slugs instead of IDs
       Object.entries(filters).forEach(([key, value]) => {
         if (value instanceof Set && value.size > 0) {
-          params.append(key, Array.from(value).join(','));
+          const slugs = Array.from(value).map(id => idToSlug[id] || id);
+          params.append(key, slugs.join(','));
         } else if (typeof value === 'string' && value) {
           params.append(key, value);
         }
       });
-
-      // Update URL without reloading page
-      const newURL = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
-      window.history.pushState({}, '', newURL);
-    }
-
-    // Function to restore filters from URL parameters
-    function restoreFiltersFromURL() {
-      const params = new URLSearchParams(window.location.search);
-
-      // Restore each filter type
-      params.forEach((value, key) => {
-        if (key in filters) {
-          if (filters[key] instanceof Set) {
-            value.split(',').forEach(val => {
-              filters[key].add(val);
-              // Check corresponding checkbox
-              document.querySelector(`.${key}-filter[value="${val}"]`).checked = true;
-            });
-          } else {
-            filters[key] = value;
-            if (key === 'search') {
-              searchInput.value = value;
+      
+      // Set page number
+      params.set('page', page.toString());
+      
+      // Update URL without reloading page (only if pushState is true)
+      const newUrl = `${window.location.pathname}?${params.toString()}`;
+      if (pushState) {
+        history.pushState({ filters, page }, '', newUrl);
+      }
+      
+      // Show loading state
+      videoContainer.innerHTML = '<div class="u-align--center p-strip"><span class="p-card__spinner"><i class="p-icon--spinner u-animation--spin"></i></span><span class="u-off-screen">Loading...</span></div>';
+      
+      try {
+        // Fetch the filtered content
+        const response = await fetch(newUrl, {
+          signal: abortController.signal
+        });
+        
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        
+        const html = await response.text();
+        
+        // Create a temporary element to parse the HTML
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+        // Extract the video cards section
+        const newVideoContainer = doc.getElementById('video-container');
+        const newPagination = doc.getElementById('pagination-container');
+        
+        // Update the DOM with new content
+        if (newVideoContainer) {
+          videoContainer.innerHTML = newVideoContainer.innerHTML;
+        }
+        
+        // Check if pagination should be shown based on total items
+        const totalItems = newVideoContainer ? 
+          parseInt(newVideoContainer.getAttribute('data-total-items')) : 0;
+        const itemsPerPage = 12; // Should match server-side
+        const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+        
+        // Update pagination
+        if (paginationContainer) {
+          if (newPagination) {
+            // Server returned pagination, use it
+            paginationContainer.innerHTML = newPagination.innerHTML;
+            paginationContainer.style.display = '';
+            setupPaginationLinks();
+          } else if (totalPages > 1) {
+            // Server didn't return pagination, but we need it
+            // Fetch the full page to get pagination HTML
+            const fullPageResponse = await fetch(window.location.pathname);
+            const fullPageHtml = await fullPageResponse.text();
+            const fullPageDoc = new DOMParser().parseFromString(fullPageHtml, 'text/html');
+            const fullPagePagination = fullPageDoc.getElementById('pagination-container');
+            
+            if (fullPagePagination) {
+              paginationContainer.innerHTML = fullPagePagination.innerHTML;
+              paginationContainer.style.display = '';
+              setupPaginationLinks();
+            } else {
+              paginationContainer.style.display = 'none';
             }
+          } else {
+            // Only one page, hide pagination
+            paginationContainer.style.display = 'none';
           }
         }
-      });
-
-      updateVisibility();
-    }
-
-    function updateVisibility() {
-      const container = document.querySelector('.u-equal-height');
-      let visibleCount = 0;
-
-      videoCards.forEach(card => {
-        const cardTopics = card.dataset.topics.split(' ').filter(Boolean);
-        const cardEvents = card.dataset.events.split(' ').filter(Boolean);
-        const cardDates = card.dataset.dates.split(' ').filter(Boolean);
-        const cardPresenters = card.dataset.presenters.split(' ').filter(Boolean);
-
-        // Get searchable content from the card and normalize it
-        const title = normalizeText(card.querySelector('.video-title').textContent);
-        const tags = normalizeText([...cardTopics, ...cardEvents, ...cardDates].join(' '));
-        const presenters = normalizeText(cardPresenters.join(' '));
-        const searchContent = `${title} ${tags} ${presenters}`;
-
-        // Split search terms and normalize them
-        const searchTerms = normalizeText(filters.search).split(' ').filter(Boolean);
-        const searchMatch = !filters.search ||
-          searchTerms.every(term => searchContent.includes(term));
-
-        // Check filters using OR logic within categories
-        const topicsMatch = filters.topic.size === 0 ||
-          [...filters.topic].some(topic => cardTopics.includes(topic));
-        const eventsMatch = filters.event.size === 0 ||
-          [...filters.event].some(event => cardEvents.includes(event));
-        const datesMatch = filters.date.size === 0 ||
-          [...filters.date].some(date => cardDates.includes(date));
-        const presentersMatch = filters.presenter.size === 0 ||
-          [...filters.presenter].some(presenter => cardPresenters.includes(presenter));
-
-        // Show/hide card based on filters
-        const isVisible = searchMatch && topicsMatch && eventsMatch && datesMatch && presentersMatch;
-        const cardWrapper = card.closest('.col-4');
-
-        if (isVisible) {
-          cardWrapper.style.display = '';
-          visibleCount++;
-        } else {
-          cardWrapper.style.display = 'none';
+        
+        // After processing, show the appropriate UI elements
+        
+        // Check if there are any video cards in the updated container
+        const hasVideos = newVideoContainer && newVideoContainer.querySelectorAll('.p-card').length > 0;
+        
+        // Show/hide pagination based on total pages
+        if (paginationContainer) {
+          paginationContainer.style.display = totalPages > 1 ? '' : 'none';
         }
-      });
-
-      // Update grid layout based on visible items
-      if (visibleCount === 0) {
-        // No results found - could add a "no results" message here
-        container.style.display = 'block';
-      } else {
-        container.style.display = 'flex';
+        
+        // Show/hide results counter
+        if (resultsCounter) {
+          const hasFilters = filters.topic.size > 0 || 
+                           filters.event.size > 0 || 
+                           filters.date.size > 0 || 
+                           filters.presenter.size > 0 || 
+                           filters.search;
+                           
+          if (hasFilters && hasVideos) {
+            resultsCounter.textContent = `${totalItems} video${totalItems !== 1 ? 's' : ''} match your filters`;
+            resultsCounter.style.display = 'block';
+          } else {
+            resultsCounter.style.display = 'none';
+          }
+        }
+        
+        // Show/hide no results message
+        if (noResultsMessage) {
+          noResultsMessage.style.display = hasVideos ? 'none' : 'block';
+        }
+      } catch (error) {
+        // Ignore aborted request errors
+        if (error.name !== 'AbortError') {
+          console.error('Error fetching filtered content:', error);
+          // Fall back to traditional page reload
+          window.location.href = newUrl;
+        }
+        
+        // In case of error, reset UI elements
+        if (noResultsMessage) noResultsMessage.style.display = 'none';
+        if (resultsCounter) resultsCounter.style.display = 'none';
+        if (paginationContainer) paginationContainer.style.display = 'none';
+      } finally {
+        // Clear current request reference if this is still the current request
+        if (currentRequest === abortController) {
+          currentRequest = null;
+        }
       }
     }
-
-    // Modify existing checkbox handler
+    
+    // Function to set up pagination link event listeners
+    function setupPaginationLinks() {
+      document.querySelectorAll('.p-pagination__link, .p-pagination__link--previous, .p-pagination__link--next')
+        .forEach(link => {
+          if (!link.classList.contains('is-disabled') && !link.hasAttribute('aria-disabled')) {
+            link.addEventListener('click', (e) => {
+              e.preventDefault();
+              const url = new URL(link.href);
+              const page = url.searchParams.get('page');
+              if (page) {
+                updateFilteredContent(page);
+              }
+            });
+          }
+        });
+    }
+    
+    // Handle browser back/forward buttons
+    window.addEventListener('popstate', (event) => {
+      // Get filters from URL parameters
+      const url = new URL(window.location.href);
+      const params = url.searchParams;
+      
+      // Clear existing filters
+      Object.keys(filters).forEach(key => {
+        if (filters[key] instanceof Set) {
+          filters[key].clear();
+        } else {
+          filters[key] = '';
+        }
+      });
+      
+      // Parse topic, event, date, presenter parameters
+      ['topic', 'event', 'date', 'presenter'].forEach(type => {
+        const paramValue = params.get(type);
+        if (paramValue) {
+          // Split by comma and convert slugs to IDs
+          paramValue.split(',').forEach(slug => {
+            if (slug) {
+              const id = slugToId[slug] || slug;
+              filters[type].add(id.toString());
+            }
+          });
+        }
+      });
+      
+      // Parse search parameter
+      filters.search = params.get('search') || '';
+      
+      // Update checkbox UI to match filters
+      updateCheckboxesFromFilters();
+      
+      // Get page number
+      const page = parseInt(params.get('page')) || 1;
+      
+      // Fetch content without pushing state (we're already in that state)
+      updateFilteredContent(page, false);
+    });
+    
+    // Update checkboxes to match current filters
+    function updateCheckboxesFromFilters() {
+      // First uncheck all boxes
+      document.querySelectorAll('.topic-filter, .event-filter, .date-filter, .presenter-filter')
+        .forEach(checkbox => { checkbox.checked = false; });
+      
+      // Then check only the active ones
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value instanceof Set) {
+          value.forEach(val => {
+            const checkbox = document.querySelector(`.${key}-filter[value="${val}"]`);
+            if (checkbox) checkbox.checked = true;
+          });
+        }
+      });
+      
+      // Update search input
+      if (searchInput) {
+        searchInput.value = filters.search || '';
+      }
+    }
+    
+    // Attach filter change handlers
     document.querySelectorAll('.topic-filter, .event-filter, .date-filter, .presenter-filter')
       .forEach(checkbox => {
         checkbox.addEventListener('change', (e) => {
           const filterType = e.target.classList[1].split('-')[0];
+          const value = e.target.value.toString(); // Ensure string type
+          
           if (e.target.checked) {
-            filters[filterType].add(e.target.value);
+            filters[filterType].add(value);
           } else {
-            filters[filterType].delete(e.target.value);
+            filters[filterType].delete(value);
           }
-          updateVisibility();
-          updateURLParameters();
+          updateFilteredContent();
         });
       });
+    
+    // Search input handlers
+    if (searchInput) {
+      // Pre-fill with search value from server
+      searchInput.value = filters.search;
+      
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          filters.search = searchInput.value;
+          updateFilteredContent();
+        }
+      });
+      
+      // Submit button handler
+      const submitSearch = document.getElementById('submit-search');
+      if (submitSearch) {
+        submitSearch.addEventListener('click', (e) => {
+          e.preventDefault();
+          filters.search = searchInput.value;
+          updateFilteredContent();
+        });
+      }
+    }
+    
+    // Reset search button
+    if (resetSearch) {
+      resetSearch.addEventListener('click', () => {
+        filters.search = '';
+        searchInput.value = '';
+        updateFilteredContent();
+      });
+    }
+    
+    // Reset all filters button
+    if (resetFiltersBtn) {
+      resetFiltersBtn.addEventListener('click', () => {
+        // Reset all filters
+        Object.keys(filters).forEach(key => {
+          if (filters[key] instanceof Set) {
+            filters[key].clear();
+          } else {
+            filters[key] = '';
+          }
+        });
+        
+        // Update checkboxes
+        updateCheckboxesFromFilters();
+        
+        // Reset the page
+        window.location.href = window.location.pathname;
+      });
+    }
+    
+    // Initialize checkboxes based on current filters
+    updateCheckboxesFromFilters();
+    
+    // Show initial filter counter if filters are applied
+    const hasInitialFilters = filters.topic.size > 0 || 
+                          filters.event.size > 0 || 
+                          filters.date.size > 0 || 
+                          filters.presenter.size > 0 || 
+                          filters.search;
+                          
+    if (resultsCounter && hasInitialFilters) {
+      const totalItems = parseInt(videoContainer.getAttribute('data-total-items')) || 0;
+      if (totalItems > 0) {
+        resultsCounter.textContent = `${totalItems} video${totalItems !== 1 ? 's' : ''} match your filters`;
+        resultsCounter.style.display = 'block';
+      } else {
+        resultsCounter.style.display = 'none';
+      }
+    }
+    
+    // Show no results message on initial page load if needed
+    if (videoContainer && noResultsMessage) {
+      const totalItems = parseInt(videoContainer.getAttribute('data-total-items')) || 0;
+      const hasVideos = videoContainer.querySelectorAll('.p-card').length > 0;
+      
+      if (!hasVideos) {
+        noResultsMessage.style.display = 'block';
+      } else {
+        noResultsMessage.style.display = 'none';
+      }
+    }
+    
+    // Set up pagination links initially
+    setupPaginationLinks();
 
-    // Modify search handlers
-    searchInput.addEventListener('input', (e) => {
-      filters.search = e.target.value;
-      updateVisibility();
-      updateURLParameters();
-    });
-
-    resetSearch.addEventListener('click', () => {
-      filters.search = '';
-      searchInput.value = '';
-      updateVisibility();
-      updateURLParameters();
-    });
-
-    // Restore filters on page load
-    restoreFiltersFromURL();
-
-    // Add toggle functionality for filter button on mobile and medium screens
-    const filterButton = document.querySelector('[aria-controls="filter-accordion"]');
+    // Setup filter accordion toggle for mobile
+    const filterButton = document.querySelector('button[aria-controls="filter-accordion"]');
     const filterAccordion = document.getElementById('filter-accordion');
-
+    
     if (filterButton && filterAccordion) {
+      // Initialize the state
+      filterButton.setAttribute('aria-expanded', 'false');
+      
       filterButton.addEventListener('click', () => {
-        const isHidden = filterAccordion.classList.contains('u-hide--small') ||
-                        filterAccordion.classList.contains('u-hide--medium');
-        if (isHidden) {
-          filterAccordion.classList.remove('u-hide--small');
-          filterAccordion.classList.remove('u-hide--medium');
-          filterButton.textContent = 'Hide filters';
-        } else {
-          filterAccordion.classList.add('u-hide--small');
-          filterAccordion.classList.add('u-hide--medium');
+        const isExpanded = filterButton.getAttribute('aria-expanded') === 'true';
+        
+        // Toggle the state
+        filterButton.setAttribute('aria-expanded', !isExpanded);
+        
+        // Toggle classes to show/hide the accordion
+        if (isExpanded) {
+          filterAccordion.classList.add('u-hide--small', 'u-hide--medium');
           filterButton.textContent = 'Show filters';
+        } else {
+          filterAccordion.classList.remove('u-hide--small', 'u-hide--medium');
+          filterButton.textContent = 'Hide filters';
         }
       });
     }

@@ -7,10 +7,18 @@ RUN_COMMAND="talisker.gunicorn.gevent webapp.app:app --bind $1 --worker-class ge
 echo "Running alembic migrations"
 alembic upgrade head
 
-# Only run dummy data import in development mode
+# Only run placeholder data import in development mode
 if [ "${FLASK_DEBUG,,}" = "true" ] || [ "${FLASK_DEBUG}" = "True" ] || [ "${FLASK_DEBUG}" = "1" ] || [ "${FLASK_DEBUG}" = "yes" ]; then
-    echo "Running dummy data import"
-    python3 scripts/dummy-data_import.py
+    echo "Running placeholder data import"
+    
+    # Check if we should use dynamic or static placeholder data
+    if [ "${PLACEHOLDER_DATA_DYNAMIC,,}" = "true" ] || [ "${PLACEHOLDER_DATA_DYNAMIC}" = "True" ] || [ "${PLACEHOLDER_DATA_DYNAMIC}" = "1" ] || [ "${PLACEHOLDER_DATA_DYNAMIC}" = "yes" ]; then
+        echo "Using dynamically generated placeholder data"
+        python3 scripts/import-dynamic-placeholder-data.py
+    else
+        echo "Using static placeholder data from JSON files"
+        python3 scripts/import-static-placeholder-data.py
+    fi
 fi
 
 if [ "${FLASK_DEBUG,,}" = "true" ] || [ "${FLASK_DEBUG}" = "True" ] || [ "${FLASK_DEBUG}" = "1" ] || [ "${FLASK_DEBUG}" = "yes" ]; then
