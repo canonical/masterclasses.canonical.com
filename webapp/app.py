@@ -169,6 +169,10 @@ def register():
         submission_status=submission_status
     )
 
+@app.route("/events/<event>")
+def event(event):
+    return flask.render_template("/events/{}.html".format(event))
+
 @app.teardown_appcontext
 def shutdown_session(exception=None):
     db_session.remove()
