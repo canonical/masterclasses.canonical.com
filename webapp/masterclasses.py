@@ -164,16 +164,17 @@ def videos():
     )
     all_recorded_videos = all_videos_query.all()
     
-    topic_tags = VideoService.get_tags_by_category('Topic')
-    event_tags = VideoService.get_tags_by_category('Event')
-    date_tags = VideoService.get_tags_by_category('Date')
-    presenters = VideoService.get_presenters_with_videos()
-    live_videos = VideoService.get_live_videos()
+    video_service = VideoService()
+    topic_tags = video_service.get_tags_by_category('Topic')
+    event_tags = video_service.get_tags_by_category('Event')
+    date_tags = video_service.get_tags_by_category('Date')
+    presenters = video_service.get_presenters_with_videos()
+    live_videos = video_service.get_live_videos()
     
     search_query = flask.request.args.get('search', '')
     
     # Get filtered videos using the service
-    recorded_videos, total_videos = VideoService.search_videos(
+    recorded_videos, total_videos = video_service.search_videos(
         search_query,
         topic_filter,
         event_filter,
