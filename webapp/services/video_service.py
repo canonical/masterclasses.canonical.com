@@ -12,6 +12,10 @@ class VideoService:
     def __init__(self):
         self.repository = VideoRepository()
 
+    def get_video_by_id(self, video_id):
+        """Get a video by its ID."""
+        return self.repository.get_video_by_id(video_id)
+
     def get_live_videos(self):
         """Get currently live videos."""
         return self.repository.get_live_videos()

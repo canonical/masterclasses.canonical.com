@@ -7,6 +7,10 @@ from models.tag import Tag, TagCategory
 
 class VideoRepository:
     @staticmethod
+    def get_video_by_id(video_id):
+        return db_session.query(Video).filter(Video.id == video_id).first()
+
+    @staticmethod
     def get_live_videos():
         now = datetime.now(timezone.utc)
         now_unix = int(now.timestamp())

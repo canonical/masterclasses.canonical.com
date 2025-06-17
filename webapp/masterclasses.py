@@ -112,7 +112,8 @@ def index():
 
 @masterclasses.route("/<title>-class-<id>")
 def video(id, title):
-    video = get_video_by_id(id)
+    video_service = VideoService()
+    video = video_service.get_video_by_id(id)
     if not video:
         flask.abort(404)
         
