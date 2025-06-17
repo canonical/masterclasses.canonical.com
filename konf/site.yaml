@@ -21,6 +21,11 @@ env:
       key: masterclasses-database-url
       name: masterclasses-canonical-com
 
+  - name: MATTERMOST_DEV_WEBHOOK_URL
+    secretKeyRef:
+      key: mattermost-dev-webhook-url
+      name: masterclasses-canonical-com
+
 # Overrides for production
 production:
   replicas: 2
