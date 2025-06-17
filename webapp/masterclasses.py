@@ -18,6 +18,7 @@ from models.submission import VideoSubmission
 from webapp.auth import require_api_token
 from flask import jsonify
 from webapp.utils.text_utils import slugify
+from webapp.services.video_service import VideoService
 
 masterclasses = flask.Blueprint(
     "masterclasses",
@@ -163,151 +164,27 @@ def videos():
     )
     all_recorded_videos = all_videos_query.all()
     
-    topic_tags = get_tags_by_category('Topic')
-    event_tags = get_tags_by_category('Event')
-    date_tags = get_tags_by_category('Date')
-    
-    presenters = (db_session.query(Presenter)
-                 .join(Presenter.videos)
-                 .filter(Video.recording.isnot(None))
-                 .group_by(Presenter.id)
-                 .having(func.count(Video.id) > 0)
-                 .order_by(Presenter.name)
-                 .all())
-    
-    live_videos = get_live_videos()
+    topic_tags = VideoService.get_tags_by_category('Topic')
+    event_tags = VideoService.get_tags_by_category('Event')
+    date_tags = VideoService.get_tags_by_category('Date')
+    presenters = VideoService.get_presenters_with_videos()
+    live_videos = VideoService.get_live_videos()
     
     search_query = flask.request.args.get('search', '')
     
-    # Helper function to render the empty results template
-    def render_empty_results():
-        return flask.render_template(
-            "videos.html",
-            recorded_videos=[],
-            all_recorded_videos=all_recorded_videos,
-            topic_tags=topic_tags,
-            event_tags=event_tags,
-            date_tags=date_tags,
-            presenters=presenters,
-            live_videos=live_videos,
-            pagination={'page': 1, 'total_pages': 1, 'total_items': 0, 'items_per_page': items_per_page},
-            active_filters={
-                'topic': topic_filter,
-                'event': event_filter,
-                'date': date_filter,
-                'presenter': presenter_filter
-            }
-        )
-
-    query_base = db_session.query(Video).filter(Video.recording.isnot(None))
-    matched_ids = None
+    # Get filtered videos using the service
+    recorded_videos, total_videos = VideoService.search_videos(
+        search_query,
+        topic_filter,
+        event_filter,
+        date_filter,
+        presenter_filter,
+        page,
+        items_per_page
+    )
     
-    # Define a function to execute a filter query and update matched_ids
-    def apply_filter(filter_query):
-        nonlocal matched_ids
-        filter_ids = {vid.id for vid in filter_query}
-
-        if matched_ids is None:
-            matched_ids = filter_ids
-        else:
-            matched_ids &= filter_ids
-
-        return len(matched_ids) > 0
-    
-    tag_filters = [
-        ('Topic', topic_filter),
-        ('Event', event_filter),
-        ('Date', date_filter)
-    ]
-    
-    for category, filter_values in tag_filters:
-        if filter_values:
-            tag_query = (
-                query_base.join(Tag, Video.tags)
-                .join(TagCategory)
-                .filter(TagCategory.name == category)
-                .filter(Tag.id.in_(filter_values))
-                .distinct()
-            )
-            if not apply_filter(tag_query):
-                return render_empty_results()
-    
-    if presenter_filter:
-        presenter_query = (
-            query_base.join(Video.presenters)
-            .filter(Presenter.id.in_(presenter_filter))
-            .distinct()
-        )
-        if not apply_filter(presenter_query):
-            return render_empty_results()
-    
-    if search_query:
-        normalized_search = unidecode(search_query.lower())
-        search_terms = normalized_search.split()
-        
-        search_query_obj = (
-            query_base
-            .outerjoin(Tag, Video.tags)
-            .outerjoin(Video.presenters)
-            .group_by(Video.id)
-            .having(
-                or_(
-                    func.lower(func.string_agg(Presenter.name, ' ')).contains(search_query.lower()),
-                    func.lower(func.string_agg(Tag.name, ' ')).contains(search_query.lower()),
-                    
-                    # Match by video title or description
-                    *[
-                        or_(
-                            func.lower(Video.title).contains(term),
-                            func.lower(Video.description).contains(term)
-                        ) for term in search_terms
-                    ]
-                )
-            )
-        )
-        
-        if not apply_filter(search_query_obj):
-            all_videos = db_session.query(Video).filter(Video.recording.isnot(None)).all()
-            
-            filtered_ids = set()
-            
-            search_tokens = slugify(search_query)
-            
-            for video in all_videos:
-                for presenter in video.presenters:
-                    presenter_name = presenter.name.lower()
-                    normalized_presenter = unidecode(presenter_name)
-                    
-                    if normalized_search in normalized_presenter:
-                        filtered_ids.add(video.id)
-                        break
-                    
-                    name_parts = normalized_presenter.split()
-                    
-                    for part in name_parts:
-                        if part.startswith(normalized_search) or normalized_search.startswith(part):
-                            filtered_ids.add(video.id)
-                            break
-                            
-                        if normalized_search in part:
-                            filtered_ids.add(video.id)
-                            break
-            
-            if filtered_ids:
-                matched_ids = filtered_ids
-    
-    if matched_ids is None:
-        final_query = query_base
-    else:
-        final_query = query_base.filter(Video.id.in_(matched_ids))
-    
-    final_query = final_query.order_by(Video.unixstart.desc())
-    total_videos = final_query.count()
     total_pages = max(1, (total_videos + items_per_page - 1) // items_per_page)
-    
     page = min(max(1, page), total_pages)
-    
-    recorded_videos = final_query.limit(items_per_page).offset((page - 1) * items_per_page).all()
     
     active_filter_slugs = {
         'topic': topic_filter_slugs,
@@ -338,7 +215,7 @@ def videos():
             'presenter': presenter_filter,
             'search': search_query
         },
-        active_filter_slugs=active_filter_slugs  # Pass slugs to template
+        active_filter_slugs=active_filter_slugs
     )
 
 @masterclasses.route("/videos/<title>-class-<id>")
