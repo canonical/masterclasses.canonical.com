@@ -1,21 +1,18 @@
-import os
-import flask
-from sqlalchemy import create_engine, func, nullslast, and_
-from sqlalchemy.orm import scoped_session, sessionmaker
-from datetime import datetime, timezone
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 import logging
+import os
+import textwrap
+from datetime import datetime, timezone
 
-from models.video import Video
+import flask
+from sqlalchemy import and_, func
+
 from models.presenter import Presenter
+from models.submission import VideoSubmission
 from models.tag import Tag, TagCategory
+from models.video import Video
 from webapp.database import db_session
 from webapp.forms import MasterclassRegistrationForm
-from models.submission import VideoSubmission
-from webapp.auth import require_api_token
-from flask import jsonify
+from webapp.mattermost import (MattermostMessagePayload, try_send_message)
 
 masterclasses = flask.Blueprint(
     "masterclasses",
@@ -26,11 +23,12 @@ masterclasses = flask.Blueprint(
 
 logger = logging.getLogger(__name__)
 
+
 def get_live_videos():
     """Helper function to get currently live videos."""
     now = datetime.now(timezone.utc)
     now_unix = int(now.timestamp())
-    
+
     return db_session.query(Video).filter(
         and_(
             Video.unixstart <= now_unix,
@@ -38,36 +36,40 @@ def get_live_videos():
         )
     ).all()
 
+
 def get_tags_by_category(category_name):
     """Helper function to get tags by category name that have associated videos with recordings."""
     query = (db_session.query(Tag)
-            .join(TagCategory)
-            .join(Tag.videos)  # Join with videos
-            .filter(TagCategory.name == category_name)
-            .filter(Video.recording.isnot(None))  # Only count videos with recordings
-            .group_by(Tag.id, TagCategory.id)  # Group by to avoid duplicates
-            .having(func.count(Video.id) > 0))  # Only include tags with at least one video
-    
+             .join(TagCategory)
+             .join(Tag.videos)  # Join with videos
+             .filter(TagCategory.name == category_name)
+             # Only count videos with recordings
+             .filter(Video.recording.isnot(None))
+             .group_by(Tag.id, TagCategory.id)  # Group by to avoid duplicates
+             # Only include tags with at least one video
+             .having(func.count(Video.id) > 0))
+
     if category_name == 'Date':
         # For date tags, we'll sort them in reverse chronological order
         tags = query.all()
-        
+
         def date_sort_key(tag):
             # Parse "Q1 2024" format
             quarter = int(tag.name[1])  # Get the quarter number
             year = int(tag.name[-4:])   # Get the year
             return (-year, -quarter)     # Negative for reverse order
-            
+
         return sorted(tags, key=date_sort_key)
     else:
         # For other categories, sort alphabetically
         return query.order_by(Tag.name).all()
 
+
 @masterclasses.route("/")
 def index():
     now = datetime.now(timezone.utc)
     now_unix = int(now.timestamp())
-    
+
     # Live videos (started but not ended)
     live_videos = db_session.query(Video).filter(
         and_(
@@ -90,9 +92,12 @@ def index():
     ).order_by(Video.unixstart).all()
 
     # Query tag categories and their associated tags
-    topic_tags = db_session.query(Tag).join(TagCategory).filter(TagCategory.name == "Topic").all()
-    event_tags = db_session.query(Tag).join(TagCategory).filter(TagCategory.name == "Event").all()
-    date_tags = db_session.query(Tag).join(TagCategory).filter(TagCategory.name == "Date").all()
+    topic_tags = db_session.query(Tag).join(
+        TagCategory).filter(TagCategory.name == "Topic").all()
+    event_tags = db_session.query(Tag).join(
+        TagCategory).filter(TagCategory.name == "Event").all()
+    date_tags = db_session.query(Tag).join(
+        TagCategory).filter(TagCategory.name == "Date").all()
     presenters = db_session.query(Presenter).all()
 
     return flask.render_template(
@@ -107,23 +112,26 @@ def index():
         now=now_unix
     )
 
+
 @masterclasses.route("/<title>-class-<id>")
 def video(id, title):
     video = get_video_by_id(id)
     if not video:
         flask.abort(404)
-        
+
     # Verify the title slug matches
     if flask.current_app.jinja_env.filters['slugify'](video.title) != title:
         return flask.redirect(
             flask.url_for(
                 'masterclasses.video',
-                title=flask.current_app.jinja_env.filters['slugify'](video.title),
+                title=flask.current_app.jinja_env.filters['slugify'](
+                    video.title),
                 id=id
             )
         )
-    
+
     return flask.render_template("video.html", video=video)
+
 
 @masterclasses.route("/videos")
 def videos():
@@ -139,15 +147,15 @@ def videos():
     topic_tags = get_tags_by_category('Topic')
     event_tags = get_tags_by_category('Event')
     date_tags = get_tags_by_category('Date')
-    
+
     # Get only presenters who have videos with recordings
     presenters = (db_session.query(Presenter)
-                 .join(Presenter.videos)
-                 .filter(Video.recording.isnot(None))
-                 .group_by(Presenter.id)
-                 .having(func.count(Video.id) > 0)
-                 .order_by(Presenter.name)
-                 .all())
+                  .join(Presenter.videos)
+                  .filter(Video.recording.isnot(None))
+                  .group_by(Presenter.id)
+                  .having(func.count(Video.id) > 0)
+                  .order_by(Presenter.name)
+                  .all())
 
     return flask.render_template(
         "videos.html",
@@ -158,28 +166,30 @@ def videos():
         presenters=presenters
     )
 
+
 @masterclasses.route("/videos/<title>-class-<id>")
 def video_player(title, id):
     video = db_session.query(Video)\
         .filter(Video.id == id)\
         .first()
-    
+
     if not video:
         flask.abort(404)
-        
+
     # Verify the title slug matches
     if flask.current_app.jinja_env.filters['slugify'](video.title) != title:
         return flask.redirect(
             flask.url_for(
                 'masterclasses.video_player',
-                title=flask.current_app.jinja_env.filters['slugify'](video.title),
+                title=flask.current_app.jinja_env.filters['slugify'](
+                    video.title),
                 id=id
             )
         )
-    
+
     # Get topic tags for the current video
     topic_tags = [tag.id for tag in video.tags if tag.category.name == "Topic"]
-    
+
     # Base query for suggested videos
     suggested_query = db_session.query(Video)\
         .filter(Video.id != video.id)\
@@ -209,16 +219,17 @@ def video_player(title, id):
             .order_by(func.random())\
             .limit(3)\
             .all()
-    
+
     # Get live videos using helper function
     live_videos = get_live_videos()
-    
+
     return flask.render_template(
         "video_player.html",
         video=video,
         suggested_videos=suggested_videos,
         live_videos=live_videos
     )
+
 
 @masterclasses.app_template_filter()
 def timestamp_to_date(value, format='%d %b %Y'):
@@ -229,6 +240,7 @@ def timestamp_to_date(value, format='%d %b %Y'):
         return datetime.fromtimestamp(int(value)).strftime(format)
     except (ValueError, TypeError):
         return ''
+
 
 @masterclasses.app_template_filter('google_drive_id')
 def google_drive_id(url):
@@ -241,16 +253,17 @@ def google_drive_id(url):
     except (IndexError, AttributeError):
         return url
 
+
 @masterclasses.route("/random")
 def random_video():
     video = db_session.query(Video)\
         .filter(Video.recording.isnot(None))\
         .order_by(func.random())\
         .first()
-    
+
     if not video:
         return flask.redirect(flask.url_for('masterclasses.videos'))
-        
+
     return flask.redirect(
         flask.url_for(
             'masterclasses.video_player',
@@ -259,17 +272,14 @@ def random_video():
         )
     )
 
+
 @masterclasses.route("/register", methods=["GET", "POST"])
 def register():
-    if "openid" not in flask.session:
-        return flask.redirect("/login?next=/register")
-    
-    # Get live videos using helper function
     live_videos = get_live_videos()
-    
+
     form = MasterclassRegistrationForm()
     submission_status = None
-    
+
     if form.validate_on_submit():
         try:
             submission = VideoSubmission(
@@ -278,17 +288,34 @@ def register():
                 duration=form.duration_other.data if form.duration.data == 'other' else form.duration.data,
                 email=flask.session["openid"]["email"]
             )
-            
+
             db_session.add(submission)
             db_session.commit()
-            
+            # TODO: Add email notification after submission to form has been made.
+            # I have started this in ./utils/email.py, but we need a service account before it can be finished.
+            # TODO: Integrate with Celery to send the message in the background.
+            # This works for now but with adding email notifications, we need to send the message in the background instead of increasing the request time.
+            notification_text = (
+                "### 🎉 New masterclass submission 🎉\n"
+                f"**Title:** {form.title.data}\n"
+                f"**Description:**\n{form.description.data}\n"
+                f"**Duration:** {form.duration.data}\n"
+                f"**Email:** {flask.session['openid']['email']}"
+            )
+            mattermost_message = MattermostMessagePayload(
+                text=notification_text
+            )
+            mattermost_url = os.getenv('MATTERMOST_DEV_WEBHOOK_URL')
+            if mattermost_url:
+                try_send_message(
+                    mattermost_message, mattermost_url)
             # Clear the form after successful submission
             form = MasterclassRegistrationForm(None)
             submission_status = {
                 'success': True,
                 'message': "Your masterclass submission has been received successfully! We'll review it and get back to you soon."
             }
-            
+
         except Exception as e:
             db_session.rollback()
             logger.error(f"Failed to save submission: {e}")
@@ -296,7 +323,7 @@ def register():
                 'success': False,
                 'message': "There was an error submitting your masterclass. Please try again."
             }
-    
+
     return flask.render_template(
         "register.html",
         form=form,
