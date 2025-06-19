@@ -1,27 +1,18 @@
 import logging
 import os
-import smtplib
-import textwrap
 from datetime import datetime, timezone
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 
 import flask
-from flask import jsonify
-from sqlalchemy import and_, create_engine, func, nullslast, or_
-from sqlalchemy.orm import scoped_session, sessionmaker
-from unidecode import unidecode
+from sqlalchemy import and_, func
 
 from models.presenter import Presenter
 from models.submission import VideoSubmission
 from models.tag import Tag, TagCategory
 from models.video import Video
-from webapp.auth import require_api_token
 from webapp.database import db_session
 from webapp.forms import MasterclassRegistrationForm
 from webapp.mattermost import MattermostMessagePayload, try_send_message
 from webapp.services.video_service import VideoService
-from webapp.utils.text_utils import slugify
 
 masterclasses = flask.Blueprint(
     "masterclasses",
@@ -171,14 +162,7 @@ def videos():
     all_presenters = db_session.query(Presenter).all()
     presenter_slug_to_id = {slugify(presenter.name): presenter.id for presenter in all_presenters}
     presenter_filter = [presenter_slug_to_id.get(slug) for slug in presenter_filter_slugs if slug in presenter_slug_to_id]
-    
-    all_videos_query = (
-        db_session.query(Video)
-        .filter(Video.recording.isnot(None))
-        .order_by(Video.unixstart.desc())
-    )
 
-    all_recorded_videos = all_videos_query.all()
     
     video_service = VideoService()
     topic_tags = video_service.get_tags_by_category('Topic')
@@ -213,7 +197,6 @@ def videos():
     return flask.render_template(
         "videos.html",
         recorded_videos=recorded_videos,
-        all_recorded_videos=all_recorded_videos,
         topic_tags=topic_tags,
         event_tags=event_tags,
         date_tags=date_tags,
