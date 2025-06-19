@@ -168,3 +168,8 @@ def register():
         form=form,
         submission_status=submission_status
     )
+
+@app.route("/events/<event>")
+def event(event):
+    return flask.render_template("/events/{}.html".format(event))
+

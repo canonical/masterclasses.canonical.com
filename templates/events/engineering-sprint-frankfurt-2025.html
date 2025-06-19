@@ -1,0 +1,1165 @@
+{% extends "base.html" %}
+
+{% from "shared/_upcoming_session.html" import upcoming_session %}
+{% from "_macros/vf_hero.jinja" import vf_hero %}
+{% from "_macros/vf_tiered-list.jinja" import vf_tiered_list %}
+{% from "shared/_video_card.html" import video_card %}
+
+{% block content %}
+
+  {% call(slot) vf_hero(
+    title_text='Engineering Sprint',
+    subtitle_text='Frankfurt, May 2025',
+    layout='50/50',
+    is_split_on_medium=true
+    ) -%}
+    {%- if slot == 'description' -%}
+
+    {%- endif -%}
+    {%- if slot == 'cta' -%}
+      <a href="/videos?event=engineering-sprint&date=q2-2025"
+         class="p-button--positive">Browse all videos</a>
+    {%- endif -%}
+    {%- if slot == 'image' -%}
+      <iframe src="https://drive.google.com/file/d/11hNPkDQee8croIPMOep_2Qj6zmUq7LuU/preview"
+              allow="autoplay"
+              allowfullscreen
+              class="iframe-video"></iframe>
+    {%- endif -%}
+  {% endcall -%}
+
+  <div class="p-section">
+    <style>
+      .video-card {
+        height: auto;
+      }
+    </style>
+    {%- call(slot) vf_tiered_list(is_list_full_width_on_tablet=false) -%}
+      {%- if slot == 'title' -%}
+        <h2>Monday, May 12</h2>
+      {%- endif -%}
+
+      {%- if slot == 'list_item_title_1' -%}
+        <h3 class="p-muted-heading">Plenary</h3>
+      {%- endif -%}
+
+      {%- if slot == 'list_item_description_1' -%}
+        <div class="p-card video-card u-no-padding"
+             data-topics=""
+             data-events="engineering-sprint"
+             data-dates="q2-2025"
+             data-presenters="jon-seager mark-shuttleworth">
+
+          <div class="p-card__image u-image-position">
+            <a href="/videos/opening-plenary-class-368">
+              <div class="thumbnail-wrapper">
+                <img loading="lazy"
+                     alt="Opening Plenary video"
+                     src="https://assets.ubuntu.com/v1/cef66cd2-Opening%20Plenary.png"
+                     class="u-image-position--bottom" />
+
+                <div class="duration-badge u-image-position--bottom u-image-position--right">60 mins</div>
+              </div>
+            </a>
+          </div>
+
+          <div class="p-card__inner u-no-padding--top">
+            <h2 class="u-no-margin--bottom p-text--small">
+              <a class="video-title p-link--soft"
+                 href="/videos/opening-plenary-class-368">Opening Plenary</a>
+            </h2>
+
+            <p class="u-text--muted video-tags u-no-margin--bottom u-no-padding--top"
+               style="font-size: 0.7rem">May 12, 2025</p>
+
+            <p class="video-presenters u-text--muted" style="font-size: 0.7rem;">
+
+              Jon Seager and
+
+              Mark Shuttleworth
+
+            </p>
+
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- if slot == 'list_item_title_2' -%}
+        <h3 class="p-heading--5">Juju Workshop</h3>
+      {%- endif -%}
+
+      {%- if slot == 'list_item_description_2' -%}
+        <div class="p-card video-card u-no-padding"
+             data-topics=""
+             data-events="engineering-sprint"
+             data-dates="q2-2025"
+             data-presenters="luca-bello mike-thamm">
+
+          <div class="p-card__image u-image-position">
+            <a href="/videos/juju-doctor-intro-workshop-class-369">
+              <div class="thumbnail-wrapper">
+                <img loading="lazy"
+                     alt="Juju-doctor intro &amp; workshop video"
+                     src="https://assets.ubuntu.com/v1/c726f9f1-Juju-doctor%20intro%20&amp;%20workshop.png"
+                     class="u-image-position--bottom" />
+
+                <div class="duration-badge u-image-position--bottom u-image-position--right">120 mins</div>
+              </div>
+            </a>
+          </div>
+
+          <div class="p-card__inner u-no-padding--top">
+            <h2 class="u-no-margin--bottom p-text--small">
+              <a class="video-title p-link--soft"
+                 href="/videos/juju-doctor-intro-workshop-class-369">Juju-doctor intro &amp; workshop</a>
+            </h2>
+
+            <p class="u-text--muted video-tags u-no-margin--bottom u-no-padding--top"
+               style="font-size: 0.7rem">May 12, 2025</p>
+
+            <p class="video-presenters u-text--muted" style="font-size: 0.7rem;">
+
+              Luca Bello and
+
+              Mike Thamm
+
+            </p>
+
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- if slot == 'list_item_title_3' -%}
+        <h3 class="p-heading--5">Lightning Talks</h3>
+      {%- endif -%}
+
+      {%- if slot == 'list_item_description_3' -%}
+        <div class="row">
+          <div class="col-3">
+            <div class="p-card video-card u-no-padding"
+                 data-topics=""
+                 data-events="engineering-sprint"
+                 data-dates="q2-2025"
+                 data-presenters="tim-andersson">
+
+              <div class="p-card__image u-image-position">
+                <a href="/videos/hardware-installer-testing-an-update-class-370">
+                  <div class="thumbnail-wrapper">
+                    <img loading="lazy"
+                         alt="hardware-installer-testing - an update! video"
+                         src="https://assets.ubuntu.com/v1/979b129a-hardware-installer-testing%20-%20an%20update!.png"
+                         class="u-image-position--bottom" />
+
+                    <div class="duration-badge u-image-position--bottom u-image-position--right">5 mins</div>
+                  </div>
+                </a>
+              </div>
+
+              <div class="p-card__inner u-no-padding--top">
+                <h2 class="u-no-margin--bottom p-text--small">
+                  <a class="video-title p-link--soft"
+                     href="/videos/hardware-installer-testing-an-update-class-370">hardware-installer-testing - an update!</a>
+                </h2>
+
+                <p class="u-text--muted video-tags u-no-margin--bottom u-no-padding--top"
+                   style="font-size: 0.7rem">May 12, 2025</p>
+
+                <p class="video-presenters u-text--muted" style="font-size: 0.7rem;">Tim Andersson</p>
+
+              </div>
+            </div>
+          </div>
+
+          <div class="col-3">
+            <div class="p-card video-card u-no-padding"
+                 data-topics=""
+                 data-events="engineering-sprint"
+                 data-dates="q2-2025"
+                 data-presenters="jeremie-deray">
+
+              <div class="p-card__image u-image-position">
+                <a href="/videos/oh-there-is-a-robotics-team-at-canonical-class-371">
+                  <div class="thumbnail-wrapper">
+                    <img loading="lazy"
+                         alt="Oh, there is a Robotics team at Canonical?! video"
+                         src="https://assets.ubuntu.com/v1/7aa40ad4-Oh,%20there%20is%20a%20Robotics%20team%20at%20Canonical_!.png"
+                         class="u-image-position--bottom" />
+
+                    <div class="duration-badge u-image-position--bottom u-image-position--right">5 mins</div>
+                  </div>
+                </a>
+              </div>
+
+              <div class="p-card__inner u-no-padding--top">
+                <h2 class="u-no-margin--bottom p-text--small">
+                  <a class="video-title p-link--soft"
+                     href="/videos/oh-there-is-a-robotics-team-at-canonical-class-371">Oh, there is a Robotics team at Canonical?!</a>
+                </h2>
+
+                <p class="u-text--muted video-tags u-no-margin--bottom u-no-padding--top"
+                   style="font-size: 0.7rem">May 12, 2025</p>
+
+                <p class="video-presenters u-text--muted" style="font-size: 0.7rem;">Jeremie Deray</p>
+
+              </div>
+            </div>
+          </div>
+
+          <div class="col-3">
+            <div class="p-card video-card u-no-padding"
+                 data-topics=""
+                 data-events="engineering-sprint"
+                 data-dates="q2-2025"
+                 data-presenters="jason-nucciarone">
+
+              <div class="p-card__image u-image-position">
+                <a href="/videos/i-like-gamboling-class-373">
+                  <div class="thumbnail-wrapper">
+                    <img loading="lazy"
+                         alt="i like gamboling video"
+                         src="https://assets.ubuntu.com/v1/d26e75f3-i%20like%20gamboling.png"
+                         class="u-image-position--bottom" />
+
+                    <div class="duration-badge u-image-position--bottom u-image-position--right">5 mins</div>
+                  </div>
+                </a>
+              </div>
+
+              <div class="p-card__inner u-no-padding--top">
+                <h2 class="u-no-margin--bottom p-text--small">
+                  <a class="video-title p-link--soft"
+                     href="/videos/i-like-gamboling-class-373">i like gamboling</a>
+                </h2>
+
+                <p class="u-text--muted video-tags u-no-margin--bottom u-no-padding--top"
+                   style="font-size: 0.7rem">May 12, 2025</p>
+
+                <p class="video-presenters u-text--muted" style="font-size: 0.7rem;">Jason Nucciarone</p>
+
+              </div>
+            </div>
+          </div>
+
+          <div class="col-3">
+            <div class="p-card video-card u-no-padding"
+                 data-topics=""
+                 data-events="engineering-sprint"
+                 data-dates="q2-2025"
+                 data-presenters="tong-shinn">
+
+              <div class="p-card__image u-image-position">
+                <a href="/videos/superdistro-onboarding-faq-class-372">
+                  <div class="thumbnail-wrapper">
+                    <img loading="lazy"
+                         alt="Superdistro Onboarding FAQ video"
+                         src="https://assets.ubuntu.com/v1/39446da8-Superdistro%20Onboarding%20FAQ.png"
+                         class="u-image-position--bottom" />
+
+                    <div class="duration-badge u-image-position--bottom u-image-position--right">5 mins</div>
+                  </div>
+                </a>
+              </div>
+
+              <div class="p-card__inner u-no-padding--top">
+                <h2 class="u-no-margin--bottom p-text--small">
+                  <a class="video-title p-link--soft"
+                     href="/videos/superdistro-onboarding-faq-class-372">Superdistro Onboarding FAQ</a>
+                </h2>
+
+                <p class="u-text--muted video-tags u-no-margin--bottom u-no-padding--top"
+                   style="font-size: 0.7rem">May 12, 2025</p>
+
+                <p class="video-presenters u-text--muted" style="font-size: 0.7rem;">Tong Shinn</p>
+
+              </div>
+            </div>
+          </div>
+
+          <div class="col-3">
+            <div class="p-card video-card u-no-padding"
+                 data-topics=""
+                 data-events="engineering-sprint"
+                 data-dates="q2-2025"
+                 data-presenters="adriaan-van-niekerk">
+
+              <div class="p-card__image u-image-position">
+                <a href="/videos/you-can-customize-salesforce-class-374">
+                  <div class="thumbnail-wrapper">
+                    <img loading="lazy"
+                         alt="You Can Customize Salesforce video"
+                         src="https://assets.ubuntu.com/v1/407918aa-You%20Can%20Customize%20Salesforce.png"
+                         class="u-image-position--bottom" />
+
+                    <div class="duration-badge u-image-position--bottom u-image-position--right">5 mins</div>
+                  </div>
+                </a>
+              </div>
+
+              <div class="p-card__inner u-no-padding--top">
+                <h2 class="u-no-margin--bottom p-text--small">
+                  <a class="video-title p-link--soft"
+                     href="/videos/you-can-customize-salesforce-class-374">You Can Customize Salesforce</a>
+                </h2>
+
+                <p class="u-text--muted video-tags u-no-margin--bottom u-no-padding--top"
+                   style="font-size: 0.7rem">May 12, 2025</p>
+
+                <p class="video-presenters u-text--muted" style="font-size: 0.7rem;">Adriaan Van Niekerk</p>
+
+              </div>
+            </div>
+          </div>
+
+          <div class="col-3">
+            <div class="p-card video-card u-no-padding"
+                 data-topics="api"
+                 data-events="engineering-sprint"
+                 data-dates="q2-2025"
+                 data-presenters="matt-kosarek">
+
+              <div class="p-card__image u-image-position">
+                <a href="/videos/miracle-a-tiling-window-manager-built-on-mir-class-375">
+                  <div class="thumbnail-wrapper">
+                    <img loading="lazy"
+                         alt="Miracle: a Tiling Window Manager Built on Mir video"
+                         src="https://assets.ubuntu.com/v1/cdae8399-Miracle_%20a%20Tiling%20Window%20Manager%20Built%20on%20Mir.png"
+                         class="u-image-position--bottom" />
+
+                    <div class="duration-badge u-image-position--bottom u-image-position--right">5 mins</div>
+                  </div>
+                </a>
+              </div>
+
+              <div class="p-card__inner u-no-padding--top">
+                <h2 class="u-no-margin--bottom p-text--small">
+                  <a class="video-title p-link--soft"
+                     href="/videos/miracle-a-tiling-window-manager-built-on-mir-class-375">Miracle: a Tiling Window Manager Built on Mir</a>
+                </h2>
+
+                <p class="u-text--muted video-tags u-no-margin--bottom u-no-padding--top"
+                   style="font-size: 0.7rem">May 12, 2025</p>
+
+                <p class="video-presenters u-text--muted" style="font-size: 0.7rem;">Matt Kosarek</p>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+      {%- endif -%}
+
+    {%- endcall -%}
+
+    {%- call(slot) vf_tiered_list(is_list_full_width_on_tablet=false) -%}
+      {%- if slot == 'title' -%}
+        <h2>Tuesday, May 13</h2>
+      {%- endif -%}
+
+      {%- if slot == 'list_item_title_1' -%}
+        <h3 class="p-muted-heading">Lightning Talks (AM)</h3>
+      {%- endif -%}
+
+      {%- if slot == 'list_item_description_1' -%}
+        <div class="row">
+          <div class="col-3">
+            <div class="p-card video-card u-no-padding "
+                 data-topics=""
+                 data-events="engineering-sprint"
+                 data-dates="q2-2025"
+                 data-presenters="guillaume-belanger">
+
+              <div class="p-card__image u-image-position">
+                <a href="/videos/should-we-stop-writing-charms-in-python-class-376">
+                  <div class="thumbnail-wrapper">
+                    <img loading="lazy"
+                         alt="Should we stop writing Charms in Python? video"
+                         src="https://assets.ubuntu.com/v1/34d6fad7-Should%20we%20stop%20writing%20Charms%20in%20Python_.png"
+                         class="u-image-position--bottom" />
+
+                    <div class="duration-badge u-image-position--bottom u-image-position--right">5 mins</div>
+                  </div>
+                </a>
+              </div>
+
+              <div class="p-card__inner u-no-padding--top">
+                <h2 class="u-no-margin--bottom p-text--small">
+                  <a class="video-title p-link--soft"
+                     href="/videos/should-we-stop-writing-charms-in-python-class-376">Should we stop writing Charms in Python?</a>
+                </h2>
+
+                <p class="u-text--muted video-tags u-no-margin--bottom u-no-padding--top"
+                   style="font-size: 0.7rem">May 13, 2025</p>
+
+                <p class="video-presenters u-text--muted" style="font-size: 0.7rem;">Guillaume Belanger</p>
+
+              </div>
+            </div>
+          </div>
+          <div class="col-3">
+
+            <div class="p-card video-card u-no-padding "
+                 data-topics=""
+                 data-events="engineering-sprint"
+                 data-dates="q2-2025"
+                 data-presenters="pushkar-kulkarni">
+
+              <div class="p-card__image u-image-position">
+                <a href="/videos/1brc-and-graalvm-class-377">
+                  <div class="thumbnail-wrapper">
+                    <img loading="lazy"
+                         alt="1BRC and GraalVM video"
+                         src="https://assets.ubuntu.com/v1/712f9b91-1BRC%20and%20GraalVM.png"
+                         class="u-image-position--bottom" />
+
+                    <div class="duration-badge u-image-position--bottom u-image-position--right">5 mins</div>
+                  </div>
+                </a>
+              </div>
+
+              <div class="p-card__inner u-no-padding--top">
+                <h2 class="u-no-margin--bottom p-text--small">
+                  <a class="video-title p-link--soft"
+                     href="/videos/1brc-and-graalvm-class-377">1BRC and GraalVM</a>
+                </h2>
+
+                <p class="u-text--muted video-tags u-no-margin--bottom u-no-padding--top"
+                   style="font-size: 0.7rem">May 13, 2025</p>
+
+                <p class="video-presenters u-text--muted" style="font-size: 0.7rem;">Pushkar Kulkarni</p>
+
+              </div>
+            </div>
+
+          </div>
+          <div class="col-3">
+
+            <div class="p-card video-card u-no-padding "
+                 data-topics=""
+                 data-events="engineering-sprint"
+                 data-dates="q2-2025"
+                 data-presenters="nkeiruka-whenu">
+
+              <div class="p-card__image u-image-position">
+                <a href="/videos/obtaining-mastery-with-masterclasses-class-378">
+                  <div class="thumbnail-wrapper">
+                    <img loading="lazy"
+                         alt="Obtaining mastery with Masterclasses video"
+                         src="https://assets.ubuntu.com/v1/b5597cdb-Obtaining%20mastery%20with%20Masterclasses.png"
+                         class="u-image-position--bottom" />
+
+                    <div class="duration-badge u-image-position--bottom u-image-position--right">5 mins</div>
+                  </div>
+                </a>
+              </div>
+
+              <div class="p-card__inner u-no-padding--top">
+                <h2 class="u-no-margin--bottom p-text--small">
+                  <a class="video-title p-link--soft"
+                     href="/videos/obtaining-mastery-with-masterclasses-class-378">Obtaining mastery with Masterclasses</a>
+                </h2>
+
+                <p class="u-text--muted video-tags u-no-margin--bottom u-no-padding--top"
+                   style="font-size: 0.7rem">May 13, 2025</p>
+
+                <p class="video-presenters u-text--muted" style="font-size: 0.7rem;">Nkeiruka Whenu</p>
+
+              </div>
+            </div>
+
+          </div>
+          <div class="col-3">
+
+            <div class="p-card video-card u-no-padding "
+                 data-topics=""
+                 data-events="engineering-sprint"
+                 data-dates="q2-2025"
+                 data-presenters="christian-grabowski">
+
+              <div class="p-card__image u-image-position">
+                <a href="/videos/performance-testing-dns-class-379">
+                  <div class="thumbnail-wrapper">
+                    <img loading="lazy"
+                         alt="Performance testing DNS video"
+                         src="https://assets.ubuntu.com/v1/5ff9a7fb-Performance%20testing%20DNS.png"
+                         class="u-image-position--bottom" />
+
+                    <div class="duration-badge u-image-position--bottom u-image-position--right">5 mins</div>
+                  </div>
+                </a>
+              </div>
+
+              <div class="p-card__inner u-no-padding--top">
+                <h2 class="u-no-margin--bottom p-text--small">
+                  <a class="video-title p-link--soft"
+                     href="/videos/performance-testing-dns-class-379">Performance testing DNS</a>
+                </h2>
+
+                <p class="u-text--muted video-tags u-no-margin--bottom u-no-padding--top"
+                   style="font-size: 0.7rem">May 13, 2025</p>
+
+                <p class="video-presenters u-text--muted" style="font-size: 0.7rem;">Christian Grabowski</p>
+
+              </div>
+            </div>
+
+          </div>
+          <div class="col-3">
+
+            <div class="p-card video-card u-no-padding "
+                 data-topics=""
+                 data-events="engineering-sprint"
+                 data-dates="q2-2025"
+                 data-presenters="yanisa-scherber">
+
+              <div class="p-card__image u-image-position">
+                <a href="/videos/documentation-driven-development-class-380">
+                  <div class="thumbnail-wrapper">
+                    <img loading="lazy"
+                         alt="Documentation Driven Development video"
+                         src="https://assets.ubuntu.com/v1/bf59f205-Documentation%20Driven%20Development.png"
+                         class="u-image-position--bottom" />
+
+                    <div class="duration-badge u-image-position--bottom u-image-position--right">5 mins</div>
+                  </div>
+                </a>
+              </div>
+
+              <div class="p-card__inner u-no-padding--top">
+                <h2 class="u-no-margin--bottom p-text--small">
+                  <a class="video-title p-link--soft"
+                     href="/videos/documentation-driven-development-class-380">Documentation Driven Development</a>
+                </h2>
+
+                <p class="u-text--muted video-tags u-no-margin--bottom u-no-padding--top"
+                   style="font-size: 0.7rem">May 13, 2025</p>
+
+                <p class="video-presenters u-text--muted" style="font-size: 0.7rem;">Yanisa Scherber</p>
+
+              </div>
+            </div>
+
+          </div>
+          <div class="col-3">
+
+            <div class="p-card video-card u-no-padding "
+                 data-topics=""
+                 data-events="engineering-sprint"
+                 data-dates="q2-2025"
+                 data-presenters="michael-hudson-doyle">
+
+              <div class="p-card__image u-image-position">
+                <a href="/videos/seeing-the-invisible-perceptual-cognitive-aspects-of-expertise-class-381">
+                  <div class="thumbnail-wrapper">
+                    <img loading="lazy"
+                         alt="Seeing the Invisible: Perceptual-Cognitive Aspects of Expertise video"
+                         src="https://assets.ubuntu.com/v1/88ba7047-Seeing%20the%20Invisible_%20Perceptual-Cognitive%20Aspects%20of%20Expertise.png"
+                         class="u-image-position--bottom" />
+
+                    <div class="duration-badge u-image-position--bottom u-image-position--right">5 mins</div>
+                  </div>
+                </a>
+              </div>
+
+              <div class="p-card__inner u-no-padding--top">
+                <h2 class="u-no-margin--bottom p-text--small">
+                  <a class="video-title p-link--soft"
+                     href="/videos/seeing-the-invisible-perceptual-cognitive-aspects-of-expertise-class-381">Seeing the Invisible: Perceptual-Cognitive Aspects of Expertise</a>
+                </h2>
+
+                <p class="u-text--muted video-tags u-no-margin--bottom u-no-padding--top"
+                   style="font-size: 0.7rem">May 13, 2025</p>
+
+                <p class="video-presenters u-text--muted" style="font-size: 0.7rem;">Michael Hudson-Doyle</p>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- if slot == 'list_item_title_2' -%}
+        <h3 class="p-muted-heading">Panel</h3>
+      {%- endif -%}
+
+      {%- if slot == 'list_item_description_2' -%}
+        <div class="p-card video-card u-no-padding"
+             data-topics=""
+             data-events="engineering-sprint"
+             data-dates="q1-2020 q2-2025"
+             data-presenters="cindy-goldberg jon-seager stephanie-domas">
+
+          <div class="p-card__image u-image-position">
+            <a href="/videos/breaking-barriers-thriving-while-working-remotely-class-382">
+              <div class="thumbnail-wrapper">
+                <img loading="lazy"
+                     alt="Breaking Barriers: Thriving While Working Remotely video"
+                     src="https://assets.ubuntu.com/v1/4fc63482-Breaking%20Barriers_%20Thriving%20While%20Working%20Remotely.png"
+                     class="u-image-position--bottom" />
+
+                <div class="duration-badge u-image-position--bottom u-image-position--right">60 mins</div>
+              </div>
+            </a>
+          </div>
+
+          <div class="p-card__inner u-no-padding--top">
+            <h2 class="u-no-margin--bottom p-text--small">
+              <a class="video-title p-link--soft"
+                 href="/videos/breaking-barriers-thriving-while-working-remotely-class-382">Breaking Barriers: Thriving While Working Remotely</a>
+            </h2>
+
+            <p class="u-text--muted video-tags u-no-margin--bottom u-no-padding--top"
+               style="font-size: 0.7rem">May 13, 2025</p>
+
+            <p class="video-presenters u-text--muted" style="font-size: 0.7rem;">Cindy Goldberg, Jon Seager, et al.</p>
+
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- if slot == 'list_item_title_3' -%}
+        <h3 class="p-muted-heading">Lightning Talks (PM)</h3>
+      {%- endif -%}
+
+      {%- if slot == 'list_item_description_3' -%}
+        <div class="row">
+          <div class="col-3">
+
+            <div class="p-card video-card u-no-padding"
+                 data-topics=""
+                 data-events="engineering-sprint"
+                 data-dates="q2-2025"
+                 data-presenters="robby-pocase">
+
+              <div class="p-card__image u-image-position">
+                <a href="/videos/you-need-a-task-list-class-384">
+                  <div class="thumbnail-wrapper">
+                    <img loading="lazy"
+                         alt="you need a task list video"
+                         src="https://assets.ubuntu.com/v1/dab69e41-you%20need%20a%20task%20list.png"
+                         class="u-image-position--bottom" />
+
+                    <div class="duration-badge u-image-position--bottom u-image-position--right">5 mins</div>
+                  </div>
+                </a>
+              </div>
+
+              <div class="p-card__inner u-no-padding--top">
+                <h2 class="u-no-margin--bottom p-text--small">
+                  <a class="video-title p-link--soft"
+                     href="/videos/you-need-a-task-list-class-384">you need a task list</a>
+                </h2>
+
+                <p class="u-text--muted video-tags u-no-margin--bottom u-no-padding--top"
+                   style="font-size: 0.7rem">May 13, 2025</p>
+
+                <p class="video-presenters u-text--muted" style="font-size: 0.7rem;">Robby Pocase</p>
+
+              </div>
+            </div>
+
+          </div>
+
+          <div class="col-3">
+
+            <div class="p-card video-card u-no-padding"
+                 data-topics=""
+                 data-events="engineering-sprint"
+                 data-dates="q2-2025"
+                 data-presenters="ed-jones">
+
+              <div class="p-card__image u-image-position">
+                <a href="/videos/starlark-and-superpowered-configuration-class-385">
+                  <div class="thumbnail-wrapper">
+                    <img loading="lazy"
+                         alt="Starlark and superpowered configuration video"
+                         src="https://assets.ubuntu.com/v1/840fe2ee-Starlark%20and%20superpowered%20configuration.png"
+                         class="u-image-position--bottom" />
+
+                    <div class="duration-badge u-image-position--bottom u-image-position--right">5 mins</div>
+                  </div>
+                </a>
+              </div>
+
+              <div class="p-card__inner u-no-padding--top">
+                <h2 class="u-no-margin--bottom p-text--small">
+                  <a class="video-title p-link--soft"
+                     href="/videos/starlark-and-superpowered-configuration-class-385">Starlark and superpowered configuration</a>
+                </h2>
+
+                <p class="u-text--muted video-tags u-no-margin--bottom u-no-padding--top"
+                   style="font-size: 0.7rem">May 13, 2025</p>
+
+                <p class="video-presenters u-text--muted" style="font-size: 0.7rem;">Ed Jones</p>
+
+              </div>
+            </div>
+
+          </div>
+
+          <div class="col-3">
+
+            <div class="p-card video-card u-no-padding"
+                 data-topics=""
+                 data-events="engineering-sprint"
+                 data-dates="q2-2025"
+                 data-presenters="arif-ali">
+
+              <div class="p-card__image u-image-position">
+                <a href="/videos/s-o-s-help-class-386">
+                  <div class="thumbnail-wrapper">
+                    <img loading="lazy"
+                         alt="S.O.S -- help video"
+                         src="https://assets.ubuntu.com/v1/ebb14057-S.O.S%20--%20help.png"
+                         class="u-image-position--bottom" />
+
+                    <div class="duration-badge u-image-position--bottom u-image-position--right">5 mins</div>
+                  </div>
+                </a>
+              </div>
+
+              <div class="p-card__inner u-no-padding--top">
+                <h2 class="u-no-margin--bottom p-text--small">
+                  <a class="video-title p-link--soft" href="/videos/s-o-s-help-class-386">S.O.S -- help</a>
+                </h2>
+
+                <p class="u-text--muted video-tags u-no-margin--bottom u-no-padding--top"
+                   style="font-size: 0.7rem">May 13, 2025</p>
+
+                <p class="video-presenters u-text--muted" style="font-size: 0.7rem;">Arif Ali</p>
+
+              </div>
+            </div>
+
+          </div>
+
+          <div class="col-3">
+
+            <div class="p-card video-card u-no-padding"
+                 data-topics=""
+                 data-events="engineering-sprint"
+                 data-dates="q2-2025"
+                 data-presenters="hartmut-obendorf">
+
+              <div class="p-card__image u-image-position">
+                <a href="/videos/crafting-tools-instruments-can-change-the-world-class-387">
+                  <div class="thumbnail-wrapper">
+                    <img loading="lazy"
+                         alt="Crafting Tools - Instruments Can Change the World video"
+                         src="https://assets.ubuntu.com/v1/c7352893-Crafting%20Tools%20-%20Instruments%20Can%20Change%20the%20World.png"
+                         class="u-image-position--bottom" />
+
+                    <div class="duration-badge u-image-position--bottom u-image-position--right">5 mins</div>
+                  </div>
+                </a>
+              </div>
+
+              <div class="p-card__inner u-no-padding--top">
+                <h2 class="u-no-margin--bottom p-text--small">
+                  <a class="video-title p-link--soft"
+                     href="/videos/crafting-tools-instruments-can-change-the-world-class-387">Crafting Tools - Instruments Can Change the World</a>
+                </h2>
+
+                <p class="u-text--muted video-tags u-no-margin--bottom u-no-padding--top"
+                   style="font-size: 0.7rem">May 13, 2025</p>
+
+                <p class="video-presenters u-text--muted" style="font-size: 0.7rem;">Hartmut Obendorf</p>
+
+              </div>
+            </div>
+
+          </div>
+
+          <div class="col-3">
+
+            <div class="p-card video-card u-no-padding"
+                 data-topics=""
+                 data-events="engineering-sprint"
+                 data-dates="q2-2025"
+                 data-presenters="weii-wang">
+
+              <div class="p-card__image u-image-position">
+                <a href="/videos/abc-of-usb-c-class-388">
+                  <div class="thumbnail-wrapper">
+                    <img loading="lazy"
+                         alt="ABC of USB-C video"
+                         src="https://assets.ubuntu.com/v1/4f35eced-ABC%20of%20USB-C.png"
+                         class="u-image-position--bottom" />
+
+                    <div class="duration-badge u-image-position--bottom u-image-position--right">5 mins</div>
+                  </div>
+                </a>
+              </div>
+
+              <div class="p-card__inner u-no-padding--top">
+                <h2 class="u-no-margin--bottom p-text--small">
+                  <a class="video-title p-link--soft"
+                     href="/videos/abc-of-usb-c-class-388">ABC of USB-C</a>
+                </h2>
+
+                <p class="u-text--muted video-tags u-no-margin--bottom u-no-padding--top"
+                   style="font-size: 0.7rem">May 13, 2025</p>
+
+                <p class="video-presenters u-text--muted" style="font-size: 0.7rem;">Weii Wang</p>
+
+              </div>
+            </div>
+
+          </div>
+
+          <div class="col-3">
+
+            <div class="p-card video-card u-no-padding"
+                 data-topics=""
+                 data-events="engineering-sprint"
+                 data-dates="q2-2025"
+                 data-presenters="tarek-ismail">
+
+              <div class="p-card__image u-image-position">
+                <a href="/videos/mir-swiss-cheese-class-389">
+                  <div class="thumbnail-wrapper">
+                    <img loading="lazy"
+                         alt="Mir &amp; Swiss Cheese video"
+                         src="https://assets.ubuntu.com/v1/57ec9c56-Mir%20&amp;%20Swiss%20Cheese.png"
+                         class="u-image-position--bottom" />
+
+                    <div class="duration-badge u-image-position--bottom u-image-position--right">5 mins</div>
+                  </div>
+                </a>
+              </div>
+
+              <div class="p-card__inner u-no-padding--top">
+                <h2 class="u-no-margin--bottom p-text--small">
+                  <a class="video-title p-link--soft"
+                     href="/videos/mir-swiss-cheese-class-389">Mir &amp; Swiss Cheese</a>
+                </h2>
+
+                <p class="u-text--muted video-tags u-no-margin--bottom u-no-padding--top"
+                   style="font-size: 0.7rem">May 13, 2025</p>
+
+                <p class="video-presenters u-text--muted" style="font-size: 0.7rem;">Tarek Ismail</p>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      {%- endif -%}
+    {%- endcall -%}
+
+    {%- call(slot) vf_tiered_list(is_list_full_width_on_tablet=false) -%}
+      {%- if slot == 'title' -%}
+        <h2>Wednesday, May 14</h2>
+      {%- endif -%}
+
+      {%- if slot == 'list_item_title_1' -%}
+        <h3 class="p-muted-heading">Lightning Talks (AM)</h3>
+      {%- endif -%}
+
+      {%- if slot == 'list_item_description_1' -%}
+        <div class="row">
+          <div class="col-3">
+
+            <div class="p-card video-card u-no-padding"
+                 data-topics=""
+                 data-events="engineering-sprint"
+                 data-dates="q2-2025"
+                 data-presenters="david-wilding">
+
+              <div class="p-card__image u-image-position">
+                <a href="/videos/runnable-readmes-class-390">
+                  <div class="thumbnail-wrapper">
+                    <img loading="lazy"
+                         alt="Runnable READMEs video"
+                         src="https://assets.ubuntu.com/v1/b649cbe7-Runnable%20READMEs.png"
+                         class="u-image-position--bottom" />
+
+                    <div class="duration-badge u-image-position--bottom u-image-position--right">5 mins</div>
+                  </div>
+                </a>
+              </div>
+
+              <div class="p-card__inner u-no-padding--top">
+                <h2 class="u-no-margin--bottom p-text--small">
+                  <a class="video-title p-link--soft"
+                     href="/videos/runnable-readmes-class-390">Runnable READMEs</a>
+                </h2>
+
+                <p class="u-text--muted video-tags u-no-margin--bottom u-no-padding--top"
+                   style="font-size: 0.7rem">May 14, 2025</p>
+
+                <p class="video-presenters u-text--muted" style="font-size: 0.7rem;">David Wilding</p>
+
+              </div>
+            </div>
+
+          </div>
+          <div class="col-3">
+
+            <div class="p-card video-card u-no-padding"
+                 data-topics=""
+                 data-events="engineering-sprint"
+                 data-dates="q2-2025"
+                 data-presenters="vladimir-petko">
+
+              <div class="p-card__image u-image-position">
+                <a href="/videos/devpack-for-spring-snap-class-391">
+                  <div class="thumbnail-wrapper">
+                    <img loading="lazy"
+                         alt="Devpack for Spring snap video"
+                         src="https://assets.ubuntu.com/v1/5205b5b0-Devpack%20for%20Spring%20snap.png"
+                         class="u-image-position--bottom" />
+
+                    <div class="duration-badge u-image-position--bottom u-image-position--right">5 mins</div>
+                  </div>
+                </a>
+              </div>
+
+              <div class="p-card__inner u-no-padding--top">
+                <h2 class="u-no-margin--bottom p-text--small">
+                  <a class="video-title p-link--soft"
+                     href="/videos/devpack-for-spring-snap-class-391">Devpack for Spring snap</a>
+                </h2>
+
+                <p class="u-text--muted video-tags u-no-margin--bottom u-no-padding--top"
+                   style="font-size: 0.7rem">May 14, 2025</p>
+
+                <p class="video-presenters u-text--muted" style="font-size: 0.7rem;">Vladimir Petko</p>
+
+              </div>
+            </div>
+
+          </div>
+          <div class="col-3">
+
+            <div class="p-card video-card u-no-padding"
+                 data-topics=""
+                 data-events="engineering-sprint"
+                 data-dates="q2-2025"
+                 data-presenters="enzo-deng goulin-khoge">
+
+              <div class="p-card__image u-image-position">
+                <a href="/videos/launchpad-news-class-392">
+                  <div class="thumbnail-wrapper">
+                    <img loading="lazy"
+                         alt="Launchpad News video"
+                         src="https://assets.ubuntu.com/v1/f35b3ac5-Launchpad%20News.png"
+                         class="u-image-position--bottom" />
+
+                    <div class="duration-badge u-image-position--bottom u-image-position--right">5 mins</div>
+                  </div>
+                </a>
+              </div>
+
+              <div class="p-card__inner u-no-padding--top">
+                <h2 class="u-no-margin--bottom p-text--small">
+                  <a class="video-title p-link--soft"
+                     href="/videos/launchpad-news-class-392">Launchpad News</a>
+                </h2>
+
+                <p class="u-text--muted video-tags u-no-margin--bottom u-no-padding--top"
+                   style="font-size: 0.7rem">May 14, 2025</p>
+
+                <p class="video-presenters u-text--muted" style="font-size: 0.7rem;">
+
+                  Enzo Deng and
+
+                  Goulin Khoge
+
+                </p>
+
+              </div>
+            </div>
+
+          </div>
+          <div class="col-3">
+
+            <div class="p-card video-card u-no-padding"
+                 data-topics=""
+                 data-events="engineering-sprint"
+                 data-dates="q2-2025"
+                 data-presenters="graham-morrison">
+
+              <div class="p-card__image u-image-position">
+                <a href="/videos/glenn-gould-and-documentation-class-393">
+                  <div class="thumbnail-wrapper">
+                    <img loading="lazy"
+                         alt="Glenn Gould and documentation video"
+                         src="https://assets.ubuntu.com/v1/aeea5d3d-Glenn%20Gould%20and%20documentation.png"
+                         class="u-image-position--bottom" />
+
+                    <div class="duration-badge u-image-position--bottom u-image-position--right">5 mins</div>
+                  </div>
+                </a>
+              </div>
+
+              <div class="p-card__inner u-no-padding--top">
+                <h2 class="u-no-margin--bottom p-text--small">
+                  <a class="video-title p-link--soft"
+                     href="/videos/glenn-gould-and-documentation-class-393">Glenn Gould and documentation</a>
+                </h2>
+
+                <p class="u-text--muted video-tags u-no-margin--bottom u-no-padding--top"
+                   style="font-size: 0.7rem">May 14, 2025</p>
+
+                <p class="video-presenters u-text--muted" style="font-size: 0.7rem;">Graham Morrison</p>
+
+              </div>
+            </div>
+
+          </div>
+
+          <div class="col-3">
+
+            <div class="p-card video-card u-no-padding"
+                 data-topics=""
+                 data-events="engineering-sprint"
+                 data-dates="q2-2025"
+                 data-presenters="stephanie-domas">
+
+              <div class="p-card__image u-image-position">
+                <a href="/videos/stephanies-security-stories-class-394">
+                  <div class="thumbnail-wrapper">
+                    <img loading="lazy"
+                         alt="Stephanies Security Stories video"
+                         src="https://assets.ubuntu.com/v1/b8092653-Stephanies%20Security%20Stories.png"
+                         class="u-image-position--bottom" />
+
+                    <div class="duration-badge u-image-position--bottom u-image-position--right">5 mins</div>
+                  </div>
+                </a>
+              </div>
+
+              <div class="p-card__inner u-no-padding--top">
+                <h2 class="u-no-margin--bottom p-text--small">
+                  <a class="video-title p-link--soft"
+                     href="/videos/stephanies-security-stories-class-394">Stephanies Security Stories</a>
+                </h2>
+
+                <p class="u-text--muted video-tags u-no-margin--bottom u-no-padding--top"
+                   style="font-size: 0.7rem">May 14, 2025</p>
+
+                <p class="video-presenters u-text--muted" style="font-size: 0.7rem;">Stephanie Domas</p>
+
+              </div>
+            </div>
+
+          </div>
+
+          <div class="col-3">
+
+            <div class="p-card video-card u-no-padding"
+                 data-topics=""
+                 data-events="engineering-sprint"
+                 data-dates="q2-2025"
+                 data-presenters="georgia-garcia">
+
+              <div class="p-card__image u-image-position">
+                <a href="/videos/apparmor-and-the-unprivileged-user-namespace-restriction-class-395">
+                  <div class="thumbnail-wrapper">
+                    <img loading="lazy"
+                         alt="AppArmor and the unprivileged user namespace restriction video"
+                         src="https://assets.ubuntu.com/v1/e11bf50d-AppArmor%20and%20the%20unprivileged%20user%20namespace%20restriction.png"
+                         class="u-image-position--bottom" />
+
+                    <div class="duration-badge u-image-position--bottom u-image-position--right">5 mins</div>
+                  </div>
+                </a>
+              </div>
+
+              <div class="p-card__inner u-no-padding--top">
+                <h2 class="u-no-margin--bottom p-text--small">
+                  <a class="video-title p-link--soft"
+                     href="/videos/apparmor-and-the-unprivileged-user-namespace-restriction-class-395">AppArmor and the unprivileged user namespace restriction</a>
+                </h2>
+
+                <p class="u-text--muted video-tags u-no-margin--bottom u-no-padding--top"
+                   style="font-size: 0.7rem">May 14, 2025</p>
+
+                <p class="video-presenters u-text--muted" style="font-size: 0.7rem;">Georgia Garcia</p>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- if slot == 'list_item_title_2' -%}
+        <h3 class="p-muted-heading">Panel</h3>
+      {%- endif -%}
+
+      {%- if slot == 'list_item_description_2' -%}
+        ...
+      {%- endif -%}
+
+      {%- if slot == 'list_item_title_3' -%}
+        <h3 class="p-muted-heading">Lightning Talks (PM)</h3>
+      {%- endif -%}
+
+      {%- if slot == 'list_item_description_3' -%}
+        ...
+      {%- endif -%}
+    {%- endcall -%}
+
+    {%- call(slot) vf_tiered_list(is_list_full_width_on_tablet=false) -%}
+      {%- if slot == 'title' -%}
+        <h2>Thursday, May 15</h2>
+      {%- endif -%}
+
+      {%- if slot == 'list_item_title_1' -%}
+        <h3 class="p-muted-heading">Lightning Talks (AM)</h3>
+      {%- endif -%}
+
+      {%- if slot == 'list_item_description_1' -%}
+        ...
+      {%- endif -%}
+
+      {%- if slot == 'list_item_title_2' -%}
+        <h3 class="p-muted-heading">Panel</h3>
+      {%- endif -%}
+
+      {%- if slot == 'list_item_description_2' -%}
+        ...
+      {%- endif -%}
+
+      {%- if slot == 'list_item_title_3' -%}
+        <h3 class="p-muted-heading">Lightning Talks (PM)</h3>
+      {%- endif -%}
+
+      {%- if slot == 'list_item_description_3' -%}
+        ...
+      {%- endif -%}
+    {%- endcall -%}
+
+    {%- call(slot) vf_tiered_list(is_list_full_width_on_tablet=false) -%}
+      {%- if slot == 'title' -%}
+        <h2>Friday, May 15</h2>
+      {%- endif -%}
+
+      {%- if slot == 'list_item_title_1' -%}
+        <h3 class="p-muted-heading">Lightning Talks (AM)</h3>
+      {%- endif -%}
+
+      {%- if slot == 'list_item_description_1' -%}
+        ...
+      {%- endif -%}
+
+      {%- if slot == 'list_item_title_2' -%}
+        <h3 class="p-muted-heading">Lightning Talks (PM)</h3>
+      {%- endif -%}
+
+      {%- if slot == 'list_item_description_2' -%}
+        ...
+      {%- endif -%}
+
+      {%- if slot == 'list_item_title_3' -%}
+        <h3 class="p-muted-heading">Closing Plenary</h3>
+      {%- endif -%}
+
+      {%- if slot == 'list_item_description_3' -%}
+        ...
+      {%- endif -%}
+    {%- endcall -%}
+  </div>
+{% endblock %}
