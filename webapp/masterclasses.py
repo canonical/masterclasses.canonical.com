@@ -1,18 +1,27 @@
 import logging
 import os
+import smtplib
 import textwrap
 from datetime import datetime, timezone
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 import flask
-from sqlalchemy import and_, func
+from flask import jsonify
+from sqlalchemy import and_, create_engine, func, nullslast, or_
+from sqlalchemy.orm import scoped_session, sessionmaker
+from unidecode import unidecode
 
 from models.presenter import Presenter
 from models.submission import VideoSubmission
 from models.tag import Tag, TagCategory
 from models.video import Video
+from webapp.auth import require_api_token
 from webapp.database import db_session
 from webapp.forms import MasterclassRegistrationForm
-from webapp.mattermost import (MattermostMessagePayload, try_send_message)
+from webapp.mattermost import MattermostMessagePayload, try_send_message
+from webapp.services.video_service import VideoService
+from webapp.utils.text_utils import slugify
 
 masterclasses = flask.Blueprint(
     "masterclasses",
@@ -115,7 +124,8 @@ def index():
 
 @masterclasses.route("/<title>-class-<id>")
 def video(id, title):
-    video = get_video_by_id(id)
+    video_service = VideoService()
+    video = video_service.get_video_by_id(id)
     if not video:
         flask.abort(404)
 
@@ -135,35 +145,94 @@ def video(id, title):
 
 @masterclasses.route("/videos")
 def videos():
-    # Get all videos with recordings ordered by start time descending (newest first)
-    recorded_videos = (
+    # Get pagination parameters from request
+    page = flask.request.args.get('page', 1, type=int)
+    items_per_page = 12
+    
+    topic_filter_slugs = flask.request.args.get('topic', '').split(',')
+    event_filter_slugs = flask.request.args.get('event', '').split(',')
+    date_filter_slugs = flask.request.args.get('date', '').split(',')
+    presenter_filter_slugs = flask.request.args.get('presenter', '').split(',')
+    
+    topic_filter_slugs = [f for f in topic_filter_slugs if f]
+    event_filter_slugs = [f for f in event_filter_slugs if f]
+    date_filter_slugs = [f for f in date_filter_slugs if f]
+    presenter_filter_slugs = [f for f in presenter_filter_slugs if f]
+
+    all_tags = db_session.query(Tag).all()
+    slugify = flask.current_app.jinja_env.filters['slugify']
+    
+    tag_slug_to_id = {slugify(tag.name): tag.id for tag in all_tags}
+    
+    topic_filter = [tag_slug_to_id.get(slug) for slug in topic_filter_slugs if slug in tag_slug_to_id]
+    event_filter = [tag_slug_to_id.get(slug) for slug in event_filter_slugs if slug in tag_slug_to_id]
+    date_filter = [tag_slug_to_id.get(slug) for slug in date_filter_slugs if slug in tag_slug_to_id]
+    
+    all_presenters = db_session.query(Presenter).all()
+    presenter_slug_to_id = {slugify(presenter.name): presenter.id for presenter in all_presenters}
+    presenter_filter = [presenter_slug_to_id.get(slug) for slug in presenter_filter_slugs if slug in presenter_slug_to_id]
+    
+    all_videos_query = (
         db_session.query(Video)
-        .filter(Video.recording.isnot(None))  # Only get videos with recordings
-        .order_by(Video.unixstart.desc())  # Order by start time descending
-        .all()
+        .filter(Video.recording.isnot(None))
+        .order_by(Video.unixstart.desc())
     )
 
-    # Get all tags by category
-    topic_tags = get_tags_by_category('Topic')
-    event_tags = get_tags_by_category('Event')
-    date_tags = get_tags_by_category('Date')
-
-    # Get only presenters who have videos with recordings
-    presenters = (db_session.query(Presenter)
-                  .join(Presenter.videos)
-                  .filter(Video.recording.isnot(None))
-                  .group_by(Presenter.id)
-                  .having(func.count(Video.id) > 0)
-                  .order_by(Presenter.name)
-                  .all())
+    all_recorded_videos = all_videos_query.all()
+    
+    video_service = VideoService()
+    topic_tags = video_service.get_tags_by_category('Topic')
+    event_tags = video_service.get_tags_by_category('Event')
+    date_tags = video_service.get_tags_by_category('Date')
+    presenters = video_service.get_presenters_with_videos()
+    live_videos = video_service.get_live_videos()
+    
+    search_query = flask.request.args.get('search', '')
+    
+    # Get filtered videos using the service
+    recorded_videos, total_videos = video_service.search_videos(
+        search_query,
+        topic_filter,
+        event_filter,
+        date_filter,
+        presenter_filter,
+        page,
+        items_per_page
+    )
+    
+    total_pages = max(1, (total_videos + items_per_page - 1) // items_per_page)
+    page = min(max(1, page), total_pages)
+    
+    active_filter_slugs = {
+        'topic': topic_filter_slugs,
+        'event': event_filter_slugs,
+        'date': date_filter_slugs,
+        'presenter': presenter_filter_slugs
+    }
 
     return flask.render_template(
         "videos.html",
         recorded_videos=recorded_videos,
+        all_recorded_videos=all_recorded_videos,
         topic_tags=topic_tags,
         event_tags=event_tags,
         date_tags=date_tags,
-        presenters=presenters
+        presenters=presenters,
+        live_videos=live_videos,
+        pagination={
+            'page': page,
+            'total_pages': total_pages,
+            'total_items': total_videos,
+            'items_per_page': items_per_page
+        },
+        active_filters={
+            'topic': topic_filter,
+            'event': event_filter,
+            'date': date_filter,
+            'presenter': presenter_filter,
+            'search': search_query
+        },
+        active_filter_slugs=active_filter_slugs
     )
 
 

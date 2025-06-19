@@ -15,7 +15,7 @@
   <section class="p-accordion__panel has-tick-elements" id="{{ filter_class }}-section" aria-labelledby="{{ filter_class }}-tab" aria-hidden="false">
     {% for item in sorted_items[:3] %}
     <label class="p-checkbox">
-      <input type="checkbox" class="p-checkbox__input {{ filter_class }}-filter" value="{{ item.name|lower|replace(' ', '-') }}">
+      <input type="checkbox" class="p-checkbox__input {{ filter_class }}-filter" value="{{ item.id }}">
       <span class="p-checkbox__label">{{ item.name }}</span>
       <span class="p-badge">{{ item.videos|selectattr('recording')|list|length }}</span>
     </label>
@@ -23,7 +23,7 @@
     {% if sorted_items|length > 3 %}
       {% for item in sorted_items[3:] %}
       <label class="p-checkbox" style="display: none;">
-        <input type="checkbox" class="p-checkbox__input {{ filter_class }}-filter" value="{{ item.name|lower|replace(' ', '-') }}">
+        <input type="checkbox" class="p-checkbox__input {{ filter_class }}-filter" value="{{ item.id }}">
         <span class="p-checkbox__label">{{ item.name }}</span>
         <span class="p-badge">{{ item.videos|selectattr('recording')|list|length }}</span>
       </label>

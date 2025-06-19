@@ -168,3 +168,7 @@ def register():
         form=form,
         submission_status=submission_status
     )
+
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db_session.remove()
