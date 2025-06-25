@@ -172,46 +172,33 @@
     const resultsCounter = document.getElementById('filter-results-count');
     const paginationContainer = document.getElementById('pagination-container');
     
-    // Create mappings between IDs and slugs
-    const idToSlug = {
-      // For topics
-      {% for tag in topic_tags %}
-      "{{ tag.id }}": "{{ tag.name|slugify }}",
-      {% endfor %}
-      // For events
-      {% for tag in event_tags %}
-      "{{ tag.id }}": "{{ tag.name|slugify }}",
-      {% endfor %}
-      // For dates
-      {% for tag in date_tags %}
-      "{{ tag.id }}": "{{ tag.name|slugify }}",
-      {% endfor %}
-      // For presenters
-      {% for presenter in presenters %}
-      "{{ presenter.id }}": "{{ presenter.name|slugify }}",
-      {% endfor %}
+    {% set filter_types = [
+        {'key': 'topic', 'items': topic_tags, 'label': 'name'},
+        {'key': 'event', 'items': event_tags, 'label': 'name'},
+        {'key': 'date', 'items': date_tags, 'label': 'name'},
+        {'key': 'presenter', 'items': presenters, 'label': 'name'}
+    ] %}
+
+    {% for filter in filter_types %}
+    const {{ filter.key }}IdToSlug = {
+    {% for item in filter['items'] %}
+    "{{ item.id }}": "{{ item[filter['label']]|slugify }}"{% if not loop.last %},{% endif %}
+    {% endfor %}
+    };
+    const {{ filter.key }}SlugToId = {
+    {% for item in filter['items'] %}
+    "{{ item[filter['label']]|slugify }}": "{{ item.id }}"{% if not loop.last %},{% endif %}
+    {% endfor %}
+    };
+    {% endfor %}
+
+    const idToSlugMaps = {
+      topic: topicIdToSlug,
+      event: eventIdToSlug,
+      date: dateIdToSlug,
+      presenter: presenterIdToSlug
     };
 
-    const slugToId = {
-      // For topics
-      {% for tag in topic_tags %}
-      "{{ tag.name|slugify }}": "{{ tag.id }}",
-      {% endfor %}
-      // For events
-      {% for tag in event_tags %}
-      "{{ tag.name|slugify }}": "{{ tag.id }}",
-      {% endfor %}
-      // For dates
-      {% for tag in date_tags %}
-      "{{ tag.name|slugify }}": "{{ tag.id }}",
-      {% endfor %}
-      // For presenters
-      {% for presenter in presenters %}
-      "{{ presenter.name|slugify }}": "{{ presenter.id }}",
-      {% endfor %}
-    };
-    
-    // Initialize filters from active_filters - convert all IDs to strings for consistency
     const filters = {
       topic: new Set(Array.from({{ active_filters.topic|tojson }}).map(id => id.toString())),
       event: new Set(Array.from({{ active_filters.event|tojson }}).map(id => id.toString())),
@@ -244,7 +231,8 @@
       // Add each filter type to URL parameters, using slugs instead of IDs
       Object.entries(filters).forEach(([key, value]) => {
         if (value instanceof Set && value.size > 0) {
-          const slugs = Array.from(value).map(id => idToSlug[id] || id);
+          const idToSlugMap = idToSlugMaps[key];
+          const slugs = Array.from(value).map(id => idToSlugMap[id] || id);
           params.append(key, slugs.join(','));
         } else if (typeof value === 'string' && value) {
           params.append(key, value);
