@@ -1,5 +1,6 @@
 import os
 import flask
+import yaml
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from canonicalwebteam.flask_base.app import FlaskBase
@@ -27,6 +28,8 @@ from webapp.api import api
 from webapp.forms import MasterclassSubmissionForm
 from canonicalwebteam import image_template
 from jinja2 import ChoiceLoader, FileSystemLoader
+from sqlalchemy.sql.expression import func
+
 
 app = FlaskBase(
     __name__,
@@ -169,9 +172,45 @@ def register():
         submission_status=submission_status
     )
 
-@app.route("/events/<event>")
-def event(event):
-    return flask.render_template("/events/{}.html".format(event))
+# @app.route("/events/<event>")
+# def event(event):
+#     return flask.render_template("/events/{}.html".format(event))
+
+@app.route("/events/<event_slug>")
+def event_detail(event_slug):
+    yaml_path = os.path.join("events", f"{event_slug}.yaml")
+
+    if not os.path.exists(yaml_path):
+        flask.abort(404, description="Event not found")
+
+    with open(yaml_path, "r") as f:
+        try:
+            event_data = yaml.safe_load(f)
+        except yaml.YAMLError as e:
+            app.logger.error(f"Failed to parse YAML for event '{event_slug}': {e}")
+            flask.abort(500, description="Invalid event data")
+
+    # Replace video IDs with actual video objects
+    for day in event_data.get("days", []):
+        for session in day.get("sessions", []):
+            video_objs = []
+            for video_id in session.get("videos", []):
+                video = db_session.get(Video, video_id)
+                if video:
+                    video_objs.append(video)
+                else:
+                    app.logger.warning(f"Video ID {video_id} not found in DB for event '{event_slug}'")
+                    # mock with random video if not found
+                    video = db_session.query(Video).order_by(func.random()).first()
+                    if video:
+                        video_objs.append(video)
+            session["videos"] = video_objs
+
+    # Replace featured video if it exists
+    featured_video_id = event_data.get("featured_video")
+    event_data["featured_video_obj"] = db_session.get(Video, featured_video_id) if featured_video_id else db_session.query(Video).order_by(func.random()).first()
+
+    return flask.render_template("event.html", event=event_data)
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):

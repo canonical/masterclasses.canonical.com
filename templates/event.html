@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% from "shared/_upcoming_session.html" import upcoming_session %}
+{% from "_macros/vf_hero.jinja" import vf_hero %}
+{% from "_macros/vf_tiered-list.jinja" import vf_tiered_list %}
+{% from "shared/_video_card.html" import video_card %}
+
+{% block content %}
+
+  {% call(slot) vf_hero(
+    title_text=event.title,
+    subtitle_text=event.subtitle,
+    layout='50/50',
+    is_split_on_medium=true
+    ) -%}
+    {%- if slot == 'description' -%}
+
+    {%- endif -%}
+    {%- if slot == 'cta' -%}
+      <a href="/videos?event=engineering-sprint&date=q2-2025"
+         class="p-button--positive">Browse all videos</a>
+    {%- endif -%}
+    {%- if slot == 'image' -%}
+      <iframe src="https://drive.google.com/file/d/11hNPkDQee8croIPMOep_2Qj6zmUq7LuU/preview"
+              allow="autoplay"
+              allowfullscreen
+              class="iframe-video"></iframe>
+    {%- endif -%}
+  {% endcall -%}
+
+  <div class="p-section">
+    <style>
+      .video-card {
+        height: auto;
+      }
+    </style>
+
+  {% for day in event.days %}
+    {% set session_count = day.sessions | length %}
+    {% call(slot) vf_tiered_list(is_list_full_width_on_tablet=false) %}
+
+      {%- if slot == 'title' -%}
+        <h2>{{ day.title }}</h2>
+      {%- endif -%}
+
+      {% for session in day.sessions %}
+        {%- set session_index = loop.index -%}
+        {%- set slot_title = 'list_item_title_' ~ session_index -%}
+        {%- set slot_desc = 'list_item_description_' ~ session_index -%}
+
+        {%- if slot == slot_title -%}
+          <h3 class="p-heading--5">{{ session.title }}</h3>
+        {%- endif -%}
+
+        {%- if slot == slot_desc -%}
+          {% if session.videos | length > 1 %}
+            <!-- Render multiple videos in a row -->
+            <div class="row">
+              {% for video in session.videos %}
+                <div class="col-3">
+                  {{ video_card(video) }}
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <!-- Single video card -->
+            {{ video_card(session.videos[0]) }}
+          {% endif %}
+        {%- endif -%}
+
+      {% endfor %}
+    {% endcall %}
+  {% endfor %}
+
+  </div>
+{% endblock %}

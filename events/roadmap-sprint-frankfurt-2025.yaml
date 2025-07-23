@@ -1,0 +1,57 @@
+title: Product Roadmap Sprint
+subtitle: Frankfurt, May 2025
+featured_video: 332
+days:
+  - date: 2025-05-05
+    title: Monday, May 5
+    sessions:
+      - title: Plenary
+        videos: [332]
+      - title: Roadmap
+        videos: [331]
+      - title: Lighning Talks
+        videos: [330, 329, 328, 327, 326]
+  - date: 2025-05-06
+    title: Tuesday, May 6
+    sessions:
+      - title: Roadmap
+        videos: [333]
+      - title: Roadmap
+        videos: [334]
+      - title: Lighning Talks
+        videos: [335, 336, 337, 338, 339]
+  - date: 2025-05-07
+    title: Wednesday, May 7
+    sessions:
+      - title: Roadmap
+        videos: [340]
+      - title: Roadmap
+        videos: [341]
+      - title: Panel
+        videos: [343]
+      - title: Roadmap
+        videos: [344]
+      - title: Lighning Talks
+        videos: [345, 346, 347, 348, 349, 350]
+  - date: 2025-05-08
+    title: Thursday, May 8
+    sessions:
+      - title: Roadmap
+        videos: [351]
+      - title: Roadmap
+        videos: [352]
+      - title: Lighning Talks
+        videos: [353, 354, 355, 356, 357, 358]
+  - date: 2025-05-09
+    title: Friday, May 9
+    sessions:
+      - title: Roadmap
+        videos: [359]
+      - title: Roadmap
+        videos: [360]
+      - title: Foundations
+        videos: [361]
+      - title: Lighning Talks
+        videos: [362, 363, 364, 365, 366]
+      - title: Plenary
+        videos: [367]
