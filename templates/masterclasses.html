@@ -116,6 +116,51 @@
 {%- endcall -%}
 {%- endif -%}
 
+<div class="p-section">
+  {%- call(slot) vf_tiered_list(is_list_full_width_on_tablet=false) -%}
+    {%- if slot == 'title' -%}
+      <h2>Recent Sprints</h2>
+    {%- endif -%}
+
+    {%- if slot == 'list_item_title_1' -%}
+      <h3 class="p-muted-heading">Engineering Sprint</h3>
+    {%- endif -%}
+
+    {%- if slot == 'list_item_description_1' -%}
+      <div class="p-section--shallow">
+        <iframe src="https://drive.google.com/file/d/11hNPkDQee8croIPMOep_2Qj6zmUq7LuU/preview"
+                title="Opening Plenary of the Engineering Sprint in Frankfurt, May 2025"
+                allow="autoplay"
+                allowfullscreen
+                class="iframe-video"></iframe>
+        <p>Videos from Engineering Spring in Frankfurt include the opening and closing plenary, discussion panels, workshops and lighting talks.</p>
+        <p>
+          <a href="/videos?event=engineering-sprint&date=q2-2025">Explore all Frankfurt Engineering Sprint videos&nbsp;&rsaquo;</a>
+        </p>
+      </div>
+    {%- endif -%}
+
+    {%- if slot == 'list_item_title_2' -%}
+      <h3 class="p-muted-heading">Roadmap Sprint</h3>
+    {%- endif -%}
+
+    {%- if slot == 'list_item_description_2' -%}
+      <div class="p-section--shallow">
+        <iframe src="https://drive.google.com/file/d/10RMCGtuDtwiuhEtjv6unJbYhZl04GiEa/preview"
+                title="Opening Plenary of the Product Roadmap Sprint in Frankfurt, May 2025"
+                allow="autoplay"
+                allowfullscreen
+                class="iframe-video"></iframe>
+        <p>Videos from Product Roadmap Spring in Frankfurt include the opening and closing plenary, presentations of the product teams, discussion panels and lighting talks.</p>
+        <p>
+          <a href="/videos?event=roadmap-sprint&date=q2-2025">Explore all Frankfurt Roadmap Sprint videos&nbsp;&rsaquo;</a>
+        </p>
+      </div>
+    {%- endif -%}
+
+  {%- endcall -%}
+</div>
+
 <section class="p-strip is-light">
   <div class="row">
     <div class="col-9">
