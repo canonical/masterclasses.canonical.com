@@ -50,3 +50,5 @@ demo:
       value: true
     - name: API_TOKEN
       value: super-secret-token
+    - name: PLACEHOLDER_DATA_DYNAMIC
+      value: true
