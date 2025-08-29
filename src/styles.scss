@@ -185,3 +185,10 @@
 .p-strip p del {
   text-decoration: line-through;
 }
+
+// Fix for Vanilla badge bug
+// https://github.com/canonical/vanilla-framework/issues/5629
+.p-checkbox .p-badge {
+  text-indent: 0;
+  vertical-align: text-bottom;
+}
