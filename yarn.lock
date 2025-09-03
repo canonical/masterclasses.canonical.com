@@ -1176,10 +1176,10 @@ util-deprecate@^1.0.2:
   resolved "https://registry.yarnpkg.com/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"
   integrity sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==
 
-vanilla-framework@4.32.0:
-  version "4.32.0"
-  resolved "https://registry.yarnpkg.com/vanilla-framework/-/vanilla-framework-4.32.0.tgz#be0730a25e3fd67b8071a2721cba524da5b531a3"
-  integrity sha512-RdYyNO0zaaZTZ5tw5wLQvuBcSBjmGEN3JYKBf2BJX1/RSnfobpdakl36ftMRkGgjCS7yXnj6toYr+PXiTCYQ+g==
+vanilla-framework@4.32.1:
+  version "4.32.1"
+  resolved "https://registry.yarnpkg.com/vanilla-framework/-/vanilla-framework-4.32.1.tgz#6c861e09511bc40605432824d9d8fa8a9ec2e1d6"
+  integrity sha512-BNXHJ5glRB+o4dorWdqyUv8dIoFddYy16yUvsP0MQ55W1VG9K8lrGJYiw9bXElBTh9+WubbJicIF2Vnl3hzIzg==
 
 which@^1.3.1:
   version "1.3.1"
