@@ -28,8 +28,7 @@ from webapp.api import api
 from webapp.forms import MasterclassSubmissionForm
 from canonicalwebteam import image_template
 from jinja2 import ChoiceLoader, FileSystemLoader
-from sqlalchemy.sql.expression import func
-
+from sqlalchemy.sql.expression import func, and_
 
 app = FlaskBase(
     __name__,
@@ -119,6 +118,11 @@ def time_until_filter(timestamp):
 def format_date_filter(timestamp):
     return datetime.fromtimestamp(timestamp, timezone.utc).strftime('%B %d, %Y')
 
+@app.template_filter('format_date_iso')
+def format_date_filter_iso(timestamp):
+    """Convert a UNIX timestamp to ISO 8601 string in UTC."""
+    return datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat()
+
 @app.route("/videos/<video_id>")
 def video_player(video_id):
     return flask.render_template("video_player.html", video_id=video_id)
@@ -172,9 +176,6 @@ def register():
         submission_status=submission_status
     )
 
-# @app.route("/events/<event>")
-# def event(event):
-#     return flask.render_template("/events/{}.html".format(event))
 
 @app.route("/events/<event_slug>")
 def event_detail(event_slug):
@@ -183,32 +184,57 @@ def event_detail(event_slug):
     if not os.path.exists(yaml_path):
         flask.abort(404, description="Event not found")
 
-    with open(yaml_path, "r") as f:
-        try:
+    try:
+        with open(yaml_path, "r") as f:
             event_data = yaml.safe_load(f)
-        except yaml.YAMLError as e:
-            app.logger.error(f"Failed to parse YAML for event '{event_slug}': {e}")
-            flask.abort(500, description="Invalid event data")
+    except (IOError, yaml.YAMLError) as e:
+        app.logger.error(f"Failed to read or parse YAML for '{event_slug}': {e}")
+        flask.abort(500, description="Invalid or unreadable event data")
 
-    # Replace video IDs with actual video objects
+    tag_name = event_data.get("tag")
+
+    featured_video = None
+
+    # For each session, find videos within its time range
     for day in event_data.get("days", []):
         for session in day.get("sessions", []):
-            video_objs = []
-            for video_id in session.get("videos", []):
-                video = db_session.get(Video, video_id)
-                if video:
-                    video_objs.append(video)
-                else:
-                    app.logger.warning(f"Video ID {video_id} not found in DB for event '{event_slug}'")
-                    # mock with random video if not found
-                    video = db_session.query(Video).order_by(func.random()).first()
-                    if video:
-                        video_objs.append(video)
-            session["videos"] = video_objs
+            start_datetime = session.get("start")
+            end_datetime = session.get("end")
 
-    # Replace featured video if it exists
-    featured_video_id = event_data.get("featured_video")
-    event_data["featured_video_obj"] = db_session.get(Video, featured_video_id) if featured_video_id else db_session.query(Video).order_by(func.random()).first()
+            if not start_datetime or not end_datetime:
+                session["videos"] = []
+                app.logger.warning(f"Session '{session.get('title')}' is missing start or end time in '{event_slug}'.")
+                continue
+
+            if not isinstance(start_datetime, datetime):
+                raise TypeError(f"Value of 'start' must be a valid datetime, got {start_datetime!r}.")
+
+            if not isinstance(end_datetime, datetime):
+                raise TypeError(f"Value of 'end' must be a valid datetime, got {end_datetime!r}.")
+
+            # Convert to epoch seconds
+            start_ts = int(start_datetime.timestamp())
+            end_ts = int(end_datetime.timestamp())
+
+            # Query videos filtered by tag first (if provided)
+            query = db_session.query(Video).join(Video.tags)
+            if tag_name:
+                query = query.filter(Tag.name == tag_name)
+
+            # Filter videos where 'unixstart' is within the session's time range
+            session_videos = query.filter(
+                Video.unixstart >= start_ts,
+                Video.unixstart < end_ts
+            ).order_by(Video.unixstart).all()
+
+            session["videos"] = session_videos
+
+            # Set the first video of the first session as featured if none set yet
+            if session_videos and not featured_video:
+                featured_video = session_videos[0]
+
+    if featured_video:
+        event_data["featured_video"] = featured_video
 
     return flask.render_template("event.html", event=event_data)
 

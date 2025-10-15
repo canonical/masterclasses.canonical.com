@@ -17,14 +17,32 @@
 
     {%- endif -%}
     {%- if slot == 'cta' -%}
-      <a href="/videos?event=engineering-sprint&date=q2-2025"
+      <a href="{{ event.all_videos_url }}"
          class="p-button--positive">Browse all videos</a>
+      <a href="{{ event.live_stream_url }}">Join the live stream</a>
     {%- endif -%}
     {%- if slot == 'image' -%}
-      <iframe src="https://drive.google.com/file/d/11hNPkDQee8croIPMOep_2Qj6zmUq7LuU/preview"
-              allow="autoplay"
-              allowfullscreen
-              class="iframe-video"></iframe>
+      {%- if event.featured_video and event.featured_video.recording -%}
+          <iframe
+        src="https://drive.google.com/file/d/{{ event.featured_video.recording|google_drive_id }}/preview"
+        allow="autoplay"
+        allowfullscreen
+        class="iframe-video"
+      ></iframe>
+      {%- else -%}
+
+          {{ image(url="https://assets.ubuntu.com/v1/8f77cc6c-image%2010.png",
+            alt="",
+            width="1832",
+            height="1220",
+            hi_def=True,
+            loading="auto|lazy"
+            ) | safe
+          }}
+      {%- endif -%}
+
+
+
     {%- endif -%}
   {% endcall -%}
 
@@ -53,18 +71,25 @@
         {%- endif -%}
 
         {%- if slot == slot_desc -%}
-          {% if session.videos | length > 1 %}
-            <!-- Render multiple videos in a row -->
-            <div class="row">
-              {% for video in session.videos %}
-                <div class="col-3">
-                  {{ video_card(video) }}
-                </div>
-              {% endfor %}
-            </div>
+          {%- if session.videos %}
+            {% if session.videos | length > 1 %}
+              <!-- Render multiple videos in a row -->
+              <div class="grid-row">
+                {% for video in session.videos %}
+                  <div class="grid-col-2 p-section--shallow">
+                    {{ video_card(video) }}
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <!-- Single video card -->
+              <div class="p-section--shallow">
+                {{ video_card(session.videos[0]) }}
+              </div>
+            {% endif %}
           {% else %}
-            <!-- Single video card -->
-            {{ video_card(session.videos[0]) }}
+              <!-- No videos available -->
+              <p class="u-text--muted">No videos available for this session.</p>
           {% endif %}
         {%- endif -%}
 
