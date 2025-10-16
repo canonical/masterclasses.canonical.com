@@ -193,6 +193,7 @@ def event_detail(event_slug):
 
     tag_name = event_data.get("tag")
 
+    # TODO: Read featured video from YAML when available (timestamp?)
     featured_video = None
 
     # For each session, find videos within its time range
@@ -227,11 +228,13 @@ def event_detail(event_slug):
                 Video.unixstart < end_ts
             ).order_by(Video.unixstart).all()
 
+            # Use last video as featured video (should end up as "Closing plenary")
+            # TODO: fix this when we have a proper way to mark featured video
+            if session_videos:
+                featured_video = session_videos[-1]
+
             session["videos"] = session_videos
 
-            # Set the first video of the first session as featured if none set yet
-            if session_videos and not featured_video:
-                featured_video = session_videos[0]
 
     if featured_video:
         event_data["featured_video"] = featured_video

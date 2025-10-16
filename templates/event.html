@@ -19,7 +19,9 @@
     {%- if slot == 'cta' -%}
       <a href="{{ event.all_videos_url }}"
          class="p-button--positive">Browse all videos</a>
+      {%- if event.live_stream_url -%}
       <a href="{{ event.live_stream_url }}">Join the live stream</a>
+      {%- endif -%}
     {%- endif -%}
     {%- if slot == 'image' -%}
       {%- if event.featured_video and event.featured_video.recording -%}

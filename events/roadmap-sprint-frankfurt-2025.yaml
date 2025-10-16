@@ -1,57 +1,76 @@
 title: Product Roadmap Sprint
 subtitle: Frankfurt, May 2025
-featured_video: 332
+all_videos_url: /videos?event=roadmap-sprint&date=q2-2025
 days:
   - date: 2025-05-05
     title: Monday, May 5
     sessions:
       - title: Plenary
-        videos: [332]
+        start: 2025-05-05T08:30:00+00:00
+        end: 2025-05-05T09:30:00+00:00
       - title: Roadmap
-        videos: [331]
+        start: 2025-05-05T16:00:00+00:00
+        end: 2025-05-05T16:45:00+00:00
       - title: Lighning Talks
-        videos: [330, 329, 328, 327, 326]
+        start: 2025-05-05T17:00:00+00:00
+        end: 2025-05-05T17:30:00+00:00
   - date: 2025-05-06
     title: Tuesday, May 6
     sessions:
       - title: Roadmap
-        videos: [333]
+        start: 2025-05-06T08:30:00+00:00
+        end: 2025-05-06T09:15:00+00:00
       - title: Roadmap
-        videos: [334]
+        start: 2025-05-06T16:00:00+00:00
+        end: 2025-05-06T16:45:00+00:00
       - title: Lighning Talks
-        videos: [335, 336, 337, 338, 339]
+        start: 2025-05-06T17:00:00+00:00
+        end: 2025-05-06T17:30:00+00:00
   - date: 2025-05-07
     title: Wednesday, May 7
     sessions:
       - title: Roadmap
-        videos: [340]
+        start: 2025-05-07T08:30:00+00:00
+        end: 2025-05-07T09:15:00+00:00
       - title: Roadmap
-        videos: [341]
+        start: 2025-05-07T09:15:00+00:00
+        end: 2025-05-07T10:00:00+00:00
       - title: Panel
-        videos: [343]
+        start: 2025-05-07T13:30:00+00:00
+        end: 2025-05-07T14:30:00+00:00
       - title: Roadmap
-        videos: [344]
+        start: 2025-05-07T16:00:00+00:00
+        end: 2025-05-07T16:45:00+00:00
       - title: Lighning Talks
-        videos: [345, 346, 347, 348, 349, 350]
+        start: 2025-05-07T17:00:00+00:00
+        end: 2025-05-07T17:30:00+00:00
   - date: 2025-05-08
     title: Thursday, May 8
     sessions:
       - title: Roadmap
-        videos: [351]
+        start: 2025-05-08T08:30:00+00:00
+        end: 2025-05-08T09:15:00+00:00
       - title: Roadmap
-        videos: [352]
+        start: 2025-05-08T16:00:00+00:00
+        end: 2025-05-08T16:45:00+00:00
       - title: Lighning Talks
-        videos: [353, 354, 355, 356, 357, 358]
+        start: 2025-05-08T17:00:00+00:00
+        end: 2025-05-08T17:30:00+00:00
   - date: 2025-05-09
     title: Friday, May 9
     sessions:
       - title: Roadmap
-        videos: [359]
+        start: 2025-05-09T08:30:00+00:00
+        end: 2025-05-09T09:15:00+00:00
       - title: Roadmap
-        videos: [360]
+        start: 2025-05-09T09:15:00+00:00
+        end: 2025-05-09T10:00:00+00:00
       - title: Foundations
-        videos: [361]
+        start: 2025-05-09T14:15:00+00:00
+        end: 2025-05-09T15:00:00+00:00
       - title: Lighning Talks
-        videos: [362, 363, 364, 365, 366]
+        start: 2025-05-09T15:00:00+00:00
+        end: 2025-05-09T15:30:00+00:00
       - title: Plenary
-        videos: [367]
+        start: 2025-05-09 15:30:00
+        end: 2025-05-09 16:00:00
