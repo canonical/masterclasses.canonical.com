@@ -54,7 +54,7 @@
               <button id="reset-filters" class="p-button">Reset Filters</button>
             </div>
           </div>
-          
+
           <!-- Pagination component -->
           {% if pagination.total_pages > 1 %}
           <nav id="pagination-container" class="p-pagination" aria-label="Pagination">
@@ -85,8 +85,8 @@
               <!-- Then use it in each pagination link -->
               <li class="p-pagination__item">
                 {% if pagination.page > 1 %}
-                <a class="p-pagination__link--previous" 
-                   href="{{ pagination_url(pagination.page-1) }}" 
+                <a class="p-pagination__link--previous"
+                   href="{{ pagination_url(pagination.page-1) }}"
                    title="Previous page">
                   <i class="p-icon--chevron-down">Previous page</i>
                 </a>
@@ -96,54 +96,54 @@
                 </span>
                 {% endif %}
               </li>
-              
+
               <!-- First page -->
               <li class="p-pagination__item">
-                <a class="p-pagination__link {% if pagination.page == 1 %}is-active{% endif %}" 
+                <a class="p-pagination__link {% if pagination.page == 1 %}is-active{% endif %}"
                    {% if pagination.page == 1 %}aria-current="page"{% endif %}
-                   href="{{ pagination_url(1) }}" 
+                   href="{{ pagination_url(1) }}"
                    aria-label="Page 1">1</a>
               </li>
-              
+
               <!-- Truncation if needed -->
               {% if pagination.page > 3 %}
               <li class="p-pagination__item p-pagination__item--truncation">…</li>
               {% endif %}
-              
+
               <!-- Pages around current page -->
               {% set start_page = 2 if pagination.page <= 2 else pagination.page - 1 %}
               {% set end_page = pagination.total_pages - 1 if pagination.page >= pagination.total_pages - 1 else pagination.page + 1 %}
               {% for p in range(start_page, end_page + 1) %}
                 {% if p > 1 and p < pagination.total_pages %}
                 <li class="p-pagination__item">
-                  <a class="p-pagination__link {% if pagination.page == p %}is-active{% endif %}" 
+                  <a class="p-pagination__link {% if pagination.page == p %}is-active{% endif %}"
                      {% if pagination.page == p %}aria-current="page"{% endif %}
-                     href="{{ pagination_url(p) }}" 
+                     href="{{ pagination_url(p) }}"
                      aria-label="Page {{ p }}">{{ p }}</a>
                 </li>
                 {% endif %}
               {% endfor %}
-              
+
               <!-- Truncation if needed -->
               {% if pagination.page < pagination.total_pages - 2 %}
               <li class="p-pagination__item p-pagination__item--truncation">…</li>
               {% endif %}
-              
+
               <!-- Last page (if more than 1 page) -->
               {% if pagination.total_pages > 1 and pagination.total_pages != 1 %}
               <li class="p-pagination__item">
-                <a class="p-pagination__link {% if pagination.page == pagination.total_pages %}is-active{% endif %}" 
+                <a class="p-pagination__link {% if pagination.page == pagination.total_pages %}is-active{% endif %}"
                    {% if pagination.page == pagination.total_pages %}aria-current="page"{% endif %}
-                   href="{{ pagination_url(pagination.total_pages) }}" 
+                   href="{{ pagination_url(pagination.total_pages) }}"
                    aria-label="Page {{ pagination.total_pages }}">{{ pagination.total_pages }}</a>
               </li>
               {% endif %}
-              
+
               <!-- Next page button -->
               <li class="p-pagination__item">
                 {% if pagination.page < pagination.total_pages %}
-                <a class="p-pagination__link--next" 
-                   href="{{ pagination_url(pagination.page+1) }}" 
+                <a class="p-pagination__link--next"
+                   href="{{ pagination_url(pagination.page+1) }}"
                    title="Next page">
                   <i class="p-icon--chevron-down">Next page</i>
                 </a>
@@ -171,7 +171,7 @@
     const noResultsMessage = document.getElementById('no-results-message');
     const resultsCounter = document.getElementById('filter-results-count');
     const paginationContainer = document.getElementById('pagination-container');
-    
+
     {% set filter_types = [
         {'key': 'topic', 'items': topic_tags, 'label': 'name'},
         {'key': 'event', 'items': event_tags, 'label': 'name'},
@@ -192,11 +192,19 @@
     };
     {% endfor %}
 
+    // Initialize filters from active_filters - convert all IDs to strings for consistency
     const idToSlugMaps = {
       topic: topicIdToSlug,
       event: eventIdToSlug,
       date: dateIdToSlug,
       presenter: presenterIdToSlug
+    };
+
+    const slugToIdMaps = {
+      topic: topicSlugToId,
+      event: eventSlugToId,
+      date: dateSlugToId,
+      presenter: presenterSlugToId
     };
 
     const filters = {
@@ -215,19 +223,19 @@
       if (currentRequest) {
         currentRequest.abort();
       }
-      
+
       // Create an AbortController for the new request
       const abortController = new AbortController();
       currentRequest = abortController;
-      
+
       // Hide UI elements while loading
       if (paginationContainer) paginationContainer.style.display = 'none';
       if (resultsCounter) resultsCounter.style.display = 'none';
       if (noResultsMessage) noResultsMessage.style.display = 'none';
-      
+
       // Build the URL with current filters
       const params = new URLSearchParams();
-      
+
       // Add each filter type to URL parameters, using slugs instead of IDs
       Object.entries(filters).forEach(([key, value]) => {
         if (value instanceof Set && value.size > 0) {
@@ -238,50 +246,50 @@
           params.append(key, value);
         }
       });
-      
+
       // Set page number
       params.set('page', page.toString());
-      
+
       // Update URL without reloading page (only if pushState is true)
       const newUrl = `${window.location.pathname}?${params.toString()}`;
       if (pushState) {
         history.pushState({ filters, page }, '', newUrl);
       }
-      
+
       // Show loading state
       videoContainer.innerHTML = '<div class="u-align--center p-strip"><span class="p-card__spinner"><i class="p-icon--spinner u-animation--spin"></i></span><span class="u-off-screen">Loading...</span></div>';
-      
+
       try {
         // Fetch the filtered content
         const response = await fetch(newUrl, {
           signal: abortController.signal
         });
-        
+
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
-        
+
         const html = await response.text();
-        
+
         // Create a temporary element to parse the HTML
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
-        
+
         // Extract the video cards section
         const newVideoContainer = doc.getElementById('video-container');
         const newPagination = doc.getElementById('pagination-container');
-        
+
         // Update the DOM with new content
         if (newVideoContainer) {
           videoContainer.innerHTML = newVideoContainer.innerHTML;
         }
-        
+
         // Check if pagination should be shown based on total items
-        const totalItems = newVideoContainer ? 
+        const totalItems = newVideoContainer ?
           parseInt(newVideoContainer.getAttribute('data-total-items')) : 0;
         const itemsPerPage = 12; // Should match server-side
         const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
-        
+
         // Update pagination
         if (paginationContainer) {
           if (newPagination) {
@@ -296,7 +304,7 @@
             const fullPageHtml = await fullPageResponse.text();
             const fullPageDoc = new DOMParser().parseFromString(fullPageHtml, 'text/html');
             const fullPagePagination = fullPageDoc.getElementById('pagination-container');
-            
+
             if (fullPagePagination) {
               paginationContainer.innerHTML = fullPagePagination.innerHTML;
               paginationContainer.style.display = '';
@@ -309,25 +317,25 @@
             paginationContainer.style.display = 'none';
           }
         }
-        
+
         // After processing, show the appropriate UI elements
-        
+
         // Check if there are any video cards in the updated container
         const hasVideos = newVideoContainer && newVideoContainer.querySelectorAll('.p-card').length > 0;
-        
+
         // Show/hide pagination based on total pages
         if (paginationContainer) {
           paginationContainer.style.display = totalPages > 1 ? '' : 'none';
         }
-        
+
         // Show/hide results counter
         if (resultsCounter) {
-          const hasFilters = filters.topic.size > 0 || 
-                           filters.event.size > 0 || 
-                           filters.date.size > 0 || 
-                           filters.presenter.size > 0 || 
+          const hasFilters = filters.topic.size > 0 ||
+                           filters.event.size > 0 ||
+                           filters.date.size > 0 ||
+                           filters.presenter.size > 0 ||
                            filters.search;
-                           
+
           if (hasFilters && hasVideos) {
             resultsCounter.textContent = `${totalItems} video${totalItems !== 1 ? 's' : ''} match your filters`;
             resultsCounter.style.display = 'block';
@@ -335,7 +343,7 @@
             resultsCounter.style.display = 'none';
           }
         }
-        
+
         // Show/hide no results message
         if (noResultsMessage) {
           noResultsMessage.style.display = hasVideos ? 'none' : 'block';
@@ -347,7 +355,7 @@
           // Fall back to traditional page reload
           window.location.href = newUrl;
         }
-        
+
         // In case of error, reset UI elements
         if (noResultsMessage) noResultsMessage.style.display = 'none';
         if (resultsCounter) resultsCounter.style.display = 'none';
@@ -359,7 +367,7 @@
         }
       }
     }
-    
+
     // Function to set up pagination link event listeners
     function setupPaginationLinks() {
       document.querySelectorAll('.p-pagination__link, .p-pagination__link--previous, .p-pagination__link--next')
@@ -376,13 +384,13 @@
           }
         });
     }
-    
+
     // Handle browser back/forward buttons
     window.addEventListener('popstate', (event) => {
       // Get filters from URL parameters
       const url = new URL(window.location.href);
       const params = url.searchParams;
-      
+
       // Clear existing filters
       Object.keys(filters).forEach(key => {
         if (filters[key] instanceof Set) {
@@ -391,7 +399,7 @@
           filters[key] = '';
         }
       });
-      
+
       // Parse topic, event, date, presenter parameters
       ['topic', 'event', 'date', 'presenter'].forEach(type => {
         const paramValue = params.get(type);
@@ -399,32 +407,32 @@
           // Split by comma and convert slugs to IDs
           paramValue.split(',').forEach(slug => {
             if (slug) {
-              const id = slugToId[slug] || slug;
+              const id = slugToIdMaps[type][slug] || slug;
               filters[type].add(id.toString());
             }
           });
         }
       });
-      
+
       // Parse search parameter
       filters.search = params.get('search') || '';
-      
+
       // Update checkbox UI to match filters
       updateCheckboxesFromFilters();
-      
+
       // Get page number
       const page = parseInt(params.get('page')) || 1;
-      
+
       // Fetch content without pushing state (we're already in that state)
       updateFilteredContent(page, false);
     });
-    
+
     // Update checkboxes to match current filters
     function updateCheckboxesFromFilters() {
       // First uncheck all boxes
       document.querySelectorAll('.topic-filter, .event-filter, .date-filter, .presenter-filter')
         .forEach(checkbox => { checkbox.checked = false; });
-      
+
       // Then check only the active ones
       Object.entries(filters).forEach(([key, value]) => {
         if (value instanceof Set) {
@@ -434,20 +442,20 @@
           });
         }
       });
-      
+
       // Update search input
       if (searchInput) {
         searchInput.value = filters.search || '';
       }
     }
-    
+
     // Attach filter change handlers
     document.querySelectorAll('.topic-filter, .event-filter, .date-filter, .presenter-filter')
       .forEach(checkbox => {
         checkbox.addEventListener('change', (e) => {
           const filterType = e.target.classList[1].split('-')[0];
           const value = e.target.value.toString(); // Ensure string type
-          
+
           if (e.target.checked) {
             filters[filterType].add(value);
           } else {
@@ -456,12 +464,12 @@
           updateFilteredContent();
         });
       });
-    
+
     // Search input handlers
     if (searchInput) {
       // Pre-fill with search value from server
       searchInput.value = filters.search;
-      
+
       searchInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
           e.preventDefault();
@@ -469,7 +477,7 @@
           updateFilteredContent();
         }
       });
-      
+
       // Submit button handler
       const submitSearch = document.getElementById('submit-search');
       if (submitSearch) {
@@ -480,7 +488,7 @@
         });
       }
     }
-    
+
     // Reset search button
     if (resetSearch) {
       resetSearch.addEventListener('click', () => {
@@ -489,7 +497,7 @@
         updateFilteredContent();
       });
     }
-    
+
     // Reset all filters button
     if (resetFiltersBtn) {
       resetFiltersBtn.addEventListener('click', () => {
@@ -501,25 +509,25 @@
             filters[key] = '';
           }
         });
-        
+
         // Update checkboxes
         updateCheckboxesFromFilters();
-        
+
         // Reset the page
         window.location.href = window.location.pathname;
       });
     }
-    
+
     // Initialize checkboxes based on current filters
     updateCheckboxesFromFilters();
-    
+
     // Show initial filter counter if filters are applied
-    const hasInitialFilters = filters.topic.size > 0 || 
-                          filters.event.size > 0 || 
-                          filters.date.size > 0 || 
-                          filters.presenter.size > 0 || 
+    const hasInitialFilters = filters.topic.size > 0 ||
+                          filters.event.size > 0 ||
+                          filters.date.size > 0 ||
+                          filters.presenter.size > 0 ||
                           filters.search;
-                          
+
     if (resultsCounter && hasInitialFilters) {
       const totalItems = parseInt(videoContainer.getAttribute('data-total-items')) || 0;
       if (totalItems > 0) {
@@ -529,36 +537,36 @@
         resultsCounter.style.display = 'none';
       }
     }
-    
+
     // Show no results message on initial page load if needed
     if (videoContainer && noResultsMessage) {
       const totalItems = parseInt(videoContainer.getAttribute('data-total-items')) || 0;
       const hasVideos = videoContainer.querySelectorAll('.p-card').length > 0;
-      
+
       if (!hasVideos) {
         noResultsMessage.style.display = 'block';
       } else {
         noResultsMessage.style.display = 'none';
       }
     }
-    
+
     // Set up pagination links initially
     setupPaginationLinks();
 
     // Setup filter accordion toggle for mobile
     const filterButton = document.querySelector('button[aria-controls="filter-accordion"]');
     const filterAccordion = document.getElementById('filter-accordion');
-    
+
     if (filterButton && filterAccordion) {
       // Initialize the state
       filterButton.setAttribute('aria-expanded', 'false');
-      
+
       filterButton.addEventListener('click', () => {
         const isExpanded = filterButton.getAttribute('aria-expanded') === 'true';
-        
+
         // Toggle the state
         filterButton.setAttribute('aria-expanded', !isExpanded);
-        
+
         // Toggle classes to show/hide the accordion
         if (isExpanded) {
           filterAccordion.classList.add('u-hide--small', 'u-hide--medium');
