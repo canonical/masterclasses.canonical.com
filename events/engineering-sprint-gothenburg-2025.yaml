@@ -7,50 +7,50 @@ days:
     title: Monday, November 3
     sessions:
       - title: Plenary
-        start: 2025-11-03T08:30:00+00:00
-        end: 2025-11-03T09:30:00+00:00
+        start: 2025-11-03 08:30:00
+        end: 2025-11-03 09:30:00
       - title: Productivity
-        start: 2025-11-03T09:30:00+00:00
-        end: 2025-11-03T10:30:00+00:00
+        start: 2025-11-03 09:30:00
+        end: 2025-11-03 10:30:00
       - title: Lighning Talks
-        start: 2025-11-03T17:00:00+00:00
-        end: 2025-11-03T17:30:00+00:00
+        start: 2025-11-03 17:00:00
+        end: 2025-11-03 17:30:00
   - date: 2025-11-04
     title: Tuesday, November 4
     sessions:
       - title: Lighning Talks (AM)
-        start: 2025-11-04T08:30:00+00:00
-        end: 2025-11-04T09:00:00+00:00
+        start: 2025-11-04 08:30:00
+        end: 2025-11-04 09:00:00
       - title: Lighning Talks (PM)
-        start: 2025-11-04T17:00:00+00:00
-        end: 2025-11-04T17:30:00+00:00
+        start: 2025-11-04 17:00:00
+        end: 2025-11-04 17:30:00
   - date: 2025-11-05
     title: Wednesday, November 5
     sessions:
       - title: Lighning Talks (AM)
-        start: 2025-11-05T08:30:00+00:00
-        end: 2025-11-05T09:00:00+00:00
+        start: 2025-11-05 08:30:00
+        end: 2025-11-05 09:00:00
       - title: Lighning Talks (PM)
-        start: 2025-11-05T17:00:00+00:00
-        end: 2025-11-05T17:30:00+00:00
+        start: 2025-11-05 17:00:00
+        end: 2025-11-05 17:30:00
   - date: 2025-11-06
     title: Thursday, November 6
     sessions:
       - title: Lighning Talks (AM)
-        start: 2025-11-06T08:30:00+00:00
-        end: 2025-11-06T09:00:00+00:00
+        start: 2025-11-06 08:30:00
+        end: 2025-11-06 09:00:00
       - title: Lighning Talks (PM)
-        start: 2025-11-06T17:00:00+00:00
-        end: 2025-11-06T17:30:00+00:00
+        start: 2025-11-06 17:00:00
+        end: 2025-11-06 17:30:00
   - date: 2025-11-07
     title: Friday, November 7
     sessions:
       - title: Lighning Talks (AM)
-        start: 2025-11-07T08:30:00+00:00
-        end: 2025-11-07T09:00:00+00:00
+        start: 2025-11-07 08:30:00
+        end: 2025-11-07 09:00:00
       - title: Lighning Talks (PM)
-        start: 2025-11-07T15:00:00+00:00
-        end: 2025-11-07T15:30:00+00:00
+        start: 2025-11-07 15:00:00
+        end: 2025-11-07 15:30:00
       - title: Closing Plenary
-        start: 2025-11-07T15:30:00+00:00
-        end: 2025-11-07T16:00:00+00:00
+        start: 2025-11-07 15:30:00
+        end: 2025-11-07 16:00:00

@@ -7,52 +7,52 @@ days:
     sessions:
       - title: Plenary
         start: 2025-07-21 07:30:00
-        end: 2025-07-21T09:00:00
+        end: 2025-07-21 09:00:00
       - title: Deep dive
-        start: 2025-07-21T12:30:00
-        end: 2025-07-21T14:30:00
+        start: 2025-07-21 12:30:00
+        end: 2025-07-21 14:30:00
       - title: Lightning Talks
-        start: 2025-07-21T16:00:00
-        end: 2025-07-21T16:30:00
+        start: 2025-07-21 16:00:00
+        end: 2025-07-21 16:30:00
   - date: 2025-07-22
     title: Tuesday, July 22
     sessions:
       - title: Negotiation
-        start: 2025-07-22T07:30:00
-        end: 2025-07-22T09:30:00
+        start: 2025-07-22 07:30:00
+        end: 2025-07-22 09:30:00
       - title: Deep dive
-        start: 2025-07-22T12:30:00
-        end: 2025-07-22T14:30:00
+        start: 2025-07-22 12:30:00
+        end: 2025-07-22 14:30:00
       - title: Lightning Talks
-        start: 2025-07-22T16:00:00
-        end: 2025-07-22T16:30:00
+        start: 2025-07-22 16:00:00
+        end: 2025-07-22 16:30:00
   - date: 2025-07-24
     title: Thursday, July 24
     sessions:
       - title: Plenary
-        start: 2025-07-24T07:30:00
-        end: 2025-07-24T08:30:00
+        start: 2025-07-24 07:30:00
+        end: 2025-07-24 08:30:00
       - title: Workshop
-        start: 2025-07-24T08:30:00
-        end: 2025-07-24T09:30:00
+        start: 2025-07-24 08:30:00
+        end: 2025-07-24 09:30:00
       - title: Panel
-        start: 2025-07-24T10:00:00
-        end: 2025-07-24T11:00:00
+        start: 2025-07-24 10:00:00
+        end: 2025-07-24 11:00:00
       - title: Deep dive
-        start: 2025-07-24T15:00:00
-        end: 2025-07-24T16:00:00
+        start: 2025-07-24 15:00:00
+        end: 2025-07-24 16:00:00
       - title: Lightning Talks
-        start: 2025-07-24T16:00:00
-        end: 2025-07-24T16:30:00
+        start: 2025-07-24 16:00:00
+        end: 2025-07-24 16:30:00
   - date: 2025-07-25
     title: Friday, July 25
     sessions:
       - title: Plenary
-        start: 2025-07-25T07:30:00
-        end: 2025-07-25T08:30:00
+        start: 2025-07-25 07:30:00
+        end: 2025-07-25 08:30:00
       - title: Lightning Talks
-        start: 2025-07-25T14:00:00
-        end: 2025-07-25T14:30:00
+        start: 2025-07-25 14:00:00
+        end: 2025-07-25 14:30:00
       - title: Closing plenary
-        start: 2025-07-25T14:30:00
-        end: 2025-07-25T15:00:00
+        start: 2025-07-25 14:30:00
+        end: 2025-07-25 15:00:00
