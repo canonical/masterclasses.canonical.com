@@ -1,0 +1,80 @@
+title: Product Roadmap Sprint
+subtitle: Gothenburg, October 2025
+live_stream_url: https://stream.meet.google.com/stream/4f77e620-f41c-4ab9-beb2-29aa1c79dfd2
+all_videos_url: /videos?event=roadmap-sprint&date=q4-2025
+days:
+  - date: 2025-10-27
+    title: Monday, October 27
+    sessions:
+      - title: Plenary
+        start: 2025-10-27T08:30:00+00:00
+        end: 2025-10-27T09:30:00+00:00
+      - title: Roadmap
+        start: 2025-10-27T16:00:00+00:00
+        end: 2025-10-27T17:00:00+00:00
+      - title: Lighning Talks
+        start: 2025-10-27T17:00:00+00:00
+        end: 2025-10-27T17:30:00+00:00
+  - date: 2025-10-28
+    title: Tuesday, October 28
+    sessions:
+      - title: Roadmap
+        start: 2025-10-28T08:30:00+00:00
+        end: 2025-10-28T09:15:00+00:00
+      - title: Panel
+        start: 2025-10-28T09:15:00+00:00
+        end: 2025-10-28T10:15:00+00:00
+      - title: Roadmap
+        start: 2025-10-28T16:00:00+00:00
+        end: 2025-10-28T17:00:00+00:00
+      - title: Lighning Talks
+        start: 2025-10-28T17:00:00+00:00
+        end: 2025-10-28T17:30:00+00:00
+  - date: 2025-10-29
+    title: Wednesday, October 29
+    sessions:
+      - title: Roadmap
+        start: 2025-10-29T08:30:00+00:00
+        end: 2025-10-29T09:15:00+00:00
+      - title: Roadmap
+        start: 2025-10-29T09:15:00+00:00
+        end: 2025-10-29T10:00:00+00:00
+      - title: Roadmap
+        start: 2025-10-29T16:00:00+00:00
+        end: 2025-10-29T16:45:00+00:00
+      - title: Lighning Talks
+        start: 2025-10-29T17:00:00+00:00
+        end: 2025-10-29T17:30:00+00:00
+  - date: 2025-10-30
+    title: Thursday, October 30
+    sessions:
+      - title: Roadmap
+        start: 2025-10-30T08:30:00+00:00
+        end: 2025-10-30T09:15:00+00:00
+      - title: SSDLC
+        start: 2025-10-30T09:15:00+00:00
+        end: 2025-10-30T10:15:00+00:00
+      - title: JIRA Workshop
+        start: 2025-10-30T13:30:00+00:00
+        end: 2025-10-30T14:30:00+00:00
+      - title: Roadmap
+        start: 2025-10-30T16:00:00+00:00
+        end: 2025-10-30T16:45:00+00:00
+      - title: Lighning Talks
+        start: 2025-10-30T17:00:00+00:00
+        end: 2025-10-30T17:30:00+00:00
+  - date: 2025-10-31
+    title: Friday, October 31
+    sessions:
+      - title: Roadmap
+        start: 2025-10-31T08:30:00+00:00
+        end: 2025-10-31T09:15:00+00:00
+      - title: Roadmap
+        start: 2025-10-31T09:15:00+00:00
+        end: 2025-10-31T10:00:00+00:00
+      - title: Lighning Talks
+        start: 2025-10-31T15:00:00+00:00
+        end: 2025-10-31T15:30:00+00:00
+      - title: Closing Plenary
+        start: 2025-10-31T15:30:00+00:00
+        end: 2025-10-31T16:00:00+00:00
