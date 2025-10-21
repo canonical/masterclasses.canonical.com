@@ -1,0 +1,75 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Event Configuration Schema",
+  "description": "Schema for event YAML configuration files",
+  "required": ["title", "subtitle", "all_videos_url", "days"],
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "The main title of the event"
+    },
+    "subtitle": {
+      "type": "string",
+      "description": "The subtitle of the event, typically including location and date"
+    },
+    "all_videos_url": {
+      "type": "string",
+      "description": "URL path to view all videos for this event",
+      "pattern": "^/videos\\?event=.+&date=.+$"
+    },
+    "live_stream_url": {
+      "type": "string",
+      "description": "Optional live stream URL for the event",
+      "format": "uri"
+    },
+    "days": {
+      "type": "array",
+      "description": "Array of event days",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["date", "title", "sessions"],
+        "properties": {
+          "date": {
+            "type": "string",
+            "description": "Date of the event day in YYYY-MM-DD format",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "title": {
+            "type": "string",
+            "description": "Human-readable title for the day"
+          },
+          "sessions": {
+            "type": "array",
+            "description": "Array of sessions for this day",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["title", "start", "end"],
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "description": "Title of the session"
+                },
+                "start": {
+                  "type": "string",
+                  "description": "Start time of the session in YYYY-MM-DD HH:MM:SS format",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$"
+                },
+                "end": {
+                  "type": "string",
+                  "description": "End time of the session in YYYY-MM-DD HH:MM:SS format",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$"
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

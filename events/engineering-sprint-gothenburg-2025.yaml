@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=./event.schema.json
 title: Engineering Sprint
 subtitle: Gothenburg, November 2025
 live_stream_url: https://stream.meet.google.com/stream/4f77e620-f41c-4ab9-beb2-29aa1c79dfd2

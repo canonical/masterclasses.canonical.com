@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=./event.schema.json
 title: Commercial Sprint
 subtitle: Berlin, July 2025
 all_videos_url: /videos?event=commercial-sprint&date=q3-2025

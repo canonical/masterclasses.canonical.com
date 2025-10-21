@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=./event.schema.json
 title: Product Roadmap Sprint
 subtitle: Frankfurt, May 2025
 all_videos_url: /videos?event=roadmap-sprint&date=q2-2025

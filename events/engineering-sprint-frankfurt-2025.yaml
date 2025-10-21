@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=./event.schema.json
 title: Engineering Sprint
 subtitle: Frankfurt, May 2025
 all_videos_url: /videos?event=engineering-sprint&date=q2-2025
