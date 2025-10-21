@@ -28,7 +28,6 @@ from webapp.api import api
 from webapp.forms import MasterclassSubmissionForm
 from canonicalwebteam import image_template
 from jinja2 import ChoiceLoader, FileSystemLoader
-from sqlalchemy.sql.expression import func, and_
 
 app = FlaskBase(
     __name__,

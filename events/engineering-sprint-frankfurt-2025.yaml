@@ -11,37 +11,37 @@ days:
       - title: Workshop
         start: 2025-05-12 14:00:00
         end: 2025-05-12 16:00:00
-      - title: Lighning Talks
+      - title: Lightning Talks
         start: 2025-05-12 17:00:00
         end: 2025-05-12 17:30:00
   - date: 2025-05-13
     title: Tuesday, May 13
     sessions:
-      - title: Lighning Talks (AM)
+      - title: Lightning Talks (AM)
         start: 2025-05-13 08:30:00
         end: 2025-05-13 09:00:00
       - title: Panel
         start: 2025-05-13 14:30:00
         end: 2025-05-13 15:30:00
-      - title: Lighning Talks (PM)
+      - title: Lightning Talks (PM)
         start: 2025-05-13 17:30:00
         end: 2025-05-13 18:00:00
   - date: 2025-05-14
     title: Wednesday, May 14
     sessions:
-      - title: Lighning Talks (AM)
+      - title: Lightning Talks (AM)
         start: 2025-05-14 08:30:00
         end: 2025-05-14 09:00:00
       - title: Deep dive
         start: 2025-05-14 15:00:00
         end: 2025-05-14 16:00:00
-      - title: Lighning Talks (PM)
+      - title: Lightning Talks (PM)
         start: 2025-05-14 16:00:00
         end: 2025-05-14 16:30:00
   - date: 2025-05-15
     title: Thursday, May 15
     sessions:
-      - title: Lighning Talks (AM)
+      - title: Lightning Talks (AM)
         start: 2025-05-15 07:30:00
         end: 2025-05-15 08:00:00
       - title: Knowledge Sharing
@@ -50,19 +50,19 @@ days:
       - title: Deep dive
         start: 2025-05-15 15:30:00
         end: 2025-05-15 16:00:00
-      - title: Lighning Talks (PM)
+      - title: Lightning Talks (PM)
         start: 2025-05-15 16:00:00
         end: 2025-05-15 16:30:00
   - date: 2025-05-16
     title: Friday, May 16
     sessions:
-      - title: Lighning Talks (AM)
+      - title: Lightning Talks (AM)
         start: 2025-05-16 07:30:00
         end: 2025-05-16 08:00:00
       - title: Deep dive
         start: 2025-05-16 12:30:00
         end: 2025-05-16 13:30:00
-      - title: Lighning Talks (PM)
+      - title: Lightning Talks (PM)
         start: 2025-05-16 14:00:00
         end: 2025-05-16 14:30:00
       - title: Plenary

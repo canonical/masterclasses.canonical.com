@@ -12,43 +12,43 @@ days:
       - title: Productivity
         start: 2025-11-03 09:30:00
         end: 2025-11-03 10:30:00
-      - title: Lighning Talks
+      - title: Lightning Talks
         start: 2025-11-03 17:00:00
         end: 2025-11-03 17:30:00
   - date: 2025-11-04
     title: Tuesday, November 4
     sessions:
-      - title: Lighning Talks (AM)
+      - title: Lightning Talks (AM)
         start: 2025-11-04 08:30:00
         end: 2025-11-04 09:00:00
-      - title: Lighning Talks (PM)
+      - title: Lightning Talks (PM)
         start: 2025-11-04 17:00:00
         end: 2025-11-04 17:30:00
   - date: 2025-11-05
     title: Wednesday, November 5
     sessions:
-      - title: Lighning Talks (AM)
+      - title: Lightning Talks (AM)
         start: 2025-11-05 08:30:00
         end: 2025-11-05 09:00:00
-      - title: Lighning Talks (PM)
+      - title: Lightning Talks (PM)
         start: 2025-11-05 17:00:00
         end: 2025-11-05 17:30:00
   - date: 2025-11-06
     title: Thursday, November 6
     sessions:
-      - title: Lighning Talks (AM)
+      - title: Lightning Talks (AM)
         start: 2025-11-06 08:30:00
         end: 2025-11-06 09:00:00
-      - title: Lighning Talks (PM)
+      - title: Lightning Talks (PM)
         start: 2025-11-06 17:00:00
         end: 2025-11-06 17:30:00
   - date: 2025-11-07
     title: Friday, November 7
     sessions:
-      - title: Lighning Talks (AM)
+      - title: Lightning Talks (AM)
         start: 2025-11-07 08:30:00
         end: 2025-11-07 09:00:00
-      - title: Lighning Talks (PM)
+      - title: Lightning Talks (PM)
         start: 2025-11-07 15:00:00
         end: 2025-11-07 15:30:00
       - title: Closing Plenary
