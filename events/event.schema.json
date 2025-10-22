@@ -7,26 +7,41 @@
   "properties": {
     "title": {
       "type": "string",
-      "description": "The main title of the event"
+      "description": "The main title of the event",
+      "examples": ["Product Roadmap Sprint"]
     },
     "subtitle": {
       "type": "string",
-      "description": "The subtitle of the event, typically including location and date"
+      "description": "The subtitle of the event, typically including location and date",
+      "examples": ["Gothenburg, October 2025"]
     },
     "all_videos_url": {
       "type": "string",
       "description": "URL path to view all videos for this event",
-      "pattern": "^/videos\\?event=.+&date=.+$"
+      "pattern": "^/videos\\?event=.+&date=.+$",
+      "examples": ["/videos?event=roadmap-sprint&date=q4-2025"]
     },
     "live_stream_url": {
       "type": "string",
       "description": "Optional live stream URL for the event",
-      "format": "uri"
+      "format": "uri",
+      "examples": ["https://stream.meet.google.com/stream/aaa-bbb-ccc"]
     },
     "days": {
       "type": "array",
       "description": "Array of event days",
       "minItems": 1,
+      "examples": [
+        [
+          {
+            "date": "2025-10-27",
+            "title": "Monday, October 27",
+            "sessions": [
+              { "title": "Plenary", "start": "2025-10-27 08:30:00", "end": "2025-10-27 09:30:00" }
+            ]
+          }
+        ]
+      ],
       "items": {
         "type": "object",
         "required": ["date", "title", "sessions"],
@@ -35,10 +50,13 @@
             "type": "string",
             "description": "Date of the event day in YYYY-MM-DD format",
             "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            ,
+            "examples": ["2025-10-27"]
           },
           "title": {
             "type": "string",
-            "description": "Human-readable title for the day"
+            "description": "Human-readable title for the day (e.g. weekday and human readable date)",
+            "examples": ["Monday, October 27"]
           },
           "sessions": {
             "type": "array",
@@ -50,17 +68,22 @@
               "properties": {
                 "title": {
                   "type": "string",
-                  "description": "Title of the session"
+                  "description": "Title of the session (human friendly; common values: Plenary, Roadmap, Lightning Talks, Panel, Workshop, Deep dive, Closing Plenary)",
+                  "examples": ["Plenary", "Roadmap", "Lightning Talks", "Panel", "Workshop", "Deep dive", "Closing Plenary"]
                 },
                 "start": {
                   "type": "string",
                   "description": "Start time of the session. Accepts YAML timestamp formats (ISO with 'T' or space-separated), with optional fractional seconds and timezone per https://yaml.org/type/timestamp.html",
                   "pattern": "^\\d{4}-\\d{2}-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+\\-]\\d{2}:?\\d{2})?$"
+                  ,
+                  "examples": ["2025-10-27 08:30:00", "2025-10-27T08:30:00Z", "2025-10-27T08:30:00+00:00"]
                 },
                 "end": {
                   "type": "string",
                   "description": "End time of the session. Accepts YAML timestamp formats (ISO with 'T' or space-separated), with optional fractional seconds and timezone per https://yaml.org/type/timestamp.html",
                   "pattern": "^\\d{4}-\\d{2}-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+\\-]\\d{2}:?\\d{2})?$"
+                  ,
+                  "examples": ["2025-10-27 09:30:00", "2025-10-27T09:30:00Z", "2025-10-27T09:30:00+00:00"]
                 }
               },
               "additionalProperties": false
