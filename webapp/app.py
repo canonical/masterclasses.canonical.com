@@ -1,5 +1,6 @@
 import os
 import flask
+import yaml
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from canonicalwebteam.flask_base.app import FlaskBase
@@ -116,6 +117,11 @@ def time_until_filter(timestamp):
 def format_date_filter(timestamp):
     return datetime.fromtimestamp(timestamp, timezone.utc).strftime('%B %d, %Y')
 
+@app.template_filter('format_date_iso')
+def format_date_filter_iso(timestamp):
+    """Convert a UNIX timestamp to ISO 8601 string in UTC."""
+    return datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat()
+
 @app.route("/videos/<video_id>")
 def video_player(video_id):
     return flask.render_template("video_player.html", video_id=video_id)
@@ -168,6 +174,71 @@ def register():
         form=form,
         submission_status=submission_status
     )
+
+
+@app.route("/events/<event_slug>")
+def event_detail(event_slug):
+    yaml_path = os.path.join("events", f"{event_slug}.yaml")
+
+    if not os.path.exists(yaml_path):
+        flask.abort(404, description="Event not found")
+
+    try:
+        with open(yaml_path, "r") as f:
+            event_data = yaml.safe_load(f)
+    except (IOError, yaml.YAMLError) as e:
+        app.logger.error(f"Failed to read or parse YAML for '{event_slug}': {e}")
+        flask.abort(500, description="Invalid or unreadable event data")
+
+    tag_name = event_data.get("tag")
+
+    # TODO: Read featured video from YAML when available (timestamp?)
+    featured_video = None
+
+    # For each session, find videos within its time range
+    for day in event_data.get("days", []):
+        for session in day.get("sessions", []):
+            start_datetime = session.get("start")
+            end_datetime = session.get("end")
+
+            if not start_datetime or not end_datetime:
+                session["videos"] = []
+                app.logger.warning(f"Session '{session.get('title')}' is missing start or end time in '{event_slug}'.")
+                continue
+
+            if not isinstance(start_datetime, datetime):
+                raise TypeError(f"Value of 'start' must be a valid datetime, got {start_datetime!r}.")
+
+            if not isinstance(end_datetime, datetime):
+                raise TypeError(f"Value of 'end' must be a valid datetime, got {end_datetime!r}.")
+
+            # Convert to epoch seconds
+            start_ts = int(start_datetime.timestamp())
+            end_ts = int(end_datetime.timestamp())
+
+            # Query videos filtered by tag first (if provided)
+            query = db_session.query(Video).join(Video.tags)
+            if tag_name:
+                query = query.filter(Tag.name == tag_name)
+
+            # Filter videos where 'unixstart' is within the session's time range
+            session_videos = query.filter(
+                Video.unixstart >= start_ts,
+                Video.unixstart < end_ts
+            ).order_by(Video.unixstart).all()
+
+            # Use last video as featured video (should end up as "Closing plenary")
+            # TODO: fix this when we have a proper way to mark featured video
+            if session_videos:
+                featured_video = session_videos[-1]
+
+            session["videos"] = session_videos
+
+
+    if featured_video:
+        event_data["featured_video"] = featured_video
+
+    return flask.render_template("event.html", event=event_data)
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
