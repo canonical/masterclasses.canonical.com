@@ -68,8 +68,8 @@
               "properties": {
                 "title": {
                   "type": "string",
-                  "description": "Title of the session (human friendly; common values: Plenary, Roadmap, Lightning Talks, Panel, Workshop, Deep dive, Closing Plenary)",
-                  "examples": ["Plenary", "Roadmap", "Lightning Talks", "Panel", "Workshop", "Deep dive", "Closing Plenary"]
+                  "description": "Title of the session (human friendly; common values: Plenary, Roadmap, Lightning talks, Panel, Workshop, Deep dive, Closing plenary)",
+                  "examples": ["Plenary", "Roadmap", "Lightning talks", "Panel", "Workshop", "Deep dive", "Closing plenary"]
                 },
                 "start": {
                   "type": "string",

@@ -13,7 +13,7 @@ days:
       - title: Roadmap
         start: 2025-10-27 16:00:00
         end: 2025-10-27 17:00:00
-      - title: Lightning Talks
+      - title: Lightning talks
         start: 2025-10-27 17:00:00
         end: 2025-10-27 17:30:00
   - date: 2025-10-28
@@ -28,7 +28,7 @@ days:
       - title: Roadmap
         start: 2025-10-28 16:00:00
         end: 2025-10-28 17:00:00
-      - title: Lightning Talks
+      - title: Lightning talks
         start: 2025-10-28 17:00:00
         end: 2025-10-28 17:30:00
   - date: 2025-10-29
@@ -43,7 +43,7 @@ days:
       - title: Roadmap
         start: 2025-10-29 16:00:00
         end: 2025-10-29 16:45:00
-      - title: Lightning Talks
+      - title: Lightning talks
         start: 2025-10-29 17:00:00
         end: 2025-10-29 17:30:00
   - date: 2025-10-30
@@ -55,13 +55,13 @@ days:
       - title: SSDLC
         start: 2025-10-30 09:15:00
         end: 2025-10-30 10:15:00
-      - title: JIRA Workshop
+      - title: JIRA workshop
         start: 2025-10-30 13:30:00
         end: 2025-10-30 14:30:00
       - title: Roadmap
         start: 2025-10-30 16:00:00
         end: 2025-10-30 16:45:00
-      - title: Lightning Talks
+      - title: Lightning talks
         start: 2025-10-30 17:00:00
         end: 2025-10-30 17:30:00
   - date: 2025-10-31
@@ -73,9 +73,9 @@ days:
       - title: Roadmap
         start: 2025-10-31 09:15:00
         end: 2025-10-31 10:00:00
-      - title: Lightning Talks
+      - title: Lightning talks
         start: 2025-10-31 15:00:00
         end: 2025-10-31 15:30:00
-      - title: Closing Plenary
+      - title: Closing plenary
         start: 2025-10-31 15:30:00
         end: 2025-10-31 16:00:00

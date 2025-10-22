@@ -12,7 +12,7 @@ days:
       - title: Deep dive
         start: 2025-07-21 12:30:00
         end: 2025-07-21 14:30:00
-      - title: Lightning Talks
+      - title: Lightning talks
         start: 2025-07-21 16:00:00
         end: 2025-07-21 16:30:00
   - date: 2025-07-22
@@ -24,7 +24,7 @@ days:
       - title: Deep dive
         start: 2025-07-22 12:30:00
         end: 2025-07-22 14:30:00
-      - title: Lightning Talks
+      - title: Lightning talks
         start: 2025-07-22 16:00:00
         end: 2025-07-22 16:30:00
   - date: 2025-07-24
@@ -42,7 +42,7 @@ days:
       - title: Deep dive
         start: 2025-07-24 15:00:00
         end: 2025-07-24 16:00:00
-      - title: Lightning Talks
+      - title: Lightning talks
         start: 2025-07-24 16:00:00
         end: 2025-07-24 16:30:00
   - date: 2025-07-25
@@ -51,7 +51,7 @@ days:
       - title: Plenary
         start: 2025-07-25 07:30:00
         end: 2025-07-25 08:30:00
-      - title: Lightning Talks
+      - title: Lightning talks
         start: 2025-07-25 14:00:00
         end: 2025-07-25 14:30:00
       - title: Closing plenary
