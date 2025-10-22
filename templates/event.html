@@ -5,6 +5,8 @@
 {% from "_macros/vf_tiered-list.jinja" import vf_tiered_list %}
 {% from "shared/_video_card.html" import video_card %}
 
+{% block title %}{{ event.title }} - {{ event.subtitle }} - Canonical Masterclasses{% endblock %}
+
 {% block content %}
 
   {% call(slot) vf_hero(
