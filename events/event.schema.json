@@ -54,13 +54,13 @@
                 },
                 "start": {
                   "type": "string",
-                  "description": "Start time of the session in YYYY-MM-DD HH:MM:SS format",
-                  "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$"
+                  "description": "Start time of the session. Accepts YAML timestamp formats (ISO with 'T' or space-separated), with optional fractional seconds and timezone per https://yaml.org/type/timestamp.html",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+\\-]\\d{2}:?\\d{2})?$"
                 },
                 "end": {
                   "type": "string",
-                  "description": "End time of the session in YYYY-MM-DD HH:MM:SS format",
-                  "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$"
+                  "description": "End time of the session. Accepts YAML timestamp formats (ISO with 'T' or space-separated), with optional fractional seconds and timezone per https://yaml.org/type/timestamp.html",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+\\-]\\d{2}:?\\d{2})?$"
                 }
               },
               "additionalProperties": false
