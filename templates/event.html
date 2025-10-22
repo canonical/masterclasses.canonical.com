@@ -3,7 +3,7 @@
 {% from "shared/_upcoming_session.html" import upcoming_session %}
 {% from "_macros/vf_hero.jinja" import vf_hero %}
 {% from "_macros/vf_tiered-list.jinja" import vf_tiered_list %}
-{% from "shared/_video_card.html" import video_card %}
+{% from "shared/_video_item.html" import video_item %}
 
 {% block title %}{{ event.title }} - {{ event.subtitle }} - Canonical Masterclasses{% endblock %}
 
@@ -81,14 +81,14 @@
               <div class="grid-row">
                 {% for video in session.videos %}
                   <div class="grid-col-2 p-section--shallow">
-                    {{ video_card(video) }}
+                    {{ video_item(video) }}
                   </div>
                 {% endfor %}
               </div>
             {% else %}
               <!-- Single video card -->
               <div class="p-section--shallow">
-                {{ video_card(session.videos[0]) }}
+                {{ video_item(session.videos[0]) }}
               </div>
             {% endif %}
           {% else %}

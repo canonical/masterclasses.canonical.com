@@ -1,0 +1,41 @@
+{# TODO: update styles of video cards across the site for consistency #}
+{% macro video_item(video) %}
+<div class="video-card p-section--shallow">
+
+    <div class="p-image-container">
+        <a href="/videos/{{ video.title|slugify }}-class-{{ video.id }}">
+            <div class="thumbnail-wrapper">
+                <img loading="lazy" alt="{{ video.title }} video"
+                    src="{{ video.thumbnails or 'https://assets.ubuntu.com/v1/8e1d3bf5-juju-hero-juju.is.svg' }}"
+                    class="p-image-container__image">
+                {% set duration = (video.unixend - video.unixstart) // 60 if video.unixend and video.unixstart else 0 %}
+                <div class="duration-badge u-image-position--bottom u-image-position--right">{{ duration }} mins</div>
+            </div>
+        </a>
+    </div>
+
+    <hr class="p-rule--highlight">
+    <h4 class="p-heading--5 u-no-margin--bottom">
+        <a class="p-link--soft" href="/videos/{{ video.title|slugify }}-class-{{ video.id }}">{{ video.title }}</a>
+    </h4>
+
+    {% if video.unixstart %}
+    <p class="video-tags u-text--muted u-no-margin--bottom">
+        {{ video.unixstart|format_datetime }}
+    </p>
+    {% endif %}
+
+    {% if video.presenters %}
+    <p class="video-presenters">
+        {% if video.presenters|length <= 2 %}
+            {% for presenter in video.presenters %}
+                {{ presenter.name }}{% if not loop.last %} and {% endif %}
+            {% endfor %}
+        {% else %}
+            {{ video.presenters[0].name }}, {{ video.presenters[1].name }}, et al.
+        {% endif %}
+    </p>
+    {% endif %}
+
+</div>
+{% endmacro %}
