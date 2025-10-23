@@ -117,6 +117,10 @@ def time_until_filter(timestamp):
 def format_date_filter(timestamp):
     return datetime.fromtimestamp(timestamp, timezone.utc).strftime('%B %d, %Y')
 
+@app.template_filter('format_datetime')
+def format_datetime_filter(timestamp):
+    return datetime.fromtimestamp(timestamp, timezone.utc).strftime('%B %d, %Y %H:%M')
+
 @app.template_filter('format_date_iso')
 def format_date_filter_iso(timestamp):
     """Convert a UNIX timestamp to ISO 8601 string in UTC."""
