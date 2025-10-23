@@ -41,6 +41,26 @@
             <li class="p-navigation__item">
               <a class="p-navigation__link" href="/videos">Videos</a>
             </li>
+            <li class="p-navigation__item--dropdown-toggle" id="sprints-toggle">
+              <a href="#sprints-toggle-menu" aria-controls="sprints-toggle-menu" class="p-navigation__link">Sprints</a>
+              <ul class="p-navigation__dropdown" id="sprints-toggle-menu" aria-hidden="true">
+                <li>
+                  <a href="/events/engineering-sprint-gothenburg-2025" class="p-navigation__dropdown-item">Engineering Sprint Gothenburg 2025</a>
+                </li>
+                <li>
+                  <a href="/events/roadmap-sprint-gothenburg-2025" class="p-navigation__dropdown-item">Roadmap Sprint Gothenburg 2025</a>
+                </li>
+                <li>
+                  <a href="/events/commercial-sprint-berlin-2025" class="p-navigation__dropdown-item">Commercial Sprint Berlin 2025</a>
+                </li>
+                <li>
+                  <a href="/events/engineering-sprint-frankfurt-2025" class="p-navigation__dropdown-item">Engineering Sprint Frankfurt 2025</a>
+                </li>
+                <li>
+                  <a href="/events/roadmap-sprint-frankfurt-2025" class="p-navigation__dropdown-item">Roadmap Sprint Frankfurt 2025</a>
+                </li>
+              </ul>
+            </li>
             <li class="p-navigation__item">
               <a class="p-navigation__link" href="/register">Register Session</a>
             </li>
@@ -145,4 +165,52 @@
 
   var navigation = document.querySelector('#navigation');
   initNavigation(navigation);
+
+  function toggleDropdown(toggle, open) {
+    var parentElement = toggle.parentNode;
+    var dropdown = document.getElementById(toggle.getAttribute('aria-controls'));
+    dropdown.setAttribute('aria-hidden', !open);
+
+    if (open) {
+      parentElement.classList.add('is-active');
+    } else {
+      parentElement.classList.remove('is-active');
+    }
+  }
+
+  function closeAllDropdowns(toggles) {
+    toggles.forEach(function(toggle) {
+      toggleDropdown(toggle, false);
+    });
+  }
+
+  function handleClickOutside(toggles, containerClass) {
+    document.addEventListener('click', function(event) {
+      var target = event.target;
+
+      if (target.closest) {
+        if (!target.closest(containerClass)) {
+          closeAllDropdowns(toggles);
+        }
+      }
+    });
+  }
+
+  function initNavDropdowns(containerClass) {
+    var toggles = [].slice.call(document.querySelectorAll(containerClass + ' [aria-controls]'));
+
+    handleClickOutside(toggles, containerClass);
+
+    toggles.forEach(function(toggle) {
+      toggle.addEventListener('click', function(e) {
+        e.preventDefault();
+
+        const shouldOpen = !toggle.parentNode.classList.contains('is-active');
+        closeAllDropdowns(toggles);
+        toggleDropdown(toggle, shouldOpen);
+      });
+    });
+  }
+
+  initNavDropdowns('.p-navigation__item--dropdown-toggle')
 </script>
