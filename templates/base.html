@@ -117,7 +117,7 @@
     function toggleMenu(e) {
       e.preventDefault();
 
-      var navigation = e.target.closest('.p-navigation');
+      const navigation = e.target.closest('.p-navigation');
       if (navigation.classList.contains('has-menu-open')) {
         closeMenu();
       } else {
@@ -128,10 +128,10 @@
 
     function openMenu(e) {
       e.preventDefault();
-      var navigation = e.target.closest('.p-navigation');
-      var nav = navigation.querySelector('.p-navigation__nav');
+      const navigation = e.target.closest('.p-navigation');
+      const nav = navigation.querySelector('.p-navigation__nav');
 
-      var buttons = document.querySelectorAll('.js-menu-button');
+      const buttons = document.querySelectorAll('.js-menu-button');
 
       buttons.forEach((searchButton) => {
         searchButton.setAttribute('aria-pressed', true);
@@ -142,11 +142,11 @@
     }
 
     function closeMenu() {
-      var navigation = document.querySelector('.p-navigation');
-      var nav = navigation.querySelector('.p-navigation__nav');
+      const navigation = document.querySelector('.p-navigation');
+      const nav = navigation.querySelector('.p-navigation__nav');
 
-      var banner = document.querySelector('.p-navigation__banner');
-      var buttons = document.querySelectorAll('.js-menu-button');
+      const banner = document.querySelector('.p-navigation__banner');
+      const buttons = document.querySelectorAll('.js-menu-button');
 
       buttons.forEach((searchButton) => {
         searchButton.removeAttribute('aria-pressed');
@@ -163,12 +163,12 @@
     }
   }
 
-  var navigation = document.querySelector('#navigation');
+  const navigation = document.querySelector('#navigation');
   initNavigation(navigation);
 
   function toggleDropdown(toggle, open) {
-    var parentElement = toggle.parentNode;
-    var dropdown = document.getElementById(toggle.getAttribute('aria-controls'));
+    const parentElement = toggle.parentNode;
+    const dropdown = document.getElementById(toggle.getAttribute('aria-controls'));
     dropdown.setAttribute('aria-hidden', !open);
 
     if (open) {
@@ -186,7 +186,7 @@
 
   function handleClickOutside(toggles, containerClass) {
     document.addEventListener('click', function(event) {
-      var target = event.target;
+      const target = event.target;
 
       if (target.closest) {
         if (!target.closest(containerClass)) {
@@ -197,7 +197,7 @@
   }
 
   function initNavDropdowns(containerClass) {
-    var toggles = [].slice.call(document.querySelectorAll(containerClass + ' [aria-controls]'));
+    const toggles = [].slice.call(document.querySelectorAll(containerClass + ' [aria-controls]'));
 
     handleClickOutside(toggles, containerClass);
 
