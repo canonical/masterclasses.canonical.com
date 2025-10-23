@@ -4,6 +4,43 @@
 {% from "_macros/vf_tiered-list.jinja" import vf_tiered_list %}
 
 {% block content %}
+
+{# hide main Gothenburg hero after the sprint has ended #}
+{% set gothenburg_end_unixtime = 1762560000 %} {# 2025-11-08T00:00:00Z #}
+{% if now < gothenburg_end_unixtime %}
+{% call(slot) vf_hero(
+  title_text='Gothenburg Sprints',
+  subtitle_text='October–November 2025',
+  layout='50/50'
+) -%}
+{%- if slot == 'description' -%}
+<p>
+  We are kicking off the 26.04 cycle in Gothenburg with Product Roadmap, and Engineering Sprints.
+  Join us virtually on a live stream, or watch the recordings later in our Masterclass video library.
+</p>
+{%- endif -%}
+{%- if slot == 'cta' -%}
+<a href="https://stream.meet.google.com/stream/4f77e620-f41c-4ab9-beb2-29aa1c79dfd2" class="p-button--positive">Join the live stream</a>
+<a href="/events/roadmap-sprint-gothenburg-2025" class="p-button">Roadmap Sprint</a>
+<a href="/events/engineering-sprint-gothenburg-2025" class="p-button">Engineering Sprint</a>
+{%- endif -%}
+{%- if slot == 'image' -%}
+<div class="u-hide--medium u-hide--small">
+  <div class="p-image-container--3-2">
+    <img loading="auto" alt="Gothia Towers in Gothenburg"
+      src="https://upload.wikimedia.org/wikipedia/commons/3/32/Gothia-towers-20110305.jpg"
+      class="p-image-container__image">
+  </div>
+  <p class="u-text--muted u-text--small"><small>Copyright: Reimund Trost, licensed under <a href="https://commons.wikimedia.org/wiki/File:Gothia-towers-20110305.jpg">CC BY-SA 3.0</a></small></p>
+</div>
+{%- endif -%}
+{% endcall -%}
+
+<div class="u-fixed-width">
+  <hr class="p-rule" />
+</div>
+{% endif %}
+
 {% call(slot) vf_hero(
   title_text='Masterclass',
   subtitle_text='Your one-stop video library for Canonical talks',

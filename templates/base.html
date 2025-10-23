@@ -41,6 +41,26 @@
             <li class="p-navigation__item">
               <a class="p-navigation__link" href="/videos">Videos</a>
             </li>
+            <li class="p-navigation__item--dropdown-toggle" id="sprints-toggle">
+              <a href="#sprints-toggle-menu" aria-controls="sprints-toggle-menu" class="p-navigation__link">Sprints</a>
+              <ul class="p-navigation__dropdown" id="sprints-toggle-menu" aria-hidden="true">
+                <li>
+                  <a href="/events/engineering-sprint-gothenburg-2025" class="p-navigation__dropdown-item">Engineering Sprint Gothenburg 2025</a>
+                </li>
+                <li>
+                  <a href="/events/roadmap-sprint-gothenburg-2025" class="p-navigation__dropdown-item">Roadmap Sprint Gothenburg 2025</a>
+                </li>
+                <li>
+                  <a href="/events/commercial-sprint-berlin-2025" class="p-navigation__dropdown-item">Commercial Sprint Berlin 2025</a>
+                </li>
+                <li>
+                  <a href="/events/engineering-sprint-frankfurt-2025" class="p-navigation__dropdown-item">Engineering Sprint Frankfurt 2025</a>
+                </li>
+                <li>
+                  <a href="/events/roadmap-sprint-frankfurt-2025" class="p-navigation__dropdown-item">Roadmap Sprint Frankfurt 2025</a>
+                </li>
+              </ul>
+            </li>
             <li class="p-navigation__item">
               <a class="p-navigation__link" href="/register">Register Session</a>
             </li>
@@ -97,7 +117,7 @@
     function toggleMenu(e) {
       e.preventDefault();
 
-      var navigation = e.target.closest('.p-navigation');
+      const navigation = e.target.closest('.p-navigation');
       if (navigation.classList.contains('has-menu-open')) {
         closeMenu();
       } else {
@@ -108,10 +128,10 @@
 
     function openMenu(e) {
       e.preventDefault();
-      var navigation = e.target.closest('.p-navigation');
-      var nav = navigation.querySelector('.p-navigation__nav');
+      const navigation = e.target.closest('.p-navigation');
+      const nav = navigation.querySelector('.p-navigation__nav');
 
-      var buttons = document.querySelectorAll('.js-menu-button');
+      const buttons = document.querySelectorAll('.js-menu-button');
 
       buttons.forEach((searchButton) => {
         searchButton.setAttribute('aria-pressed', true);
@@ -122,11 +142,11 @@
     }
 
     function closeMenu() {
-      var navigation = document.querySelector('.p-navigation');
-      var nav = navigation.querySelector('.p-navigation__nav');
+      const navigation = document.querySelector('.p-navigation');
+      const nav = navigation.querySelector('.p-navigation__nav');
 
-      var banner = document.querySelector('.p-navigation__banner');
-      var buttons = document.querySelectorAll('.js-menu-button');
+      const banner = document.querySelector('.p-navigation__banner');
+      const buttons = document.querySelectorAll('.js-menu-button');
 
       buttons.forEach((searchButton) => {
         searchButton.removeAttribute('aria-pressed');
@@ -143,6 +163,54 @@
     }
   }
 
-  var navigation = document.querySelector('#navigation');
+  const navigation = document.querySelector('#navigation');
   initNavigation(navigation);
+
+  function toggleDropdown(toggle, open) {
+    const parentElement = toggle.parentNode;
+    const dropdown = document.getElementById(toggle.getAttribute('aria-controls'));
+    dropdown.setAttribute('aria-hidden', !open);
+
+    if (open) {
+      parentElement.classList.add('is-active');
+    } else {
+      parentElement.classList.remove('is-active');
+    }
+  }
+
+  function closeAllDropdowns(toggles) {
+    toggles.forEach(function(toggle) {
+      toggleDropdown(toggle, false);
+    });
+  }
+
+  function handleClickOutside(toggles, containerClass) {
+    document.addEventListener('click', function(event) {
+      const target = event.target;
+
+      if (target.closest) {
+        if (!target.closest(containerClass)) {
+          closeAllDropdowns(toggles);
+        }
+      }
+    });
+  }
+
+  function initNavDropdowns(containerClass) {
+    const toggles = [].slice.call(document.querySelectorAll(containerClass + ' [aria-controls]'));
+
+    handleClickOutside(toggles, containerClass);
+
+    toggles.forEach(function(toggle) {
+      toggle.addEventListener('click', function(e) {
+        e.preventDefault();
+
+        const shouldOpen = !toggle.parentNode.classList.contains('is-active');
+        closeAllDropdowns(toggles);
+        toggleDropdown(toggle, shouldOpen);
+      });
+    });
+  }
+
+  initNavDropdowns('.p-navigation__item--dropdown-toggle');
 </script>
