@@ -165,24 +165,24 @@
 
     {%- if slot == 'list_item_description_1' -%}
       <div class="p-section--shallow">
-        <iframe src="https://drive.google.com/file/d/1TmDr0SlQGZl36xKB0bR0IL36kv0KAtle/preview"
-                title="Plenary: Leads, Commercial Sprint in Berlin, July 2025"
+        <iframe src="https://drive.google.com/file/d/1YIkLSGM3alM3Jqttbcg2XKQWgntF6TAS/preview"
+                title="Opening Plenary, Commercial Sprint in Vienna, January 2026"
                 allow="autoplay"
                 allowfullscreen
                 class="iframe-video"></iframe>
-        <p>Videos from Commercial Sprint in Berlin include the plenaries, deep dives and lightning talks.</p>
-        {% set berlin_end_unixtime = 1753488000 %} {# 2025-07-26T00:00:00Z #}
+        <p>Videos from Commercial Sprint in Vienna include the plenaries, deep dives, workshops and lightning talks.</p>
+        {% set vienna_end_unixtime = 1769203200 %} {# 2026-01-24T00:00:00Z #}
 
-        {%- if now < berlin_end_unixtime -%}
+        {%- if now < vienna_end_unixtime -%}
         <div class="p-notification--caution is-inline">
           <div class="p-notification__content">
             <h5 class="p-notification__title">In progress:</h5>
-            <p class="p-notification__message">Berlin Commercial Sprint is still in progress, videos are processed and uploaded as they become available.</p>
+            <p class="p-notification__message">Vienna Commercial Sprint is still in progress, videos are processed and uploaded as they become available.</p>
           </div>
         </div>
         {%- endif -%}
         <p>
-          <a href="/events/commercial-sprint-berlin-2025">Explore all Berlin Commercial Sprint videos&nbsp;&rsaquo;</a>
+          <a href="/events/commercial-sprint-vienna-2026">Explore all Vienna Commercial Sprint videos&nbsp;&rsaquo;</a>
         </p>
       </div>
     {%- endif -%}

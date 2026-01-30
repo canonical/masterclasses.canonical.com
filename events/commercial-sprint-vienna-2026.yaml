@@ -1,0 +1,74 @@
+# yaml-language-server: $schema=./event.schema.json
+title: Commercial Sprint
+subtitle: Vienna, January 2026
+all_videos_url: /videos?event=commercial-sprint&date=q1-2026
+days:
+  - date: 2026-01-19
+    title: Monday, January 19
+    sessions:
+      - title: Plenary
+        start: 2026-01-19 09:00:00
+        end: 2026-01-19 11:00:00
+      - title: Lightning talks
+        start: 2026-01-19 17:30:00
+        end: 2026-01-19 18:00:00
+  - date: 2026-01-20
+    title: Tuesday, January 20
+    sessions:
+      - title: Public Cloud
+        start: 2026-01-20 16:30:00
+        end: 2026-01-20 17:30:00
+      - title: Lightning talks
+        start: 2026-01-20 17:30:00
+        end: 2026-01-20 18:00:00
+  - date: 2026-01-21
+    title: Wednesday, January 21
+    sessions:
+      - title: Panel
+        start: 2026-01-21 14:00:00
+        end: 2026-01-21 15:00:00
+      - title: Strategy
+        start: 2026-01-21 15:00:00
+        end: 2026-01-21 15:30:00
+      - title: Lightning talks
+        start: 2026-01-21 15:30:00
+        end: 2026-01-21 16:05:00
+  - date: 2026-01-22
+    title: Thursday, January 22
+    sessions:
+      - title: Plenary
+        start: 2026-01-22 09:00:00
+        end: 2026-01-22 09:30:00
+      - title: Pro
+        start: 2026-01-22 09:30:00
+        end: 2026-01-22 10:30:00
+      - title: Deep Dive
+        start: 2026-01-22 11:00:00
+        end: 2026-01-22 12:00:00
+      - title: Data Platform
+        start: 2026-01-22 12:00:00
+        end: 2026-01-22 13:00:00
+      - title: Silicon Alliances
+        start: 2026-01-22 14:00:00
+        end: 2026-01-22 15:00:00
+      - title: VMware
+        start: 2026-01-22 15:00:00
+        end: 2026-01-22 16:00:00
+      - title: Lightning talks
+        start: 2026-01-22 17:30:00
+        end: 2026-01-22 18:00:00
+  - date: 2026-01-23
+    title: Friday, January 23
+    sessions:
+      - title: Plenary
+        start: 2026-01-23 09:00:00
+        end: 2026-01-23 10:00:00
+      - title: Panel
+        start: 2026-01-23 10:00:00
+        end: 2026-01-23 11:00:00
+      - title: Session
+        start: 2026-01-23 11:30:00
+        end: 2026-01-23 13:00:00
+      - title: Lightning talks
+        start: 2026-01-23 15:00:00
+        end: 2026-01-23 16:00:00
