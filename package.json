@@ -17,14 +17,14 @@
     "lint-templates": "djlint --profile jinja --lint ./templates/**"
   },
   "dependencies": {
-    "autoprefixer": "10.4.20",
-    "sass": "1.85.0",
+    "autoprefixer": "10.4.24",
+    "sass": "1.97.3",
     "vanilla-framework": "4.34.1",
-    "postcss": "8.5.2",
-    "postcss-cli": "11.0.0"
+    "postcss": "8.5.6",
+    "postcss-cli": "11.0.1"
   },
   "devDependencies": {
-    "stylelint": "16.14.1",
+    "stylelint": "16.26.1",
     "stylelint-config-recommended-scss": "14.1.0",
     "stylelint-order": "6.0.4"
   }
