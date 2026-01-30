@@ -21,3 +21,4 @@ tzdata==2025.1
 djlint==1.36.4
 unidecode==1.3.6
 pyyaml==6.0.2
+setuptools # XXX: added as a workaround for build issues with with Python 3.12
