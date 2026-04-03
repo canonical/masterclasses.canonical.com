@@ -41,10 +41,6 @@ COPY --from=build-css /srv/static/css static/css
 COPY --from=python-dependencies /venv /venv
 COPY --from=yarn-dependencies /srv/node_modules/vanilla-framework/templates /srv/node_modules/vanilla-framework/templates
 
-# Set git commit ID
-ARG BUILD_ID
-ENV TALISKER_REVISION_ID "${BUILD_ID}"
-
 # Setup commands to run server
 ENTRYPOINT ["./entrypoint"]
 CMD ["0.0.0.0:80"]

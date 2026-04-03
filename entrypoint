@@ -2,7 +2,7 @@
 
 set -e
 
-RUN_COMMAND="talisker.gunicorn.gevent webapp.app:app --bind $1 --worker-class gevent --name talisker-`hostname`"
+RUN_COMMAND="gunicorn webapp.app:app --bind $1 --worker-class gevent --name `hostname`"
 
 echo "Running alembic migrations"
 alembic upgrade head
@@ -10,7 +10,7 @@ alembic upgrade head
 # Only run placeholder data import in development mode
 if [ "${FLASK_DEBUG,,}" = "true" ] || [ "${FLASK_DEBUG}" = "True" ] || [ "${FLASK_DEBUG}" = "1" ] || [ "${FLASK_DEBUG}" = "yes" ]; then
     echo "Running placeholder data import"
-    
+
     # Check if we should use dynamic or static placeholder data
     if [ "${PLACEHOLDER_DATA_DYNAMIC,,}" = "true" ] || [ "${PLACEHOLDER_DATA_DYNAMIC}" = "True" ] || [ "${PLACEHOLDER_DATA_DYNAMIC}" = "1" ] || [ "${PLACEHOLDER_DATA_DYNAMIC}" = "yes" ]; then
         echo "Using dynamically generated placeholder data"
