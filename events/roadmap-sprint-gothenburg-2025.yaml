@@ -1,0 +1,81 @@
+# yaml-language-server: $schema=./event.schema.json
+title: Product Roadmap Sprint
+subtitle: Gothenburg, October 2025
+live_stream_url: https://stream.meet.google.com/stream/4f77e620-f41c-4ab9-beb2-29aa1c79dfd2
+all_videos_url: /videos?event=roadmap-sprint&date=q4-2025
+days:
+  - date: 2025-10-27
+    title: Monday, October 27
+    sessions:
+      - title: Plenary
+        start: 2025-10-27 08:30:00
+        end: 2025-10-27 09:30:00
+      - title: Roadmap
+        start: 2025-10-27 16:00:00
+        end: 2025-10-27 17:00:00
+      - title: Lightning talks
+        start: 2025-10-27 17:00:00
+        end: 2025-10-27 17:30:00
+  - date: 2025-10-28
+    title: Tuesday, October 28
+    sessions:
+      - title: Roadmap
+        start: 2025-10-28 08:30:00
+        end: 2025-10-28 09:15:00
+      - title: Panel
+        start: 2025-10-28 09:15:00
+        end: 2025-10-28 10:15:00
+      - title: Roadmap
+        start: 2025-10-28 16:00:00
+        end: 2025-10-28 17:00:00
+      - title: Lightning talks
+        start: 2025-10-28 17:00:00
+        end: 2025-10-28 17:30:00
+  - date: 2025-10-29
+    title: Wednesday, October 29
+    sessions:
+      - title: Roadmap
+        start: 2025-10-29 08:30:00
+        end: 2025-10-29 09:15:00
+      - title: Roadmap
+        start: 2025-10-29 09:15:00
+        end: 2025-10-29 10:00:00
+      - title: Roadmap
+        start: 2025-10-29 16:00:00
+        end: 2025-10-29 16:45:00
+      - title: Lightning talks
+        start: 2025-10-29 17:00:00
+        end: 2025-10-29 17:30:00
+  - date: 2025-10-30
+    title: Thursday, October 30
+    sessions:
+      - title: Roadmap
+        start: 2025-10-30 08:30:00
+        end: 2025-10-30 09:15:00
+      - title: SSDLC
+        start: 2025-10-30 09:15:00
+        end: 2025-10-30 10:15:00
+      - title: JIRA workshop
+        start: 2025-10-30 13:30:00
+        end: 2025-10-30 14:30:00
+      - title: Roadmap
+        start: 2025-10-30 16:00:00
+        end: 2025-10-30 16:45:00
+      - title: Lightning talks
+        start: 2025-10-30 17:00:00
+        end: 2025-10-30 17:30:00
+  - date: 2025-10-31
+    title: Friday, October 31
+    sessions:
+      - title: Roadmap
+        start: 2025-10-31 08:30:00
+        end: 2025-10-31 09:15:00
+      - title: Roadmap
+        start: 2025-10-31 09:15:00
+        end: 2025-10-31 10:00:00
+      - title: Lightning talks
+        start: 2025-10-31 15:00:00
+        end: 2025-10-31 15:30:00
+      - title: Closing plenary
+        start: 2025-10-31 15:30:00
+        end: 2025-10-31 16:00:00

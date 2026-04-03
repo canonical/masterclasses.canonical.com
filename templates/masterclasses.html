@@ -4,6 +4,43 @@
 {% from "_macros/vf_tiered-list.jinja" import vf_tiered_list %}
 
 {% block content %}
+
+{# hide main Gothenburg hero after the sprint has ended #}
+{% set gothenburg_end_unixtime = 1762560000 %} {# 2025-11-08T00:00:00Z #}
+{% if now < gothenburg_end_unixtime %}
+{% call(slot) vf_hero(
+  title_text='Gothenburg Sprints',
+  subtitle_text='October–November 2025',
+  layout='50/50'
+) -%}
+{%- if slot == 'description' -%}
+<p>
+  We are kicking off the 26.04 cycle in Gothenburg with Product Roadmap, and Engineering Sprints.
+  Join us virtually on a live stream, or watch the recordings later in our Masterclass video library.
+</p>
+{%- endif -%}
+{%- if slot == 'cta' -%}
+<a href="https://stream.meet.google.com/stream/4f77e620-f41c-4ab9-beb2-29aa1c79dfd2" class="p-button--positive">Join the live stream</a>
+<a href="/events/roadmap-sprint-gothenburg-2025" class="p-button">Roadmap Sprint</a>
+<a href="/events/engineering-sprint-gothenburg-2025" class="p-button">Engineering Sprint</a>
+{%- endif -%}
+{%- if slot == 'image' -%}
+<div class="u-hide--medium u-hide--small">
+  <div class="p-image-container--3-2">
+    <img loading="auto" alt="Gothia Towers in Gothenburg"
+      src="https://upload.wikimedia.org/wikipedia/commons/3/32/Gothia-towers-20110305.jpg"
+      class="p-image-container__image">
+  </div>
+  <p class="u-text--muted u-text--small"><small>Copyright: Reimund Trost, licensed under <a href="https://commons.wikimedia.org/wiki/File:Gothia-towers-20110305.jpg">CC BY-SA 3.0</a></small></p>
+</div>
+{%- endif -%}
+{% endcall -%}
+
+<div class="u-fixed-width">
+  <hr class="p-rule" />
+</div>
+{% endif %}
+
 {% call(slot) vf_hero(
   title_text='Masterclass',
   subtitle_text='Your one-stop video library for Canonical talks',
@@ -128,24 +165,24 @@
 
     {%- if slot == 'list_item_description_1' -%}
       <div class="p-section--shallow">
-        <iframe src="https://drive.google.com/file/d/1TmDr0SlQGZl36xKB0bR0IL36kv0KAtle/preview"
-                title="Plenary: Leads, Commercial Sprint in Berlin, July 2025"
+        <iframe src="https://drive.google.com/file/d/1YIkLSGM3alM3Jqttbcg2XKQWgntF6TAS/preview"
+                title="Opening Plenary, Commercial Sprint in Vienna, January 2026"
                 allow="autoplay"
                 allowfullscreen
                 class="iframe-video"></iframe>
-        <p>Videos from Commercial Sprint in Berlin include the plenaries, deep dives and lightning talks.</p>
-        {% set berlin_end_unixtime = 1753488000 %} {# 2025-07-26T00:00:00Z #}
+        <p>Videos from Commercial Sprint in Vienna include the plenaries, deep dives, workshops and lightning talks.</p>
+        {% set vienna_end_unixtime = 1769212800 %} {# 2026-01-24T00:00:00Z #}
 
-        {%- if now < berlin_end_unixtime -%}
+        {%- if now < vienna_end_unixtime -%}
         <div class="p-notification--caution is-inline">
           <div class="p-notification__content">
             <h5 class="p-notification__title">In progress:</h5>
-            <p class="p-notification__message">Berlin Commercial Sprint is still in progress, videos are processed and uploaded as they become available.</p>
+            <p class="p-notification__message">Vienna Commercial Sprint is still in progress, videos are processed and uploaded as they become available.</p>
           </div>
         </div>
         {%- endif -%}
         <p>
-          <a href="/videos?event=commercial-sprint&date=q3-2025">Explore all Berlin Commercial Sprint videos&nbsp;&rsaquo;</a>
+          <a href="/events/commercial-sprint-vienna-2026">Explore all Vienna Commercial Sprint videos&nbsp;&rsaquo;</a>
         </p>
       </div>
     {%- endif -%}
@@ -163,7 +200,7 @@
                 class="iframe-video"></iframe>
         <p>Videos from Engineering Sprint in Frankfurt include the opening and closing plenary, discussion panels, workshops and lighting talks.</p>
         <p>
-          <a href="/videos?event=engineering-sprint&date=q2-2025">Explore all Frankfurt Engineering Sprint videos&nbsp;&rsaquo;</a>
+          <a href="/events/engineering-sprint-frankfurt-2025">Explore all Frankfurt Engineering Sprint videos&nbsp;&rsaquo;</a>
         </p>
       </div>
     {%- endif -%}
@@ -181,7 +218,7 @@
                 class="iframe-video"></iframe>
         <p>Videos from Product Roadmap Sprint in Frankfurt include the opening and closing plenary, presentations of the product teams, discussion panels and lighting talks.</p>
         <p>
-          <a href="/videos?event=roadmap-sprint&date=q2-2025">Explore all Frankfurt Roadmap Sprint videos&nbsp;&rsaquo;</a>
+          <a href="/events/roadmap-sprint-frankfurt-2025">Explore all Frankfurt Roadmap Sprint videos&nbsp;&rsaquo;</a>
         </p>
       </div>
     {%- endif -%}

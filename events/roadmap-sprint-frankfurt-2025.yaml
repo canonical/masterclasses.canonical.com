@@ -1,0 +1,77 @@
+# yaml-language-server: $schema=./event.schema.json
+title: Product Roadmap Sprint
+subtitle: Frankfurt, May 2025
+all_videos_url: /videos?event=roadmap-sprint&date=q2-2025
+days:
+  - date: 2025-05-05
+    title: Monday, May 5
+    sessions:
+      - title: Plenary
+        start: 2025-05-05 08:30:00
+        end: 2025-05-05 09:30:00
+      - title: Roadmap
+        start: 2025-05-05 16:00:00
+        end: 2025-05-05 16:45:00
+      - title: Lightning talks
+        start: 2025-05-05 17:00:00
+        end: 2025-05-05 17:30:00
+  - date: 2025-05-06
+    title: Tuesday, May 6
+    sessions:
+      - title: Roadmap
+        start: 2025-05-06 08:30:00
+        end: 2025-05-06 09:15:00
+      - title: Roadmap
+        start: 2025-05-06 16:00:00
+        end: 2025-05-06 16:45:00
+      - title: Lightning talks
+        start: 2025-05-06 17:00:00
+        end: 2025-05-06 17:30:00
+  - date: 2025-05-07
+    title: Wednesday, May 7
+    sessions:
+      - title: Roadmap
+        start: 2025-05-07 08:30:00
+        end: 2025-05-07 09:15:00
+      - title: Roadmap
+        start: 2025-05-07 09:15:00
+        end: 2025-05-07 10:00:00
+      - title: Panel
+        start: 2025-05-07 13:30:00
+        end: 2025-05-07 14:30:00
+      - title: Roadmap
+        start: 2025-05-07 16:00:00
+        end: 2025-05-07 16:45:00
+      - title: Lightning talks
+        start: 2025-05-07 17:00:00
+        end: 2025-05-07 17:30:00
+  - date: 2025-05-08
+    title: Thursday, May 8
+    sessions:
+      - title: Roadmap
+        start: 2025-05-08 08:30:00
+        end: 2025-05-08 09:15:00
+      - title: Roadmap
+        start: 2025-05-08 16:00:00
+        end: 2025-05-08 16:45:00
+      - title: Lightning talks
+        start: 2025-05-08 17:00:00
+        end: 2025-05-08 17:30:00
+  - date: 2025-05-09
+    title: Friday, May 9
+    sessions:
+      - title: Roadmap
+        start: 2025-05-09 08:30:00
+        end: 2025-05-09 09:15:00
+      - title: Roadmap
+        start: 2025-05-09 09:15:00
+        end: 2025-05-09 10:00:00
+      - title: Foundations
+        start: 2025-05-09 14:15:00
+        end: 2025-05-09 15:00:00
+      - title: Lightning talks
+        start: 2025-05-09 15:00:00
+        end: 2025-05-09 15:30:00
+      - title: Plenary
+        start: 2025-05-09 15:30:00
+        end: 2025-05-09 16:00:00
