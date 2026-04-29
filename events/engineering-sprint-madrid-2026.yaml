@@ -1,0 +1,59 @@
+# yaml-language-server: $schema=./event.schema.json
+title: Engineering Sprint
+subtitle: Madrid, May 2026
+all_videos_url: /videos?event=engineering-sprint&date=q2-2026
+days:
+  - date: 2026-05-11
+    title: Monday, May 11
+    sessions:
+      - title: Plenary
+        start: 2026-05-11 09:00:00
+        end: 2026-05-11 10:00:00
+      - title: Lightning talks
+        start: 2026-05-11 17:30:00
+        end: 2026-05-11 18:00:00
+  - date: 2026-05-12
+    title: Tuesday, May 12
+    sessions:
+      - title: Lightning talks (AM)
+        start: 2026-05-12 09:00:00
+        end: 2026-05-12 09:30:00
+      - title: Panel # Women's Resource Group
+        start: 2026-05-12 14:00:00
+        end: 2026-05-12 15:00:00
+      - title: Lightning talks (PM)
+        start: 2026-05-12 17:30:00
+        end: 2026-05-12 18:00:00
+  - date: 2026-05-13
+    title: Wednesday, May 13
+    sessions:
+      - title: Lightning talks (AM)
+        start: 2026-05-13 09:00:00
+        end: 2026-05-13 09:30:00
+      - title: Lightning talks (PM)
+        start: 2026-05-13 17:30:00
+        end: 2026-05-13 18:00:00
+  - date: 2026-05-14
+    title: Thursday, May 14
+    sessions:
+      - title: Lightning talks (AM)
+        start: 2026-05-14 09:00:00
+        end: 2026-05-14 09:30:00
+      - title: Knowledge sharing # Rust Unconference
+        start: 2026-05-14 14:00:00
+        end: 2026-05-14 16:00:00
+      - title: Lightning talks (PM)
+        start: 2026-05-14 17:30:00
+        end: 2026-05-14 18:00:00
+  - date: 2026-05-15
+    title: Friday, May 15
+    sessions:
+      - title: Lightning talks (AM)
+        start: 2026-05-15 09:00:00
+        end: 2026-05-15 09:30:00
+      - title: Lightning talks (PM)
+        start: 2026-05-15 15:30:00
+        end: 2026-05-15 16:00:00
+      - title: Closing plenary
+        start: 2026-05-15 16:00:00
+        end: 2026-05-15 16:30:00
