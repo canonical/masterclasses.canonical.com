@@ -52,6 +52,9 @@ days:
       - title: Lightning talks (AM)
         start: 2026-05-15 09:00:00
         end: 2026-05-15 09:30:00
+      - title: Session # Terraform
+        start: 2026-05-15 14:00:00
+        end: 2026-05-15 15:00:00
       - title: Lightning talks (PM)
         start: 2026-05-15 15:30:00
         end: 2026-05-15 16:00:00

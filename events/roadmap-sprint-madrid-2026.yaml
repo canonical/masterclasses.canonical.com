@@ -10,7 +10,7 @@ days:
       - title: Plenary
         start: 2026-05-04 08:30:00
         end: 2026-05-04 09:30:00
-      - title: Roadmap
+      - title: Roadmap # Excellence
         start: 2026-05-04 16:00:00
         end: 2026-05-04 17:00:00
       - title: Lightning talks
@@ -19,16 +19,19 @@ days:
   - date: 2026-05-05
     title: Tuesday, May 5
     sessions:
-      - title: Roadmap
+      - title: Roadmap # Design
         start: 2026-05-05 08:30:00
         end: 2026-05-05 09:15:00
-      - title: Roadmap
+      - title: Roadmap # IS
         start: 2026-05-05 09:15:00
         end: 2026-05-05 09:45:00
-      - title: Roadmap
+      - title: Open session # AI in Workplace
+        start: 2026-05-05 11:45:00
+        end: 2026-05-05 12:30:00
+      - title: Roadmap # Documentation
         start: 2026-05-05 16:00:00
         end: 2026-05-05 16:45:00
-      - title: Roadmap
+      - title: Roadmap # SecOps
         start: 2026-05-05 16:45:00
         end: 2026-05-05 17:00:00
       - title: Lightning talks
@@ -37,13 +40,13 @@ days:
   - date: 2026-05-06
     title: Wednesday, May 6
     sessions:
-      - title: Roadmap
+      - title: Session # Product Strategy
         start: 2026-05-06 08:30:00
         end: 2026-05-06 09:15:00
-      - title: Roadmap
+      - title: Roadmap # Charmed
         start: 2026-05-06 09:15:00
         end: 2026-05-06 10:00:00
-      - title: Roadmap
+      - title: Roadmap # Cloud
         start: 2026-05-06 16:00:00
         end: 2026-05-06 17:00:00
       - title: Lightning talks
@@ -52,16 +55,19 @@ days:
   - date: 2026-05-07
     title: Thursday, May 7
     sessions:
-      - title: Roadmap
+      - title: Roadmap # SAAS
         start: 2026-05-07 08:30:00
         end: 2026-05-07 09:15:00
-      - title: Roadmap
+      - title: Roadmap # Commercial Systems
         start: 2026-05-07 09:15:00
         end: 2026-05-07 10:00:00
-      - title: Roadmap
+      - title: Open session # JIRA
+        start: 2026-05-07 11:00:00
+        end: 2026-05-07 12:30:00
+      - title: Roadmap # Devices
         start: 2026-05-07 16:00:00
         end: 2026-05-07 16:30:00
-      - title: Roadmap
+      - title: Roadmap # Public Cloud, Silicon, Kernel
         start: 2026-05-07 16:30:00
         end: 2026-05-07 17:00:00
       - title: Lightning talks
@@ -70,10 +76,10 @@ days:
   - date: 2026-05-08
     title: Friday, May 8
     sessions:
-      - title: Roadmap
+      - title: Roadmap # Web
         start: 2026-05-08 08:30:00
         end: 2026-05-08 09:15:00
-      - title: Roadmap
+      - title: Roadmap # Ubuntu Engineering
         start: 2026-05-08 09:15:00
         end: 2026-05-08 10:00:00
       - title: Lightning talks
