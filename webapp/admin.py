@@ -14,6 +14,7 @@ from models.tag import Tag, TagCategory
 from models.associations import VideoPresenter, VideoTag
 from webapp.database import db_session
 from models.submission import VideoSubmission
+from markupsafe import Markup
 import flask
 from wtforms import validators
 import logging as log
@@ -44,35 +45,35 @@ class TagModelView(RestrictedModelView):
         """Create form with explicit field definitions"""
         from wtforms import StringField, SelectField
         from wtforms.validators import DataRequired
-        
+
         class TagForm(self.form_base_class):
             name = StringField('Name', validators=[DataRequired()])
-            category = SelectField('Category', 
+            category = SelectField('Category',
                                  validators=[DataRequired()],
                                  coerce=int)
-            
+
             def __init__(self, *args, **kwargs):
                 super(TagForm, self).__init__(*args, **kwargs)
                 # Dynamically load categories for the select field
                 self.category.choices = [
                     (c.id, c.name) for c in db_session.query(TagCategory).order_by(TagCategory.name).all()
                 ]
-        
+
         return TagForm
 
     def create_model(self, form):
         """Override create_model to handle the category relationship properly"""
         try:
             model = self.model()
-            
+
             # Set the name
             model.name = form.name.data
-            
+
             # Get the category object and set it
             category = db_session.query(TagCategory).get(form.category.data)
             if category:
                 model.tag_type_id = category.id  # Assuming the foreign key field is named tag_type_id
-            
+
             self.session.add(model)
             self._on_model_change(form, model, True)
             self.session.commit()
@@ -81,7 +82,7 @@ class TagModelView(RestrictedModelView):
             if not self.handle_view_exception(ex):
                 flash('Failed to create record. %(error)s', 'error')
                 log.exception('Failed to create record.')
-            
+
             self.session.rollback()
             return False
 
@@ -90,12 +91,12 @@ class TagModelView(RestrictedModelView):
         try:
             # Update the name
             model.name = form.name.data
-            
+
             # Get the category object and update it
             category = db_session.query(TagCategory).get(form.category.data)
             if category:
                 model.tag_type_id = category.id
-            
+
             self._on_model_change(form, model, False)
             self.session.commit()
             return True
@@ -103,7 +104,7 @@ class TagModelView(RestrictedModelView):
             if not self.handle_view_exception(ex):
                 flash('Failed to update record. %(error)s', 'error')
                 log.exception('Failed to update record.')
-            
+
             self.session.rollback()
             return False
 
@@ -116,48 +117,48 @@ class TagModelView(RestrictedModelView):
         if 'json_file' not in request.files:
             flash('No file uploaded', 'error')
             return redirect(url_for('.index_view'))
-            
+
         file = request.files['json_file']
         if file.filename == '':
             flash('No file selected', 'error')
             return redirect(url_for('.index_view'))
-            
+
         if not file.filename.endswith('.json'):
             flash('File must be a JSON', 'error')
             return redirect(url_for('.index_view'))
-            
+
         try:
             # Read JSON file
             json_data = json.loads(file.read().decode('UTF8'))
-            
+
             # Process each tag
             for tag_data in json_data:
                 if not tag_data.get('name') or not tag_data.get('category'):
                     continue
-                
+
                 # Get category (must exist)
                 category = db_session.query(TagCategory).filter_by(name=tag_data['category']).first()
                 if not category:
                     continue
-                
+
                 # Create tag if it doesn't exist
                 existing_tag = db_session.query(Tag).join(TagCategory).filter(
                     Tag.name == tag_data['name'],
                     TagCategory.id == category.id
                 ).first()
-                
+
                 if not existing_tag:
                     tag = Tag(name=tag_data['name'], tag_type_id=category.id)
                     db_session.add(tag)
-            
+
             db_session.commit()
             flash('Tags imported successfully', 'success')
-            
+
         except Exception as e:
             db_session.rollback()
             log.error(f"Error importing JSON: {e}")
             flash('Error importing JSON file', 'error')
-            
+
         return redirect(url_for('.index_view'))
 
     @expose('/export-json', methods=['GET'])
@@ -165,7 +166,7 @@ class TagModelView(RestrictedModelView):
         try:
             # Query all tags with their categories
             tags = db_session.query(Tag, TagCategory).join(TagCategory).order_by(TagCategory.name, Tag.name).all()
-            
+
             # Create JSON data
             tag_list = []
             for tag, category in tags:
@@ -174,14 +175,14 @@ class TagModelView(RestrictedModelView):
                     'category': category.name
                 }
                 tag_list.append(tag_data)
-            
+
             # Create the response
             response = flask.make_response(json.dumps(tag_list, indent=2))
             response.headers["Content-Disposition"] = "attachment; filename=tags.json"
             response.headers["Content-type"] = "application/json"
-            
+
             return response
-            
+
         except Exception as e:
             log.error(f"Error exporting JSON: {e}")
             flash('Error exporting JSON file', 'error')
@@ -190,7 +191,7 @@ class TagModelView(RestrictedModelView):
 class TagCategoryModelView(RestrictedModelView):
     column_list = ['name', 'tags']
     form_columns = ['name']
-    
+
     column_formatters = {
         'tags': lambda v, c, m, p: ', '.join([tag.name for tag in m.tags]) if m.tags else ''
     }
@@ -204,39 +205,39 @@ class TagCategoryModelView(RestrictedModelView):
         if 'json_file' not in request.files:
             flash('No file uploaded', 'error')
             return redirect(url_for('.index_view'))
-            
+
         file = request.files['json_file']
         if file.filename == '':
             flash('No file selected', 'error')
             return redirect(url_for('.index_view'))
-            
+
         if not file.filename.endswith('.json'):
             flash('File must be a JSON', 'error')
             return redirect(url_for('.index_view'))
-            
+
         try:
             # Read JSON file
             json_data = json.loads(file.read().decode('UTF8'))
-            
+
             # Process each category
             for category_data in json_data:
                 if not category_data.get('name'):
                     continue
-                
+
                 # Get or create category
                 category = db_session.query(TagCategory).filter_by(name=category_data['name']).first()
                 if not category:
                     category = TagCategory(name=category_data['name'])
                     db_session.add(category)
-            
+
             db_session.commit()
             flash('Categories imported successfully', 'success')
-            
+
         except Exception as e:
             db_session.rollback()
             log.error(f"Error importing JSON: {e}")
             flash('Error importing JSON file', 'error')
-            
+
         return redirect(url_for('.index_view'))
 
     @expose('/export-json', methods=['GET'])
@@ -244,7 +245,7 @@ class TagCategoryModelView(RestrictedModelView):
         try:
             # Query all categories
             categories = db_session.query(TagCategory).order_by(TagCategory.name).all()
-            
+
             # Create JSON data
             category_list = []
             for category in categories:
@@ -252,14 +253,14 @@ class TagCategoryModelView(RestrictedModelView):
                     'name': category.name
                 }
                 category_list.append(category_data)
-            
+
             # Create the response
             response = flask.make_response(json.dumps(category_list, indent=2))
             response.headers["Content-Disposition"] = "attachment; filename=tag_categories.json"
             response.headers["Content-type"] = "application/json"
-            
+
             return response
-            
+
         except Exception as e:
             log.error(f"Error exporting JSON: {e}")
             flash('Error exporting JSON file', 'error')
@@ -283,33 +284,33 @@ class SearchableSelect2Widget(Select2Widget):
         kwargs.setdefault('data-minimum-input-length', '2')
         kwargs.setdefault('data-placeholder', 'Search presenters...')
         return super(SearchableSelect2Widget, self).__call__(field, **kwargs)
-    
+
 class SubmissionModelView(RestrictedModelView):
     column_list = ['title', 'email', 'duration', 'status', 'created_at']
     column_searchable_list = ['title', 'email']
     column_filters = ['status', 'created_at']
     form_excluded_columns = ['created_at', 'updated_at']
-    
+
     # Add sorting
     column_default_sort = ('created_at', True)  # Sort by creation date, descending
-    
+
     # Make the description viewable but not in the list
     column_details_list = ['title', 'email', 'description', 'duration', 'status', 'created_at']
-    
+
     # Add nice labels
     column_labels = {
         'created_at': 'Submitted At'
     }
-    
+
     def scaffold_form(self):
         form_class = super(SubmissionModelView, self).scaffold_form()
-        
+
         # Replace description field with custom markdown textarea
         form_class.description = TextAreaField(
             'Description',
             widget=MarkdownTextArea(),
         )
-        
+
         form_class.status.choices = [
             ('pending', 'Pending'),
             ('approved', 'Approved'),
@@ -397,7 +398,7 @@ class DateAfterFilter(BaseSQLAFilter):
         try:
             # Add debug logging
             log.info(f"Filtering after date: {value}, type: {type(value)}")
-            
+
             # Try multiple datetime formats
             try:
                 timestamp = int(datetime.strptime(value, '%Y-%m-%d %H:%M').timestamp())
@@ -472,16 +473,16 @@ class DateEqualsFilter(BaseSQLAFilter):
         return 'equals'
 
 class VideoModelView(RestrictedModelView):
-    column_list = ['title', 'description', 'unixstart', 'unixend', 'stream', 'slides', 
-                   'recording', 'chat_log', 'thumbnails', 'calendar_event', 'presenters', 
+    column_list = ['title', 'description', 'unixstart', 'unixend', 'stream', 'slides',
+                   'recording', 'chat_log', 'thumbnails', 'calendar_event', 'presenters',
                    'topic_tags', 'event_tags', 'date_tags', 'location_tags']
-    
+
     # Format the relationships display in list view
     column_formatters = {
-        'title': lambda v, c, m, p: flask.Markup(
+        'title': lambda v, c, m, p: Markup(
             f'<a href="{flask.url_for("masterclasses.video_player", title=flask.current_app.jinja_env.filters["slugify"](m.title), id=m.id)}">{m.title}</a>'
         ) if m.recording else m.title,
-        'presenters': lambda view, context, model, name: 
+        'presenters': lambda view, context, model, name:
             ', '.join([presenter.name for presenter in model.presenters]) if model.presenters else '',
         'topic_tags': lambda view, context, model, name:
             ', '.join([tag.name for tag in model.tags if tag.category.name == 'Topic']) if model.tags else '',
@@ -494,10 +495,10 @@ class VideoModelView(RestrictedModelView):
         'unixstart': lambda v, c, m, p: datetime.fromtimestamp(m.unixstart).strftime('%Y-%m-%d %H:%M') if m.unixstart else '',
         'unixend': lambda v, c, m, p: datetime.fromtimestamp(m.unixend).strftime('%Y-%m-%d %H:%M') if m.unixend else ''
     }
-    
+
     # Add sorting configuration
     column_default_sort = ('unixstart', True)  # Sort by start time by default, descending
-    
+
     # Configure sortable columns using actual database column names
     column_sortable_list = [
         'title',
@@ -511,11 +512,11 @@ class VideoModelView(RestrictedModelView):
         'unixstart': 'Start Time',
         'unixend': 'End Time'
     }
-    
+
     # Configure which fields to show in the form
     form_columns = (
         'title', 'description', 'unixstart', 'unixend',
-        'stream', 'slides', 'recording', 'chat_log', 
+        'stream', 'slides', 'recording', 'chat_log',
         'thumbnails', 'calendar_event', 'presenters', 'tags'
     )
 
@@ -530,7 +531,7 @@ class VideoModelView(RestrictedModelView):
 
     def get_filters(self):
         filters = []
-        
+
         filters.extend([
             ContainsFilter(
                 Video.title, 'Title'
@@ -563,7 +564,7 @@ class VideoModelView(RestrictedModelView):
                 Video.unixend, 'End Date Before'
             )
         ])
-        
+
         return filters
 
     # Keep the query methods for proper joining
@@ -591,10 +592,10 @@ class VideoModelView(RestrictedModelView):
     def presenters_api(self):
         search = flask.request.args.get('q', '')
         query = db_session.query(Presenter)
-        
+
         if search:
             query = query.filter(Presenter.name.ilike(f'%{search}%'))
-        
+
         presenters = query.order_by(Presenter.name).all()
         return jsonify([{
             'id': str(p.id),
@@ -605,10 +606,10 @@ class VideoModelView(RestrictedModelView):
         """Override create_model to handle datetime conversion properly"""
         try:
             model = self.model()
-            
+
             # Handle basic fields
             form_fields = form._fields.copy()
-            
+
             # Remove fields we'll handle manually
             form_fields.pop('start_time', None)
             form_fields.pop('end_time', None)
@@ -616,11 +617,11 @@ class VideoModelView(RestrictedModelView):
             form_fields.pop('topic_tags', None)
             form_fields.pop('event_tags', None)
             form_fields.pop('date_tags', None)
-            
+
             # Populate remaining fields
             for name, field in form_fields.items():
                 field.populate_obj(model, name)
-            
+
             # Handle datetime fields
             if form.start_time.data:
                 try:
@@ -644,14 +645,14 @@ class VideoModelView(RestrictedModelView):
                 except (AttributeError, ValueError) as e:
                     flash(f'Invalid end time: {str(e)}', 'error')
                     return False
-            
+
             # Handle presenters
             if form.presenters.data:
                 presenters = db_session.query(Presenter).filter(
                     Presenter.id.in_(form.presenters.data)
                 ).all()
                 model.presenters = presenters
-            
+
             # Handle tags
             all_tag_ids = []
             if form.topic_tags.data:
@@ -660,13 +661,13 @@ class VideoModelView(RestrictedModelView):
                 all_tag_ids.extend(form.event_tags.data)
             if form.date_tags.data:
                 all_tag_ids.extend(form.date_tags.data)
-            
+
             if all_tag_ids:
                 tags = db_session.query(Tag).filter(
                     Tag.id.in_(all_tag_ids)
                 ).all()
                 model.tags = tags
-            
+
             self.session.add(model)
             self._on_model_change(form, model, True)
             self.session.commit()
@@ -675,7 +676,7 @@ class VideoModelView(RestrictedModelView):
             if not self.handle_view_exception(ex):
                 flash('Failed to create record. %(error)s', 'error')
                 log.exception('Failed to create record.')
-            
+
             self.session.rollback()
             return False
 
@@ -687,12 +688,12 @@ class VideoModelView(RestrictedModelView):
         self.extra_css = [
             'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css'
         ]
-        
+
         # Set template paths
         self.edit_template = 'admin/model/edit.html'
         self.create_template = 'admin/model/create.html'
         self.named_filter_urls = True
-        
+
         # Add model templates directory
         self.model_template_path = 'admin/model'
 
@@ -703,11 +704,11 @@ class VideoModelView(RestrictedModelView):
 
     def scaffold_form(self):
         form_class = super(VideoModelView, self).scaffold_form()
-        
+
         # Remove the unix timestamp fields from the form
         delattr(form_class, 'unixstart')
         delattr(form_class, 'unixend')
-        
+
         # Add datetime picker fields with the correct format
         form_class.start_time = DateTimeField(
             'Start Time',
@@ -717,7 +718,7 @@ class VideoModelView(RestrictedModelView):
                 "step": "60"
             }
         )
-        
+
         form_class.end_time = DateTimeField(
             'End Time',
             format='%Y-%m-%dT%H:%M',
@@ -726,13 +727,13 @@ class VideoModelView(RestrictedModelView):
                 "step": "60"
             }
         )
-        
+
         # Add markdown support for description
         form_class.description = TextAreaField(
             'Description',
             widget=MarkdownTextArea(),
         )
-        
+
         # Configure presenters field with dynamic choices
         form_class.presenters = SelectMultipleField(
             'Presenters',
@@ -740,13 +741,13 @@ class VideoModelView(RestrictedModelView):
             widget=Select2Widget(multiple=True),
             choices=lambda: [(c.id, c.name) for c in db_session.query(Presenter).order_by(Presenter.name).all()]
         )
-        
+
         # Replace the tags field with separate dynamic fields
         delattr(form_class, 'tags')
-        
+
         # Get tag choices for each category using lambda functions
         form_class.topic_tags = SelectMultipleField(
-            'Topics', 
+            'Topics',
             coerce=int,
             choices=lambda: [(t.id, t.name) for t in db_session.query(Tag)
                     .join(TagCategory)
@@ -754,7 +755,7 @@ class VideoModelView(RestrictedModelView):
                     .order_by(Tag.name).all()],
             widget=Select2Widget(multiple=True)
         )
-        
+
         form_class.event_tags = SelectMultipleField(
             'Events',
             coerce=int,
@@ -764,7 +765,7 @@ class VideoModelView(RestrictedModelView):
                     .order_by(Tag.name).all()],
             widget=Select2Widget(multiple=True)
         )
-        
+
         form_class.date_tags = SelectMultipleField(
             'Dates',
             coerce=int,
@@ -774,7 +775,7 @@ class VideoModelView(RestrictedModelView):
                     .order_by(Tag.name).all()],
             widget=Select2Widget(multiple=True)
         )
-        
+
         form_class.location_tags = SelectMultipleField(
             'Locations',
             coerce=int,
@@ -784,12 +785,12 @@ class VideoModelView(RestrictedModelView):
                     .order_by(Tag.name).all()],
             widget=Select2Widget(multiple=True)
         )
-        
+
         return form_class
 
     def edit_form(self, obj=None):
         form = super(VideoModelView, self).edit_form(obj)
-        
+
         # Only populate with existing data if this is not a form submission
         if not flask.request.form:
             # Populate datetime fields
@@ -798,18 +799,18 @@ class VideoModelView(RestrictedModelView):
                     form.start_time.data = datetime.fromtimestamp(obj.unixstart)
                 if obj.unixend:
                     form.end_time.data = datetime.fromtimestamp(obj.unixend)
-                
+
                 # Populate presenter field
                 if obj.presenters:
                     form.presenters.data = [p.id for p in obj.presenters]
-                
+
                 # Populate tag fields
                 if obj.tags:
                     topic_tags = [t.id for t in obj.tags if t.category.name == 'Topic']
                     event_tags = [t.id for t in obj.tags if t.category.name == 'Event']
                     date_tags = [t.id for t in obj.tags if t.category.name == 'Date']
                     location_tags = [t.id for t in obj.tags if t.category.name == 'Location']
-                    
+
                     form.topic_tags.data = topic_tags
                     form.event_tags.data = event_tags
                     form.date_tags.data = date_tags
@@ -818,7 +819,7 @@ class VideoModelView(RestrictedModelView):
         else:
             log.info("Form submission - using submitted data")
             log.info(f"Submitted form data: {flask.request.form}")
-        
+
         return form
 
     def update_model(self, form, model):
@@ -826,7 +827,7 @@ class VideoModelView(RestrictedModelView):
         try:
             # Handle basic fields
             form_fields = form._fields.copy()
-            
+
             # Remove fields we'll handle manually
             form_fields.pop('start_time', None)
             form_fields.pop('end_time', None)
@@ -834,11 +835,11 @@ class VideoModelView(RestrictedModelView):
             form_fields.pop('topic_tags', None)
             form_fields.pop('event_tags', None)
             form_fields.pop('date_tags', None)
-            
+
             # Populate remaining fields
             for name, field in form_fields.items():
                 field.populate_obj(model, name)
-            
+
             # Handle datetime fields
             if form.start_time.data:
                 try:
@@ -861,7 +862,7 @@ class VideoModelView(RestrictedModelView):
                 except (AttributeError, ValueError) as e:
                     flash(f'Invalid end time: {str(e)}', 'error')
                     return False
-            
+
             # Handle presenters
             if form.presenters.data:
                 presenters = db_session.query(Presenter).filter(
@@ -870,7 +871,7 @@ class VideoModelView(RestrictedModelView):
                 model.presenters = presenters
             else:
                 model.presenters = []
-            
+
             # Handle tags
             all_tag_ids = []
             if form.topic_tags.data:
@@ -881,7 +882,7 @@ class VideoModelView(RestrictedModelView):
                 all_tag_ids.extend(form.date_tags.data)
             if form.location_tags.data:
                 all_tag_ids.extend(form.location_tags.data)
-            
+
             if all_tag_ids:
                 tags = db_session.query(Tag).filter(
                     Tag.id.in_(all_tag_ids)
@@ -889,7 +890,7 @@ class VideoModelView(RestrictedModelView):
                 model.tags = tags
             else:
                 model.tags = []
-            
+
             self._on_model_change(form, model, False)
             self.session.commit()
             return True
@@ -897,7 +898,7 @@ class VideoModelView(RestrictedModelView):
             if not self.handle_view_exception(ex):
                 flash('Failed to update record. %(error)s', 'error')
                 log.exception('Failed to update record.')
-            
+
             self.session.rollback()
             return False
 
@@ -981,12 +982,12 @@ class VideoModelView(RestrictedModelView):
                             if 'name' not in tag_data or 'category' not in tag_data:
                                 warnings.append(f'Invalid tag data in video "{video.title}": Missing name or category')
                                 continue
-                                
+
                             tag = db_session.query(Tag).join(TagCategory).filter(
                                 Tag.name == tag_data['name'],
                                 TagCategory.name == tag_data['category']
                             ).first()
-                            
+
                             if tag:
                                 video.tags.append(tag)
                             else:
@@ -1016,18 +1017,18 @@ class VideoModelView(RestrictedModelView):
                 summary.append(f'{len(warnings)} warnings')
             if error_count:
                 summary.append(f'{error_count} errors')
-            
+
             if summary:
                 flash(f'Import complete: {", ".join(summary)}', 'success')
-            
+
             # Show major errors if any
             if major_errors:
-                flash(f'Errors:\n' + '\n'.join(major_errors[:3]) + 
+                flash(f'Errors:\n' + '\n'.join(major_errors[:3]) +
                       ('\n...and more' if error_count > 3 else ''), 'error')
-            
+
             # Show warnings if any (limit to first 10 for readability)
             if warnings:
-                flash('Warnings:\n' + '\n'.join(warnings[:10]) + 
+                flash('Warnings:\n' + '\n'.join(warnings[:10]) +
                       ('\n...and more' if len(warnings) > 10 else ''), 'warning')
 
         except json.JSONDecodeError as e:
@@ -1036,7 +1037,7 @@ class VideoModelView(RestrictedModelView):
             db_session.rollback()
             flash(f'Error importing JSON: {str(e)}', 'error')
             log.exception('Error importing JSON')
-            
+
         return redirect(url_for('.index_view'))
 
     def _handle_presenters(self, video, presenters_data):
@@ -1046,21 +1047,21 @@ class VideoModelView(RestrictedModelView):
 
         # Clear existing presenters
         video.presenters = []
-        
+
         for presenter_data in presenters_data:
             if not isinstance(presenter_data, dict):
                 raise ValueError(f"Invalid presenter data format: {presenter_data}")
-            
+
             if 'email' not in presenter_data:
                 raise ValueError(f"Presenter data missing email: {presenter_data}")
-                
+
             presenter = db_session.query(Presenter).filter(
                 Presenter.email == presenter_data['email']
             ).first()
-            
+
             if not presenter:
                 raise ValueError(f"Presenter not found with email: {presenter_data['email']}")
-                
+
             video.presenters.append(presenter)
 
     def _handle_tags(self, video, tags_data):
@@ -1070,18 +1071,18 @@ class VideoModelView(RestrictedModelView):
 
         # Clear existing tags
         video.tags = []
-        
+
         for tag_data in tags_data:
             if not isinstance(tag_data, dict):
                 raise ValueError(f"Invalid tag data format: {tag_data}")
-            
+
             if 'name' not in tag_data:
                 raise ValueError(f"Tag data missing name: {tag_data}")
-                
+
             tag = db_session.query(Tag).filter_by(name=tag_data['name']).first()
             if not tag:
                 raise ValueError(f"Tag not found with name: {tag_data['name']}")
-                
+
             video.tags.append(tag)
 
     @expose('/export-json', methods=['GET'])
@@ -1089,14 +1090,14 @@ class VideoModelView(RestrictedModelView):
         try:
             # Query all videos with their relationships
             videos = db_session.query(Video).order_by(Video.unixstart.desc()).all()
-            
+
             # Create JSON data
             video_list = []
             for video in videos:
                 # Format timestamps
                 start_time = datetime.fromtimestamp(video.unixstart).strftime('%Y-%m-%d %H:%M')
                 end_time = datetime.fromtimestamp(video.unixend).strftime('%Y-%m-%d %H:%M')
-                
+
                 video_data = {
                     'title': video.title,
                     'description': video.description or '',
@@ -1112,14 +1113,14 @@ class VideoModelView(RestrictedModelView):
                     'tags': [{'name': t.name, 'category': t.category.name} for t in video.tags] if video.tags else []
                 }
                 video_list.append(video_data)
-            
+
             # Create the response
             response = flask.make_response(json.dumps(video_list, indent=2))
             response.headers["Content-Disposition"] = "attachment; filename=videos.json"
             response.headers["Content-type"] = "application/json"
-            
+
             return response
-            
+
         except Exception as e:
             log.error(f"Error exporting JSON: {e}")
             flash('Error exporting JSON file', 'error')
@@ -1133,20 +1134,20 @@ class VideoModelView(RestrictedModelView):
     def on_model_change(self, form, model, is_created):
         """Handle form submission and update relationships."""
         # ... existing tag handling code ...
-        
+
         # Update tags
         model.tags = []
-        
+
         # Add topic tags
         if form.topic_tags.data:
             topic_tags = db_session.query(Tag).filter(Tag.id.in_(form.topic_tags.data)).all()
             model.tags.extend(topic_tags)
-            
+
         # Add event tags
         if form.event_tags.data:
             event_tags = db_session.query(Tag).filter(Tag.id.in_(form.event_tags.data)).all()
             model.tags.extend(event_tags)
-            
+
         # Add date tags
         if form.date_tags.data:
             date_tags = db_session.query(Tag).filter(Tag.id.in_(form.date_tags.data)).all()
@@ -1178,7 +1179,7 @@ class PresenterModelView(RestrictedModelView):
 
     def get_filters(self):
         filters = []
-        
+
         filters.extend([
             ContainsFilter(
                 Presenter.name, 'Name'
@@ -1193,7 +1194,7 @@ class PresenterModelView(RestrictedModelView):
                 Presenter.videos, 'Video Count'
             )
         ])
-        
+
         return filters
 
     def get_query(self):
@@ -1216,13 +1217,13 @@ class PresenterModelView(RestrictedModelView):
         """Create form with explicit field definitions"""
         from wtforms import StringField
         from wtforms.validators import DataRequired, Email, Optional
-        
+
         class PresenterForm(self.form_base_class):
             name = StringField('Name', validators=[DataRequired()])
             email = StringField('Email', validators=[Optional(), Email()])
             hrc_id = StringField('HRC ID', validators=[Optional()])
             headshot = StringField('Headshot URL', validators=[Optional()])
-        
+
         return PresenterForm
 
     @property
@@ -1234,25 +1235,25 @@ class PresenterModelView(RestrictedModelView):
         if 'json_file' not in request.files:
             flash('No file uploaded', 'error')
             return redirect(url_for('.index_view'))
-            
+
         file = request.files['json_file']
         if file.filename == '':
             flash('No file selected', 'error')
             return redirect(url_for('.index_view'))
-            
+
         if not file.filename.endswith('.json'):
             flash('File must be a JSON', 'error')
             return redirect(url_for('.index_view'))
-            
+
         try:
             # Read JSON file
             json_data = json.loads(file.read().decode('UTF8'))
-            
+
             # Process each presenter
             for presenter_data in json_data:
                 if not presenter_data.get('name') or not presenter_data.get('hrc_id'):
                     continue
-                
+
                 # Check if presenter exists by hrc_id
                 presenter = db_session.query(Presenter).filter_by(hrc_id=presenter_data['hrc_id']).first()
                 if not presenter:
@@ -1269,15 +1270,15 @@ class PresenterModelView(RestrictedModelView):
                     presenter.email = presenter_data.get('email')
                     if presenter_data.get('headshot'):
                         presenter.headshot = presenter_data['headshot']
-            
+
             db_session.commit()
             flash('Presenters imported successfully', 'success')
-            
+
         except Exception as e:
             db_session.rollback()
             log.error(f"Error importing JSON: {e}")
             flash('Error importing JSON file', 'error')
-            
+
         return redirect(url_for('.index_view'))
 
     @expose('/export-json', methods=['GET'])
@@ -1285,7 +1286,7 @@ class PresenterModelView(RestrictedModelView):
         try:
             # Query all presenters
             presenters = db_session.query(Presenter).order_by(Presenter.name).all()
-            
+
             # Create JSON data
             presenter_list = []
             for presenter in presenters:
@@ -1296,14 +1297,14 @@ class PresenterModelView(RestrictedModelView):
                     'headshot': presenter.headshot or ''
                 }
                 presenter_list.append(presenter_data)
-            
+
             # Create the response
             response = flask.make_response(json.dumps(presenter_list, indent=2))
             response.headers["Content-Disposition"] = "attachment; filename=presenters.json"
             response.headers["Content-type"] = "application/json"
-            
+
             return response
-            
+
         except Exception as e:
             log.error(f"Error exporting JSON: {e}")
             flash('Error exporting JSON file', 'error')
@@ -1323,7 +1324,7 @@ class VideoCountFilter(BaseSQLAFilter):
                     .group_by(Presenter.id)
                     .subquery()
                 )
-                
+
                 return query.join(
                     video_counts,
                     Presenter.id == video_counts.c.id
