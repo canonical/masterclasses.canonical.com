@@ -41,6 +41,42 @@
 </div>
 {% endif %}
 
+{# hide main Madrid hero after the sprint has ended #}
+{% set madrid_end_unixtime = 1778889600 %} {# 2026-05-16T00:00:00Z #}
+{% if now < madrid_end_unixtime %}
+{% call(slot) vf_hero(
+  title_text='Madrid Sprints',
+  subtitle_text='May 2026',
+  layout='50/50'
+) -%}
+{%- if slot == 'description' -%}
+<p>
+  We are kicking off the 26.10 cycle in Madrid with Product Roadmap and Engineering Sprints.
+  Join live sessions, or watch the recordings later in our Masterclass video library.
+</p>
+{%- endif -%}
+{%- if slot == 'cta' -%}
+<a href="https://stream.meet.google.com/stream/4f77e620-f41c-4ab9-beb2-29aa1c79dfd2" class="p-button--positive">Join the live stream</a>
+<a href="/events/roadmap-sprint-madrid-2026" class="p-button">Roadmap Sprint</a>
+<a href="/events/engineering-sprint-madrid-2026" class="p-button">Engineering Sprint</a>
+{%- endif -%}
+{%- if slot == 'image' -%}
+<div class="u-hide--medium u-hide--small">
+  <div class="p-image-container--3-2 is-cover">
+    <img loading="auto" alt="Madrid city placeholder image"
+      src="https://upload.wikimedia.org/wikipedia/commons/1/14/Madrid_-_Sky_Bar_360%C2%BA_%28Hotel_Riu_Plaza_Espa%C3%B1a%29%2C_vistas_19.jpg"
+      class="p-image-container__image">
+  </div>
+  <p class="u-text--muted u-text--small"><small>Copyright: <a href="https://commons.wikimedia.org/wiki/File:Madrid_-_Sky_Bar_360%C2%BA_(Hotel_Riu_Plaza_Espa%C3%B1a),_vistas_19.jpg">CC0 1.0 Universal Public Domain Dedication</a></small></p>
+</div>
+{%- endif -%}
+{% endcall -%}
+
+<div class="u-fixed-width">
+  <hr class="p-rule" />
+</div>
+{% endif %}
+
 {% call(slot) vf_hero(
   title_text='Masterclass',
   subtitle_text='Your one-stop video library for Canonical talks',
