@@ -31,7 +31,7 @@ def init_sso(app):
 
     @open_id.after_login
     def after_login(resp):
-        if SSO_TEAM not in resp.extensions["lp"].is_member:
+        if SSO_TEAM and SSO_TEAM not in resp.extensions["lp"].is_member:
             flask.abort(403)
 
         flask.session["openid"] = {

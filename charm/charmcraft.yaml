@@ -1,0 +1,77 @@
+# This file configures Charmcraft.
+# See https://juju.is/docs/sdk/charmcraft-config for guidance.
+# For questions or help, visit https://matrix.to/#/#12-factor-charms:ubuntu.com
+
+name: masterclasses-canonical-com
+
+type: charm
+
+base: ubuntu@24.04
+
+# the platforms this charm should be built on and run on.
+# you can check your architecture with `dpkg --print-architecture`
+platforms:
+  amd64:
+  # arm64:
+  # ppc64el:
+  # s390x:
+
+summary: Flask web app serving masterclasses.canonical.com
+
+description: |
+  Canonical Masterclasses web application. Provides masterclass content,
+  event management, and user authentication via Ubuntu SSO. Backed by
+  PostgreSQL with Alembic migrations.
+
+extensions:
+  - flask-framework
+
+requires:
+  postgresql:
+    interface: postgresql_client
+    optional: false
+    limit: 1
+
+config:
+  options:
+    openid-launchpad-team:
+      type: string
+      default: canonical
+      description: >
+        Launchpad team whose members are permitted to log in via Ubuntu SSO.
+    admin-emails:
+      type: string
+      description: >
+        Comma-separated list of admin email addresses for notification emails.
+    google-project-id:
+      type: string
+      description: Google Cloud project ID for the Gmail service account.
+    private-key-id:
+      type: string
+      description: Service account private key ID (from the JSON key file).
+    client-email:
+      type: string
+      description: Service account client email (from the JSON key file).
+    client-id:
+      type: string
+      description: Service account client ID (from the JSON key file).
+    client-x509-cert-url:
+      type: string
+      description: Service account x509 cert URL (from the JSON key file).
+    gmail-delegate-account:
+      type: string
+      description: Gmail account address that the service account sends email as.
+    api-token:
+      type: secret
+      description: API token for the internal authentication endpoint.
+    directory-api-token:
+      type: secret
+      description: Canonical directory API token for the presenter-sync scheduler job.
+    mattermost-dev-webhook-url:
+      type: secret
+      description: Mattermost incoming-webhook URL for dev-channel notifications.
+    private-key:
+      type: secret
+      description: >
+        Service account private key PEM string (from the JSON key file).
+        Newlines should be encoded as literal \n.
