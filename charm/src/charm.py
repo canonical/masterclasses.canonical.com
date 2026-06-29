@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright 2026 bartek.szopka@canonical.com
+# Copyright 2026 Ubuntu
 # See LICENSE file for licensing details.
 
 """Flask Charm entrypoint."""

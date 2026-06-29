@@ -62,14 +62,6 @@ parts:
       - flask/app/node_modules/vanilla-framework/templates
       # - flask/app/alembic.ini
 
-services:
-  flask:
-    override: replace
-    # We add the worker-class and a longer timeout for the admin views
-    command: "gunicorn webapp.app:app --bind 0.0.0.0:8000 --worker-class gevent --timeout 60"
-    working-dir: /flask/app
-    startup: enabled
-
 # you may need Ubuntu packages to build a python dependency. Add them here if necessary.
 #   flask-framework/dependencies:
 #     build-packages:

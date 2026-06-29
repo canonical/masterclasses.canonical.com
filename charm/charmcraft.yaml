@@ -19,9 +19,8 @@ platforms:
 summary: Flask web app serving masterclasses.canonical.com
 
 description: |
-  Canonical Masterclasses web application. Provides masterclass content,
-  event management, and user authentication via Ubuntu SSO. Backed by
-  PostgreSQL with Alembic migrations.
+  The charm for Canonical Masterclasses website.
+  It's a Flask app, with authentication via Ubuntu SSO, and backed by PostgreSQL with Alembic migrations.
 
 extensions:
   - flask-framework
@@ -34,49 +33,21 @@ requires:
 
 config:
   options:
-    # not needed, in charm, we can default to canonical team, but for local dev, we can override it
+    # TODO: optional, defaults to canonical, likely unnecessary when we switch to new OIDC
     # openid-launchpad-team:
     #   type: string
     #   default: canonical
     #   description: >
     #     Launchpad team whose members are permitted to log in via Ubuntu SSO.
-    # email functionality not finished yet
-    # admin-emails:
-    #   type: string
-    #   description: >
-    #     Comma-separated list of admin email addresses for notification emails.
-    # google-project-id:
-    #   type: string
-    #   description: Google Cloud project ID for the Gmail service account.
-    # private-key-id:
-    #   type: string
-    #   description: Service account private key ID (from the JSON key file).
-    # client-email:
-    #   type: string
-    #   description: Service account client email (from the JSON key file).
-    # client-id:
-    #   type: string
-    #   description: Service account client ID (from the JSON key file).
-    # client-x509-cert-url:
-    #   type: string
-    #   description: Service account x509 cert URL (from the JSON key file).
-    # gmail-delegate-account:
-    #   type: string
-    #   description: Gmail account address that the service account sends email as.
-    # private-key:
+    # TODO: not currently in use on prod
+    # api-token:
     #   type: secret
-    #   description: >
-    #     Service account private key PEM string (from the JSON key file).
-    #     Newlines should be encoded as literal \n.
-    # masterclasses API token for API access
-    api-token:
-      type: secret
-      description: API token for the internal authentication endpoint.
-    # not currently in use (sheduled sync with directory)
+    #   description: API token for the internal authentication endpoint.
+    # TODO: not currently in use (sheduled sync with directory)
     # directory-api-token:
     #   type: secret
     #   description: Canonical directory API token for the presenter-sync scheduler job.
     mattermost-dev-webhook-url:
       type: secret
-      description: Mattermost incoming-webhook URL for dev-channel notifications.
+      description: Mattermost incoming-webhook URL for channel notifications.
 
