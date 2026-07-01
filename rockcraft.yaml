@@ -1,6 +1,5 @@
 name: masterclasses-canonical-com
-base: bare
-build-base: ubuntu@24.04
+base: ubuntu@24.04
 version: "0.1"
 summary: The rock for masterclasses.canonical.com
 description: |

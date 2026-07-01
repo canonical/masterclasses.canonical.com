@@ -43,7 +43,7 @@ config:
     # api-token:
     #   type: secret
     #   description: API token for the internal authentication endpoint.
-    # TODO: not currently in use (sheduled sync with directory)
+    # TODO: not currently in use (scheduled sync with directory)
     # directory-api-token:
     #   type: secret
     #   description: Canonical directory API token for the presenter-sync scheduler job.
