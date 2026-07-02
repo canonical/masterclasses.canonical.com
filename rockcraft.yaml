@@ -50,7 +50,6 @@ parts:
     after:
       - build-ui
     prime:
-      - flask/app/.env
       - flask/app/app.py
       - flask/app/webapp
       - flask/app/templates
@@ -58,8 +57,10 @@ parts:
       - flask/app/models
       - flask/app/events
       - flask/app/scripts
+      - flask/app/migrate.sh
+      - flask/app/alembic.ini
+      - flask/app/alembic
       - flask/app/node_modules/vanilla-framework/templates
-      # - flask/app/alembic.ini
 
 # you may need Ubuntu packages to build a python dependency. Add them here if necessary.
 #   flask-framework/dependencies:
