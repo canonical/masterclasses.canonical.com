@@ -31,7 +31,7 @@ parts:
     override-build: |
       set -eux
       # install dependencies
-      npm install -g yarn
+      npm install -g yarn@1.22.22
       yarn install
       # build the UI
       yarn run build
