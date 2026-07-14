@@ -1,0 +1,92 @@
+name: masterclasses-canonical-com
+base: ubuntu@24.04
+version: "0.1"
+summary: The rock for masterclasses.canonical.com
+description: |
+  The rock for masterclasses.canonical.com. It's a Flask application that serves
+  the masterclasses.canonical.com website.
+# the platforms this rock should be built on and run on.
+# you can check your architecture with `dpkg --print-architecture`
+platforms:
+  amd64:
+  # arm64:
+  # ppc64el:
+  # s390x:
+
+# to ensure the flask-framework extension works properly, your Flask application
+# should have an `app.py` file with an `app` object as the WSGI entrypoint.
+# a `requirements.txt` file with at least the flask package should also exist.
+# see https://documentation.ubuntu.com/rockcraft/1.17.0/reference/extensions/flask-framework
+# for more information.
+extensions:
+  - flask-framework
+
+parts:
+  build-ui:
+    plugin: nil
+    source: .
+    source-type: local
+    build-snaps:
+      - node/22/stable
+    override-build: |
+      set -eux
+      # install dependencies
+      npm install -g yarn@1.22.22
+      yarn install
+      # build the UI
+      yarn run build
+      mkdir -p "$CRAFT_PART_INSTALL/flask/app"
+      cp -r static "$CRAFT_PART_INSTALL/flask/app/"
+      cp -r node_modules "$CRAFT_PART_INSTALL/flask/app/"
+    # prime:
+    #   - flask/app/static
+    #   - flask/app/node_modules
+  flask-framework/install-app:
+    # by default, only the files in app/, templates/, static/, migrate, migrate.sh,
+    # migrate.py and app.py are copied into the image. You can modify the list
+    # below to override the default list and include or exclude specific
+    # files/directories in your project.
+    # note: prefix each entry with "flask/app/" followed by the local path.
+    after:
+      - build-ui
+    prime:
+      - flask/app/app.py
+      - flask/app/webapp
+      - flask/app/templates
+      - flask/app/static
+      - flask/app/models
+      - flask/app/events
+      - flask/app/scripts
+      - flask/app/migrate.sh
+      - flask/app/alembic.ini
+      - flask/app/alembic
+      - flask/app/node_modules/vanilla-framework/templates
+
+# you may need Ubuntu packages to build a python dependency. Add them here if necessary.
+#   flask-framework/dependencies:
+#     build-packages:
+#       # for example, if you need pkg-config and libxmlsec1-dev to build one
+#       # of your packages:
+#       - pkg-config
+#       - libxmlsec1-dev
+
+# you can add package slices or Debian packages to the image.
+# package slices are subsets of Debian packages, which result
+# in smaller and more secure images.
+# see https://documentation.ubuntu.com/rockcraft/1.17.0/explanation/chisel/
+
+# add this part if you want to add packages slices to your image.
+# you can find a list of packages slices at https://github.com/canonical/chisel-releases
+#   runtime-slices:
+#     plugin: nil
+#     stage-packages:
+#       # list the required package slices for your flask application below.
+#       # for example, for the slice libs of libpq5:
+#       - libpq5_libs
+
+# if you want to add a Debian package to your image, add the next part
+#   runtime-debs:
+#     plugin: nil
+#     stage-packages:
+#       # list required Debian packages for your flask application below.
+#       - libpq5

@@ -1,0 +1,53 @@
+# This file configures Charmcraft.
+# See https://juju.is/docs/sdk/charmcraft-config for guidance.
+# For questions or help, visit https://matrix.to/#/#12-factor-charms:ubuntu.com
+
+name: masterclasses-canonical-com
+
+type: charm
+
+base: ubuntu@24.04
+
+# the platforms this charm should be built on and run on.
+# you can check your architecture with `dpkg --print-architecture`
+platforms:
+  amd64:
+  # arm64:
+  # ppc64el:
+  # s390x:
+
+summary: Flask web app serving masterclasses.canonical.com
+
+description: |
+  The charm for Canonical Masterclasses website.
+  It's a Flask app, with authentication via Ubuntu SSO, and backed by PostgreSQL with Alembic migrations.
+
+extensions:
+  - flask-framework
+
+requires:
+  postgresql:
+    interface: postgresql_client
+    optional: false
+    limit: 1
+
+config:
+  options:
+    # TODO: optional, defaults to canonical, likely unnecessary when we switch to new OIDC
+    # openid-launchpad-team:
+    #   type: string
+    #   default: canonical
+    #   description: >
+    #     Launchpad team whose members are permitted to log in via Ubuntu SSO.
+    # TODO: not currently in use on prod
+    # api-token:
+    #   type: secret
+    #   description: API token for the internal authentication endpoint.
+    # TODO: not currently in use (scheduled sync with directory)
+    # directory-api-token:
+    #   type: secret
+    #   description: Canonical directory API token for the presenter-sync scheduler job.
+    mattermost-dev-webhook-url:
+      type: secret
+      description: Mattermost incoming-webhook URL for channel notifications.
+

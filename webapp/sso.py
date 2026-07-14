@@ -31,7 +31,12 @@ def init_sso(app):
 
     @open_id.after_login
     def after_login(resp):
-        if SSO_TEAM not in resp.extensions["lp"].is_member:
+        # Temporary workaround: allow @canonical.com users until canonical team membership checks are fixed.
+        user_email = (resp.email or "").strip().lower()
+        is_canonical_email = user_email.endswith("@canonical.com")
+        is_team_member = SSO_TEAM in resp.extensions["lp"].is_member if SSO_TEAM else False
+
+        if not is_team_member and not is_canonical_email:
             flask.abort(403)
 
         flask.session["openid"] = {
