@@ -1,0 +1,36 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      force_charm_build:
+        description: 'Force the charm build'
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-charm-build
+  queue: max
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build
+    uses: canonical/webteam-devops/.github/workflows/pack_release.yaml@main
+    permissions:
+      packages: write
+      id-token: write
+      contents: read
+    with:
+      charm_name: ${{ vars.CHARM_NAME }}
+      channel: ${{ vars.CHANNEL }}
+      force_charm_build: ${{ inputs.force_charm_build || false }}
+    secrets:
+      CHARMHUB_TOKEN: ${{ secrets.CHARMHUB_TOKEN }}
