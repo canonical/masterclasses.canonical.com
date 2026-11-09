@@ -35,12 +35,14 @@ parts:
       yarn install
       # build the UI
       yarn run build
+      # copy the built UI files to the flask app directory
+      # so they can be primed correctly
       mkdir -p "$CRAFT_PART_INSTALL/flask/app"
       cp -r static "$CRAFT_PART_INSTALL/flask/app/"
       cp -r node_modules "$CRAFT_PART_INSTALL/flask/app/"
-    # prime:
-    #   - flask/app/static
-    #   - flask/app/node_modules
+    prime:
+      - flask/app/static
+      - flask/app/node_modules/vanilla-framework/templates
   flask-framework/install-app:
     # by default, only the files in app/, templates/, static/, migrate, migrate.sh,
     # migrate.py and app.py are copied into the image. You can modify the list
@@ -53,14 +55,12 @@ parts:
       - flask/app/app.py
       - flask/app/webapp
       - flask/app/templates
-      - flask/app/static
       - flask/app/models
       - flask/app/events
       - flask/app/scripts
       - flask/app/migrate.sh
       - flask/app/alembic.ini
       - flask/app/alembic
-      - flask/app/node_modules/vanilla-framework/templates
 
 # you may need Ubuntu packages to build a python dependency. Add them here if necessary.
 #   flask-framework/dependencies:
