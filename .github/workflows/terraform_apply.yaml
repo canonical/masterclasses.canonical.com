@@ -1,0 +1,22 @@
+name: Terraform Apply
+
+on: workflow_dispatch
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-terraform-apply
+  queue: max
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: Terraform Apply
+    uses: canonical/webteam-devops/.github/workflows/terraform_apply.yaml@main
+    with:
+      terraform_dir: terraform/ps7/k8s-prod-web-masterclasses-default
+      iam_group: is-platform-services-webdesign
+    secrets:
+      VAULT_APPROLE_ROLE_ID: ${{ secrets.VAULT_APPROLE_ROLE_ID }}
+      VAULT_APPROLE_SECRET_ID: ${{ secrets.VAULT_APPROLE_SECRET_ID }}
